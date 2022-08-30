@@ -1,0 +1,47 @@
+$mobile: 768px;
+$tablet: 1023px;
+$desktop: 1215px;
+$widescreen: 1407px;
+$fullhd: 1408px;
+
+@mixin stack-horizontal($fit: max-content) {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: $fit;
+  gap: 1rem;
+  align-items: center;
+}
+
+@mixin stack-vertical($fit: max-content) {
+  display: grid;
+  grid-auto-flow: row;
+  grid-auto-rows: $fit;
+  gap: 1rem;
+}
+
+@mixin auto-padding($top: 1rem, $side: 1rem, $max: $tablet) {
+  padding: $top max($side, calc((100vw - $max) / 2));
+}
+
+@mixin container {
+  max-width: $tablet;
+  margin: 0 auto;
+}
+
+$navy: #001F3F;
+$blue: #0074D9;
+$aqua: #7FDBFF;
+$teal: #39CCCC;
+$olive: #3D9970;
+$green: #2ECC40;
+$lime: #01FF70;
+$yellow: #FFDC00;
+$orange: #FF851B;
+$red: #FF4136;
+$fuchsia: #F012BE;
+$purple: #B10DC9;
+$maroon: #85144B;
+$white: #FFFFFF;
+$silver: #DDDDDD;
+$gray: #AAAAAA;
+$black: #111111;
