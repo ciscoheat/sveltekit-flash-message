@@ -1,6 +1,6 @@
 {
 	"name": "sveltekit-flash-message",
-	"version": "0.6.0",
+	"version": "0.6.1",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "svelte-kit sync && svelte-package",

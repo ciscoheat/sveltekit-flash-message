@@ -2,7 +2,7 @@ import { setContext, getContext, hasContext } from 'svelte'
 import { type Writable, writable } from 'svelte/store'
 import { get } from 'svelte/store'
 import { page } from '$app/stores'
-import { browser } from '$app/environment'
+//import { browser } from '$app/environment'
 
 const d = console.debug
 
@@ -44,7 +44,9 @@ function flashStore<T>(checkValue? : ((value : unknown) => T | null)) {
 }
 
 function flashCookie() : unknown {
-  if(browser) {
+  // shim for:
+  // import { browser } from '$app/environment'
+  if(!import.meta.env.SSR) {
     if(!document.cookie.includes(cookieName + '=')) return null
 
     const cookies = parseCookie(document.cookie)
