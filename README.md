@@ -221,14 +221,15 @@ It may seem so, but this library works both with SSR and client, which is tricki
 This little snippet can be useful if you'd like to have the flash message removed when the user navigates to another route:
 
 ```typescript
-import { beforeNavigate } from '$app/navigation';
-import { getFlashStore } from "sveltekit-flash-message/client"
+import { Flash } from "sveltekit-flash-message/client";
+import { page } from "$app/stores"
 
-const flash = getFlashStore<App.PageData['flash']>()
+const flash = new Flash(page)
+const message = flash.message
 
 beforeNavigate(nav => {
-  if(nav.from.href != nav.to?.href && $flash) {
-    $flash = null
+  if(nav.from.href != nav.to?.href && $message) {
+    $message = undefined
   }
 })
 ```
