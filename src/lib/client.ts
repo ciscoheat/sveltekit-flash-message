@@ -6,7 +6,13 @@ import type { Page } from '@sveltejs/kit'
 /**
  * Shim for: import { browser } from '$app/environment'
  */
-const browser = !import.meta.env.SSR
+let browser : boolean 
+try {
+  const SSR = import.meta?.env?.SSR
+  browser = SSR === undefined ? true : SSR
+} catch(e) {
+  browser = true
+}
 
 const d = console.debug
 
