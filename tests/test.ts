@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('index page has expected h1', async ({ page }) => {
+test('Messages are displayed as expected', async ({ page }) => {
 	await page.goto('/');
 	expect(await page.textContent('h1')).toBe('sveltekit-flash-message testing ground');
 
@@ -10,7 +10,6 @@ test('index page has expected h1', async ({ page }) => {
 		messages => {
 			return messages.map(el => {
 				const test = /(.*?)(\d+)$/.exec(el.textContent || '') as RegExpExecArray
-				// eslint-disable-next-line no-debugger
 				return {
 					status: el.getAttribute('data-status'),
 					text: test[1].trim(),

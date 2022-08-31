@@ -62,20 +62,22 @@ export function load(event : ServerLoadEvent) {
 
 ## 3. Display the flash message
 
-Use `getFlashStore` to display the flash message, for example in your layout component:
+Instantiate the client `Flash` class to display the flash message, for example in your layout component:
 
 **src/routes/+layout.svelte**
 
 ```svelte
 <script lang="ts">
-  import { getFlashStore } from "sveltekit-flash-message/client";
+  import { Flash } from "sveltekit-flash-message/client";
+  import { page } from "$app/stores"
 
-  const flash = getFlashStore<App.PageData['flash']>()
+  const flash = new Flash(page)
+  const message = flash.message
 </script>
 
-{#if $flash}
-  {@const bg = $flash.type == 'success' ? '#3D9970' : '#FF4136'}
-  <div style:background-color={bg} class="flash">{$flash.message}</div>
+{#if $message}
+  {@const bg = $message.type == 'success' ? '#3D9970' : '#FF4136'}
+  <div style:background-color={bg} class="flash">{$message.message}</div>
 {/if}
 ```
 
@@ -83,7 +85,7 @@ Use `getFlashStore` to display the flash message, for example in your layout com
 
 ### Server-side
 
-To send a flash message, you'll import a function depending on whether your route is an Action or an endpoint.
+To send a flash message, you'll import a server function depending on whether your route is an Action or an endpoint.
 
 | Type | File | Function |
 | ---- | ---- | -------- |
@@ -136,19 +138,20 @@ You can also append extra headers with the `headers` argument, and customize the
 
 ### Client-side
 
-If you want to send a flash message in some other circumstances on the client, you can simply assign a new value to the store returned from `getFlashStore`:
+If you want to send a flash message in some other circumstances on the client, you can simply assign a new value to the `Flash::message` property:
 
 **src/someOtherComponent.svelte**
 
 ```svelte
 <script>
-  import { getFlashStore } from "sveltekit-flash-message/client"
+  import { Flash } from "sveltekit-flash-message/client";
+  import { page } from "$app/stores"
 
-  const flash = getFlashStore<App.PageData['flash']>()
+  const flash = new Flash(page)
+  const message = flash.message
 
   function change() {
-    const message = {type: 'success', message: 'Updated from other component!'}
-    flash.set(message)
+    $message = {type: 'success', message: 'Updated from other component!'}
   }
 </script>
 
@@ -157,22 +160,22 @@ If you want to send a flash message in some other circumstances on the client, y
 
 ## Client-side fetching and redirecting
 
-If you're using [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis) instead of a browser form submit, the flash message will be passed on to the client, but it won't be displayed automatically. To display it, you can use `getFlashMessage` after the fetch is completed:
+If you're using [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis) instead of a browser form submit, the flash message will be passed on to the client, but it won't be displayed automatically. To display it, you can use `Flash::updateFrom` after the fetch is completed:
 
 ```svelte
 <script lang="ts">
-  import { getFlashStore, getFlashMessage } from "sveltekit-flash-message/client"
+  import { Flash } from "sveltekit-flash-message/client";
+  import { page } from "$app/stores"
 
-  const message = getFlashStore<App.PageData['flash']>()
+  const flash = new Flash(page)
+  const message = flash.message
 
   async function submitForm(e : SubmitEvent) {
     const form = e.target as HTMLFormElement
     const body = new FormData(e.target as HTMLFormElement)
     
-    await fetch(form.action, { method: 'POST', body })
-
-    const flashMsg = getFlashMessage()
-    if(flashMsg) message.set(flashMsg)
+    const response = await fetch(form.action, { method: 'POST', body })
+    flash.updateFrom(response)
   }
 </script>
 
@@ -190,8 +193,8 @@ Since the flash message is transferred in a cookie, it can be easily tampered wi
 To help with that, you can add a parameter to `getFlashStore`, a validation function:
 
 ```typescript
-const checkValue = (value : unknown) => {
-  // A bit lazy validation, for the sake of the example
+// A bit lazy validation, for the sake of the example
+const validate = (value : unknown) => {
   const check = value as any
   if(typeof check === "object" && 
     ['success', 'error'].contains(check.type) && 
@@ -204,12 +207,10 @@ const checkValue = (value : unknown) => {
   return undefined // or throw, if deemed more useful
 }
 
-const store = getFlashStore<App.PageData['flash']>(checkValue)
+const flash = new Flash(page, validate)
 ```
 
 This will ensure the integrity of your flash messages. Instead of returning `undefined` you can return a default value, which is useful if you're using the library for displaying multiple messages in an array, like a notification widget.
-
-**Note:** You can only use the `checkValue` parameter *once* per request, since the cookie has to be cleared after retrieving the flash message. So if you call `getFlashStore` in other (child) components, they must be called without a `checkValue` parameter.
 
 ## So much work, for so little?
 

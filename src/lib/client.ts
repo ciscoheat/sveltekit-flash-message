@@ -50,10 +50,10 @@ export class Flash {
   readonly message : Writable<App.PageData['flash']>
   //private _message : App.PageData['flash']
   
-  private readonly checkValue : ((value : unknown) => App.PageData['flash'] | undefined) | undefined
+  private readonly validate : ((value : unknown) => App.PageData['flash'] | undefined) | undefined
 
-  constructor(page : Readable<Page>, checkValue? : ((value : unknown) => App.PageData['flash'] | undefined)) {
-    this.checkValue = checkValue
+  constructor(page : Readable<Page>, validate? : ((value : unknown) => App.PageData['flash'] | undefined)) {
+    this.validate = validate
 
     {
       // Use a Svelte Context as a static var, to make it accessible only per request.
@@ -68,7 +68,7 @@ export class Flash {
       if(!storeExists) {
         // Get current message from page
         const pageMessage = get(page).data.flash
-        const checkedMessage = this.checkValue ? this.checkValue(pageMessage) : pageMessage
+        const checkedMessage = this.validate ? this.validate(pageMessage) : pageMessage
         this.message = setContext(cookieName, writable(checkedMessage))
       }
 
@@ -78,7 +78,7 @@ export class Flash {
 
   private messageFrom(response : Response) {
     const currentMessage = flashCookie(response.headers.get('set-cookie'))
-    return (this.checkValue ? this.checkValue(currentMessage) : currentMessage) as App.PageData['flash'] | undefined
+    return (this.validate ? this.validate(currentMessage) : currentMessage) as App.PageData['flash'] | undefined
   }
 
   setFrom(response : Response) {
