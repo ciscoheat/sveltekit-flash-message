@@ -1,11 +1,12 @@
 <script lang=ts>
   import './root.scss'
-  import { getFlashStore } from "$lib/client.js";
+  import { Flash } from "$lib/client.js"
+  import { page } from '$app/stores'
 
-  const message = getFlashStore<App.PageData['flash']>(v => {
+  const message = new Flash(page, v => {
     if(!v || typeof v !== 'object') return undefined
     return v as App.PageData['flash']
-  })
+  }).message
 
   function clear() {
     $message = undefined
@@ -20,15 +21,17 @@
     <div class="right">
       <a href="/">Log in</a>
       <a href="/">Create account</a>
-      <button id="clear" on:click={clear}>Clear msg</button>
+      <button id="clear" on:click={clear}>Clear messages</button>
     </div>
   </header>
-  {#if $message}
-    {#each $message as msg}
-      {@const bg = msg.status == 'ok' ? '#3D9970' : '#FF4136'}
-      <div style:background-color={bg} class="flash">{msg.text}</div>
-    {/each}
-  {/if}
+  <div id="messages">
+    {#if $message}
+      {#each $message as msg}
+        {@const bg = msg.status == 'ok' ? '#3D9970' : '#FF4136'}
+        <div data-status={msg.status} style:background-color={bg} class="flash">{msg.text}</div>
+      {/each}
+    {/if}
+  </div>
   <main>
     <slot></slot>
   </main>

@@ -3,12 +3,12 @@ import { parse } from 'cookie'
 
 const d = console.debug
 
-type Message = App.PageData['flash']
 const cookieName = 'flash'
 const path = '/'
+const time = 120
 
-const cookieHeader = (data : Message) => ({
-  'set-cookie': cookieName + '=' + encodeURIComponent(JSON.stringify(data)) + `; Max-Age=120; Path=${path};`
+const cookieHeader = (data : App.PageData['flash']) => ({
+  'set-cookie': cookieName + '=' + encodeURIComponent(JSON.stringify(data)) + `; Max-Age=${time}; Path=${path};`
 })
 
 /////////////////////////////////////////////////////////////////////
@@ -44,9 +44,8 @@ export function loadFlash(event : ServerLoadEvent) {
     //d('setting flash message: ' + data)
   }
 
-
   return {
-    [cookieName]: data as Message | undefined
+    [cookieName]: data as App.PageData['flash'] | undefined
   }
 }
 
@@ -54,7 +53,7 @@ export const load = loadFlash
 
 /////////////////////////////////////////////////////////////////////
 
-export function flashMessage(data : Message, redirect : string | URL | RequestEvent, event? : RequestEvent) {
+export function flashMessage(data : App.PageData['flash'], redirect : string | URL | RequestEvent, event? : RequestEvent) {
   let location : string
 
   if(typeof redirect === 'string' || !('url' in redirect)) {
@@ -71,7 +70,7 @@ export function flashMessage(data : Message, redirect : string | URL | RequestEv
   return { location }
 }
 
-export function flashResponse(data : Message, redirect : string | URL, headers : Headers | Record<string, string> = {}, status = 303, statusText? : string) {
+export function flashResponse(data : App.PageData['flash'], redirect : string | URL, headers : Headers | Record<string, string> = {}, status = 303, statusText? : string) {
   const baseHeader = cookieHeader(data) as Record<string, string>
   baseHeader.location = typeof redirect === 'string' ? redirect : redirect.toString()
 
