@@ -52,9 +52,16 @@ function flashCookie(cookieString? : string | null) : unknown {
 
 /////////////////////////////////////////////////////////////////////
 
+export function debugflash() {
+  d(hasContext(cookieName))
+}
+
+export const debugflash2 = () => {
+  d(hasContext(cookieName))
+}
+
 export class Flash {
   readonly message : Writable<App.PageData['flash']>
-  //private _message : App.PageData['flash']
   
   private readonly validate : ((value : unknown) => App.PageData['flash'] | undefined) | undefined
 
