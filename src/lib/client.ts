@@ -9,7 +9,7 @@ import type { Page } from '@sveltejs/kit'
 let browser : boolean 
 try {
   const SSR = import.meta?.env?.SSR
-  browser = SSR === undefined ? true : SSR
+  browser = SSR === undefined ? true : !SSR
 } catch(e) {
   browser = true
 }
