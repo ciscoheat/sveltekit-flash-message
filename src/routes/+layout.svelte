@@ -3,17 +3,6 @@
   import { Flash } from "$lib/client.js"
   import { page } from '$app/stores'
 
-  /*
-  import { debugflash, debugflash2 } from "$lib/client.js"
-  import { hasContext } from 'svelte';
-  console.log("=== +layout.svelte ===")
-  console.log(hasContext('flash'))
-  console.log("=== debugflash ===")
-  debugflash()
-  console.log("=== debugflash2 ===")
-  debugflash2()
-  */
-
   const message = new Flash(page, v => {
     if(!v || typeof v !== 'object') return undefined
     return v as App.PageData['flash']

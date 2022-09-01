@@ -14,7 +14,7 @@ try {
   browser = true
 }
 
-const d = console.debug
+//const d = console.debug
 
 const cookieName = 'flash'
 const path = '/'
@@ -51,14 +51,6 @@ function flashCookie(cookieString? : string | null) : unknown {
 }
 
 /////////////////////////////////////////////////////////////////////
-
-export function debugflash() {
-  d(hasContext(cookieName))
-}
-
-export const debugflash2 = () => {
-  d(hasContext(cookieName))
-}
 
 export class Flash {
   readonly message : Writable<App.PageData['flash']>
