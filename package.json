@@ -1,18 +1,18 @@
 {
 	"name": "sveltekit-flash-message",
 	"version": "0.6.10",
-  "author": "Andreas Söderlund <ciscoheat@gmail.com> (https://blog.encodeart.dev)",
-  "description": "Send temporary data to the next request after redirect. Works with both SSR and client.",
-  "keywords": [
-    "sveltekit",
-    "svelte",
-    "session",
-    "flash message"
-  ],
+	"author": "Andreas Söderlund <ciscoheat@gmail.com> (https://blog.encodeart.dev)",
+	"description": "Send temporary data to the next request after redirect. Works with both SSR and client.",
+	"keywords": [
+		"sveltekit",
+		"svelte",
+		"session",
+		"flash message"
+	],
 	"license": "MIT",
-  "repository": {
-    "url": "https://github.com/ciscoheat/sveltekit-flash-message"
-  },
+	"repository": {
+		"url": "https://github.com/ciscoheat/sveltekit-flash-message"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "svelte-kit sync && svelte-package",
@@ -24,25 +24,25 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.25.0",
+		"@playwright/test": "^1.25.1",
 		"@sveltejs/adapter-auto": "next",
 		"@sveltejs/kit": "next",
 		"@sveltejs/package": "next",
 		"@types/cookie": "^0.5.1",
-		"@typescript-eslint/eslint-plugin": "^5.27.0",
-		"@typescript-eslint/parser": "^5.27.0",
-		"eslint": "^8.16.0",
-		"eslint-config-prettier": "^8.3.0",
+		"@typescript-eslint/eslint-plugin": "^5.36.1",
+		"@typescript-eslint/parser": "^5.36.1",
+		"eslint": "^8.23.0",
+		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-svelte3": "^4.0.0",
-		"prettier": "^2.6.2",
+		"prettier": "^2.7.1",
 		"prettier-plugin-svelte": "^2.7.0",
-		"sass": "^1.54.6",
-		"svelte": "^3.44.0",
-		"svelte-check": "^2.7.1",
-		"svelte-preprocess": "^4.10.6",
-		"tslib": "^2.3.1",
-		"typescript": "^4.7.4",
-		"vite": "^3.1.0-beta.1"
+		"sass": "^1.54.8",
+		"svelte": "^3.50.0",
+		"svelte-check": "^2.9.0",
+		"svelte-preprocess": "^4.10.7",
+		"tslib": "^2.4.0",
+		"typescript": "^4.8.2",
+		"vite": "^3.1.0-beta.2"
 	},
 	"type": "module",
 	"dependencies": {
