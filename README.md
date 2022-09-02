@@ -218,7 +218,7 @@ const validate = (value : unknown) => {
   }
 
   // Validation failed
-  return undefined // or throw, if deemed more useful
+  return undefined // or throw, or return default value, if deemed more useful
 }
 
 const flash = new Flash(page, validate)

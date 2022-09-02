@@ -32,28 +32,11 @@ const parseCookie = (str : string) => {
     }, output)
 }
 
-function flashCookie(cookieString? : string | null) : unknown {
-  if(!cookieString && browser) cookieString = document.cookie
-
-  if(!cookieString || !cookieString.includes(cookieName + '=')) return null
-
-  const cookies = parseCookie(cookieString)
-  if(cookies[cookieName]) {
-    try {
-      return JSON.parse(cookies[cookieName])
-    } catch(e) {
-      // Ignore value if parsing failed
-    } finally {
-      if(browser) document.cookie = cookieName + `=; Max-Age=0; Path=${path};`
-    }
-  }
-  return null
-}
-
 /////////////////////////////////////////////////////////////////////
 
 export class Flash {
   readonly message : Writable<App.PageData['flash']>
+  readonly responseMap = new WeakMap<Response, App.PageData['flash']>()
   
   private readonly validate : ((value : unknown) => App.PageData['flash'] | undefined) | undefined
 
@@ -81,9 +64,33 @@ export class Flash {
     }
   }
 
-  private messageFrom(response : Response) {
-    const currentMessage = flashCookie(response.headers.get('set-cookie'))
-    return (this.validate ? this.validate(currentMessage) : currentMessage) as App.PageData['flash'] | undefined
+  messageFrom(response : Response) {
+    if(this.responseMap.has(response)) 
+      return this.responseMap.get(response)
+
+    function parseFlashCookie(cookieString? : string | null) : unknown {
+      if(!cookieString && browser) cookieString = document.cookie
+    
+      if(!cookieString || !cookieString.includes(cookieName + '=')) return undefined
+    
+      const cookies = parseCookie(cookieString)
+      if(cookies[cookieName]) {
+        try {
+          return JSON.parse(cookies[cookieName])
+        } catch(e) {
+          // Ignore value if parsing failed
+        } finally {
+          if(browser) document.cookie = cookieName + `=; Max-Age=0; Path=${path};`
+        }
+      }
+      return undefined
+    }
+    
+    const currentMessage = parseFlashCookie(response.headers.get('set-cookie'))
+    const newMessage = (this.validate ? this.validate(currentMessage) : currentMessage) as App.PageData['flash'] | undefined
+
+    this.responseMap.set(response, newMessage)
+    return newMessage
   }
 
   setFrom(response : Response) {
