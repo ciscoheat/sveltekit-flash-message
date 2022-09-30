@@ -114,16 +114,18 @@ To send a flash message, you'll import a server function depending on whether yo
 import type { RequestEvent } from '@sveltejs/kit';
 import { flashMessage } from 'sveltekit-flash-message/server'
 
-export const POST = async (event : RequestEvent) => {
-  const form = await event.request.formData()
+export const actions = {
+  default: async (event : RequestEvent) => {
+    const form = await event.request.formData()
 
-  await api('POST', `todos/${event.locals.userid}`, {
-    text: form.get('text')
-  })
+    await api('POST', `todos/${event.locals.userid}`, {
+      text: form.get('text')
+    })
 
-  const message = {type: 'success', message: "That's the entrepreneur spirit!"}
-
-  return flashMessage(message, '/todos', event)
+    const message = {type: 'success', message: "That's the entrepreneur spirit!"}
+    
+    return flashMessage(message, '/todos', event)
+  }
 }
 ```
 
@@ -154,7 +156,7 @@ You can also append extra headers with the `headers` argument, and customize the
 
 If you want to send a flash message in some other circumstances on the client, you can simply assign a new value to the `Flash::message` property:
 
-**src/someOtherComponent.svelte**
+**src/routes/some-route/+page.svelte**
 
 ```svelte
 <script>
@@ -171,6 +173,8 @@ If you want to send a flash message in some other circumstances on the client, y
 
 <button on:click={change}>Update message</button>
 ```
+
+Note that importing like this only works on route components (files starting with a `+`).
 
 ## Client-side fetching and redirecting
 
@@ -234,9 +238,12 @@ It may seem so, but this library works both with SSR and client, which is tricki
 
 This little snippet can be useful if you'd like to have the flash message removed when the user navigates to another route:
 
+**src/routes/+layout.svelte**
+
 ```typescript
-import { Flash } from "sveltekit-flash-message/client";
+import { Flash } from "sveltekit-flash-message/client"
 import { page } from "$app/stores"
+import { beforeNavigate } from '$app/navigation'
 
 const flash = new Flash(page)
 const message = flash.message

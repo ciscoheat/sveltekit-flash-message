@@ -1,14 +1,16 @@
 import type { RequestEvent, ServerLoadEvent } from "@sveltejs/kit"
+import { redirect as redir } from "@sveltejs/kit"
 import { parse } from 'cookie'
 
 const d = console.debug
 
 const cookieName = 'flash'
+const httpOnly = false
 const path = '/'
-const time = 120
+const maxAge = 120
 
 const cookieHeader = (data : App.PageData['flash']) => ({
-  'set-cookie': cookieName + '=' + encodeURIComponent(JSON.stringify(data)) + `; Max-Age=${time}; Path=${path};`
+  'set-cookie': cookieName + '=' + encodeURIComponent(JSON.stringify(data)) + `; Max-Age=${maxAge}; Path=${path};`
 })
 
 /////////////////////////////////////////////////////////////////////
@@ -29,10 +31,10 @@ export function loadFlash(event : ServerLoadEvent) {
     // Detect if event is XMLHttpRequest, basically by checking if the browser 
     // is honoring the sec-fetch-dest header, or accepting html.
     if(event.request.headers.get('sec-fetch-dest') == 'empty' || event.request.headers.get('accept') == '*/*') {
-       //d('Possible fetch request, keeping cookie for client.')
+      //d('Possible fetch request, keeping cookie for client.')
     } else {
-       //d('Flash cookie found, clearing')
-      event.setHeaders({'set-cookie': cookieName + `=; Max-Age=0; Path=${path};`})
+      //d('Flash cookie found, clearing')
+      event.cookies.delete(cookieName)
     }
 
     try {
@@ -54,20 +56,16 @@ export const load = loadFlash
 /////////////////////////////////////////////////////////////////////
 
 export function flashMessage(data : App.PageData['flash'], redirect : string | URL | RequestEvent, event? : RequestEvent) {
-  let location : string
-
   if(typeof redirect === 'string' || !('url' in redirect)) {
     if(event === undefined)
       throw new Error('flashMessage: RequestEvent not found in the event parameter.')
-
-    event.setHeaders(cookieHeader(data))
-    location = redirect.toString()
   } else {
-    redirect.setHeaders(cookieHeader(data))
-    location = redirect.url.toString()
+    event = redirect
+    redirect = event.url
   }
 
-  return { location }
+  event.cookies.set(cookieName, JSON.stringify(data), {httpOnly, path, maxAge})
+  throw redir(303, redirect.toString())
 }
 
 export function flashResponse(data : App.PageData['flash'], redirect : string | URL, headers : Headers | Record<string, string> = {}, status = 303, statusText? : string) {
