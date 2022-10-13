@@ -1,22 +1,30 @@
-<script lang=ts>
-  import './root.scss'
-  import { Flash } from "$lib/client.js"
-  import { page } from '$app/stores'
+<script lang="ts">
+  import './root.scss';
 
-  const message = new Flash(page, v => {
-    if(!v || typeof v !== 'object') return undefined
-    return v as App.PageData['flash']
-  }).message
+  import { Flash } from '$lib/client.js';
+  import { page } from '$app/stores';
+  import { beforeNavigate } from '$app/navigation';
+
+  const message = new Flash(page, (v) => {
+    if (!v || typeof v !== 'object') return undefined;
+    return v as App.PageData['flash'];
+  }).message;
 
   function clear() {
-    $message = undefined
+    $message = undefined;
   }
+
+  beforeNavigate((nav) => {
+    if ($message && nav.from?.url.toString() != nav.to?.url.toString()) {
+      $message = undefined;
+    }
+  });
 </script>
 
 <div class="app">
   <header>
     <div class="left">
-      <input type="text" placeholder="Search...">
+      <input type="text" placeholder="Search..." />
     </div>
     <div class="right">
       <a href="/">Log in</a>
@@ -33,18 +41,27 @@
     {/if}
   </div>
   <main>
-    <slot></slot>
+    <slot />
   </main>
 
   <footer>
-      <p>Donec sollicitudin molestie malesuada. Donec sollicitudin molestie malesuada. Cras ultricies ligula sed magna dictum porta.</p>
-      <p>Sed porttitor lectus nibh. Nulla quis lorem ut libero malesuada feugiat. Curabitur non nulla sit amet nisl tempus convallis quis ac lectus.</p>
-      <p>Curabitur aliquet quam id dui posuere blandit. Cras ultricies ligula sed magna dictum porta. Donec rutrum congue leo eget malesuada.</p>
+    <p>
+      Donec sollicitudin molestie malesuada. Donec sollicitudin molestie malesuada. Cras ultricies
+      ligula sed magna dictum porta.
+    </p>
+    <p>
+      Sed porttitor lectus nibh. Nulla quis lorem ut libero malesuada feugiat. Curabitur non nulla
+      sit amet nisl tempus convallis quis ac lectus.
+    </p>
+    <p>
+      Curabitur aliquet quam id dui posuere blandit. Cras ultricies ligula sed magna dictum porta.
+      Donec rutrum congue leo eget malesuada.
+    </p>
   </footer>
 </div>
 
 <style lang="scss">
-  @import "./mixins.scss";
+  @import './mixins.scss';
 
   /////////////////////////////////////////////////////////
 
@@ -70,10 +87,10 @@
     @include auto-padding(8px);
 
     justify-content: space-between;
-    
+
     background-color: $white;
-    border-bottom: 1px solid rgb(224,224,224);
-    
+    border-bottom: 1px solid rgb(224, 224, 224);
+
     .left {
       @include stack-horizontal;
       grid-row: 1;
@@ -95,8 +112,8 @@
     }
 
     align-items: start;
-    
-    background-color: rgb(245,245,245);
+
+    background-color: rgb(245, 245, 245);
   }
 
   footer {
@@ -104,6 +121,6 @@
     @include auto-padding;
     grid-template-columns: 2fr 1fr 1fr;
 
-    background-color: rgb(229,229,229);
+    background-color: rgb(229, 229, 229);
   }
 </style>

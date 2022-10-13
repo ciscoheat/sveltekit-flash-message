@@ -4,7 +4,7 @@ This is a [Sveltekit](https://kit.svelte.dev/) library that passes temporary dat
 
 This is known as a "flash message", especially known from PHP apps, since it's easy to add this functionality with PHP's built-in session handling. With Sveltekit it's a bit harder, but this library was made to alleviate that.
 
-The library is encouraging well-behaved web apps that [Redirects after Post](https://www.theserverside.com/news/1365146/Redirect-After-Post), so a redirect is *required* for a flash message to be displayed.
+The library is encouraging well-behaved web apps that [Redirects after Post](https://www.theserverside.com/news/1365146/Redirect-After-Post), so a redirect is _required_ for a flash message to be displayed.
 
 ## Installation
 
@@ -22,11 +22,11 @@ Due to [this issue](https://github.com/sveltejs/kit/issues/6501), for now the fo
 
 ```js
 const config = {
-	plugins: [sveltekit()],
+  plugins: [sveltekit()],
   // === Add the following: ===
-	ssr: {
-		noExternal: ['sveltekit-flash-message']
-	}
+  ssr: {
+    noExternal: ['sveltekit-flash-message']
+  }
 };
 ```
 
@@ -39,7 +39,7 @@ In `src/app.d.ts` you should add the type for the flash message to `App.PageData
 ```typescript
 declare namespace App {
   interface PageData {
-    flash?: { type: 'success' | 'error', message: string }
+    flash?: { type: 'success' | 'error'; message: string };
   }
 }
 ```
@@ -51,7 +51,7 @@ If you're not using any [load functions](https://kit.svelte.dev/docs/load), this
 **src/routes/+layout.server.ts**
 
 ```typescript
-export { load } from "sveltekit-flash-message/server"
+export { load } from 'sveltekit-flash-message/server';
 ```
 
 If you've implemented a `load` function already, you can import `loadFlash` and use it in the load function instead:
@@ -59,18 +59,18 @@ If you've implemented a `load` function already, you can import `loadFlash` and 
 **src/routes/+layout.server.ts**
 
 ```typescript
-import type { ServerLoadEvent } from "@sveltejs/kit"
-import { loadFlash } from "sveltekit-flash-message/server"
+import type { ServerLoadEvent } from '@sveltejs/kit';
+import { loadFlash } from 'sveltekit-flash-message/server';
 
-export function load(event : ServerLoadEvent) {
+export function load(event: ServerLoadEvent) {
   const data = {
     some: 'data'
-  }
+  };
 
   // Returns an object: { flash: App.PageData['flash'] | undefined }
-  const flashData = loadFlash(event)
+  const flashData = loadFlash(event);
 
-  return Object.assign(flashData, data)
+  return Object.assign(flashData, data);
 }
 ```
 
@@ -82,11 +82,11 @@ Instantiate the client `Flash` class to display the flash message, for example i
 
 ```svelte
 <script lang="ts">
-  import { Flash } from "sveltekit-flash-message/client";
-  import { page } from "$app/stores"
+  import { Flash } from 'sveltekit-flash-message/client';
+  import { page } from '$app/stores';
 
-  const flash = new Flash(page)
-  const message = flash.message
+  const flash = new Flash(page);
+  const message = flash.message;
 </script>
 
 {#if $message}
@@ -99,40 +99,24 @@ Instantiate the client `Flash` class to display the flash message, for example i
 
 ### Server-side
 
-To send a flash message, you'll import a server function depending on whether your route is an Action or an endpoint.
-
-| Type | File | Function |
-| ---- | ---- | -------- |
-| Action | `+page.server.ts` | `flashMessage(message, url \| event, event)` |
-| Endpoint | `+server.ts` | `flashResponse(message, url, headers?, status = 303, statusMessage?)` |
-
-### Action example
-
-**src/routes/todos/+page.server.ts**
+To send a flash message, import and throw `redirect` or `redirect303` from `sveltekit-flash-message/server`, as in [load](https://kit.svelte.dev/docs/load#redirects) and [form actions](https://kit.svelte.dev/docs/form-actions#anatomy-of-an-action-redirects).
 
 ```typescript
-import type { RequestEvent } from '@sveltejs/kit';
-import { flashMessage } from 'sveltekit-flash-message/server'
+import { redirect, redirect303 } from 'sveltekit-flash-message/server'
 
-export const actions = {
-  default: async (event : RequestEvent) => {
-    const form = await event.request.formData()
+throw redirect(
+  status: number,
+  location: string,
+  message?: App.PageData['flash'],
+  event?: RequestEvent // Must exist if message is set
+)
 
-    await api('POST', `todos/${event.locals.userid}`, {
-      text: form.get('text')
-    })
-
-    const message = {type: 'success', message: "That's the entrepreneur spirit!"}
-    
-    return flashMessage(message, '/todos', event)
-  }
-}
-```
-
-You can also redirect to the same page by passing in the `event : RequestEvent` parameter.
-
-```typescript
-return flashMessage(message, event)
+// Makes a 303 redirect to the current URL, unless location is set
+throw redirect303(
+  message: App.PageData['flash'],
+  event: RequestEvent,
+  location?: string
+)
 ```
 
 ### Endpoint example
@@ -141,16 +125,35 @@ return flashMessage(message, event)
 
 ```typescript
 import type { RequestEvent } from '@sveltejs/kit';
-import { flashResponse } from 'sveltekit-flash-message/server'
+import { redirect } from 'sveltekit-flash-message/server';
 
-export const POST = async (event : RequestEvent) => {
-  const message = {type: 'success', message: "Endpoint POST successful!"}
-
-  return flashResponse(message, '/')
-}
+export const POST = async (event: RequestEvent) => {
+  const message = { type: 'success', message: 'Endpoint POST successful!' };
+  throw redirect(303, '/', message, event);
+};
 ```
 
-You can also append extra headers with the `headers` argument, and customize the status code and message with `status` and `statusMessage`.
+### Action example
+
+**src/routes/todos/+page.server.ts**
+
+```typescript
+import type { RequestEvent } from '@sveltejs/kit';
+import { redirect303 } from 'sveltekit-flash-message/server';
+
+export const actions = {
+  default: async (event: RequestEvent) => {
+    const form = await event.request.formData();
+
+    await api('POST', `/todos/${event.locals.userid}`, {
+      text: form.get('text')
+    });
+
+    const message = { type: 'success', message: "That's the entrepreneur spirit!" };
+    throw redirect303(message, event);
+  }
+};
+```
 
 ### Client-side
 
@@ -160,49 +163,65 @@ If you want to send a flash message in some other circumstances on the client, y
 
 ```svelte
 <script>
-  import { Flash } from "sveltekit-flash-message/client";
-  import { page } from "$app/stores"
+  import { Flash } from 'sveltekit-flash-message/client';
+  import { page } from '$app/stores';
 
-  const flash = new Flash(page)
-  const message = flash.message
+  const flash = new Flash(page);
+  const message = flash.message;
 
   function change() {
-    $message = {type: 'success', message: 'Updated from other component!'}
+    $message = { type: 'success', message: 'Updated from other component!' };
   }
 </script>
 
 <button on:click={change}>Update message</button>
 ```
 
-Note that importing like this only works on route components (files starting with a `+`).
+Note that importing like this only works on route components (files starting with a `+`), for other components you need to pass the `page` object along to them.
 
 ## Client-side fetching and redirecting
 
-If you're using [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis) instead of a browser form submit, the flash message will be passed on to the client, but it won't be displayed automatically. To display it, you can use `Flash::updateFrom` after the fetch is completed:
+If you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhancement-use-enhance) or [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis), the flash message will be passed on to the client, but it won't be displayed automatically. To display it, you can use `Flash::updateFrom` after the fetch is completed:
+
+### Example 1: Enhance
+
+```svelte
+<form
+  method="POST"
+  use:enhance={() =>
+    async ({ result, update }) =>
+      flash.updateFrom(result, update)}
+>
+  <button>Submit with enhanced form</button>
+</form>
+```
+
+### Example 2: Fetch
+
+For simplicity, this example works on client-side only.
 
 ```svelte
 <script lang="ts">
-  import { Flash } from "sveltekit-flash-message/client";
-  import { page } from "$app/stores"
+  import { Flash } from 'sveltekit-flash-message/client';
+  import { page } from '$app/stores';
 
-  const flash = new Flash(page)
-  const message = flash.message
+  const flash = new Flash(page);
+  const message = flash.message;
 
-  async function submitForm(e : SubmitEvent) {
-    const form = e.target as HTMLFormElement
-    const body = new FormData(e.target as HTMLFormElement)
-    
-    const response = await fetch(form.action, { method: 'POST', body })
-    flash.updateFrom(response)
+  async function submitForm(e: SubmitEvent) {
+    const form = e.target as HTMLFormElement;
+    const body = new FormData(e.target as HTMLFormElement);
+
+    const response = await fetch(form.action, { method: 'POST', body });
+    flash.updateFrom(response);
   }
 </script>
 
 <form method="POST" action="/test" on:submit|preventDefault={submitForm}>
-  <input type="text" name="test" value="TEST">
-  <button>Submit to /test with fetch</button>
+  <input type="text" name="test" value="TEST" />
+  <button>Submit with fetch</button>
 </form>
 ```
-
 
 ## Securing the flash message
 
@@ -212,20 +231,21 @@ To help with that, you can add a parameter to `getFlashStore`, a validation func
 
 ```typescript
 // A bit lazy validation, for the sake of the example
-const validate = (value : unknown) => {
-  const check = value as any
-  if(typeof check === "object" && 
-    ['success', 'error'].contains(check.type) && 
-    typeof check.message === "string"
+const validate = (value: unknown) => {
+  const check = value as any;
+  if (
+    typeof check === 'object' &&
+    ['success', 'error'].contains(check.type) &&
+    typeof check.message === 'string'
   ) {
-    return check 
+    return check;
   }
 
   // Validation failed
-  return undefined // or throw, or return default value, if deemed more useful
-}
+  return undefined; // or throw, or return default value, if deemed more useful
+};
 
-const flash = new Flash(page, validate)
+const flash = new Flash(page, validate);
 ```
 
 This will ensure the integrity of your flash messages. Instead of returning `undefined` you can return a default value, which is useful if you're using the library for displaying multiple messages in an array, like a notification widget.
@@ -241,18 +261,18 @@ This little snippet can be useful if you'd like to have the flash message remove
 **src/routes/+layout.svelte**
 
 ```typescript
-import { Flash } from "sveltekit-flash-message/client"
-import { page } from "$app/stores"
-import { beforeNavigate } from '$app/navigation'
+import { Flash } from 'sveltekit-flash-message/client';
+import { page } from '$app/stores';
+import { beforeNavigate } from '$app/navigation';
 
-const flash = new Flash(page)
-const message = flash.message
+const flash = new Flash(page);
+const message = flash.message;
 
-beforeNavigate(nav => {
-  if(nav.from.href != nav.to?.href && $message) {
-    $message = undefined
+beforeNavigate((nav) => {
+  if ($message && nav.from?.url.toString() != nav.to?.url.toString()) {
+    $message = undefined;
   }
-})
+});
 ```
 
 Enjoy the library, and please [open a github issue](https://github.com/ciscoheat/sveltekit-flash-message/issues) if you have suggestions or feedback in general!
