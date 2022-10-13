@@ -1,5 +1,5 @@
-import { redirect, type RequestEvent } from '@sveltejs/kit';
-import { redirect303 } from '$lib/server.js';
+import type { RequestEvent } from '@sveltejs/kit';
+import { redirect } from '$lib/server.js';
 import type { PageServerLoad } from './$types';
 import count from './counter.js';
 
@@ -12,7 +12,7 @@ export const load: PageServerLoad = (params) => {
 
 export const actions = {
   normal: async (event: RequestEvent) => {
-    throw redirect303(
+    throw redirect(
       [
         {
           status: 'error',
@@ -24,15 +24,15 @@ export const actions = {
   },
 
   enhanced: async (event: RequestEvent) => {
-    throw redirect303(
+    throw redirect(
+      '/posted',
       [
         {
           status: 'ok',
           text: '+page.server.ts POST to /posted ' + count.next()
         }
       ],
-      event,
-      '/posted'
+      event
     );
   }
 };

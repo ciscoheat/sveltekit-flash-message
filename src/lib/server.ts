@@ -54,7 +54,63 @@ export const load = loadFlash;
 
 /////////////////////////////////////////////////////////////////////
 
+export function redirect(status: number, location: string): ReturnType<typeof redir>;
+
 export function redirect(
+  message: App.PageData['flash'],
+  event: RequestEvent
+): ReturnType<typeof redir>;
+
+export function redirect(
+  location: string,
+  message: App.PageData['flash'],
+  event: RequestEvent
+): ReturnType<typeof redir>;
+
+export function redirect(
+  status: number,
+  location: string,
+  message: App.PageData['flash'],
+  event: RequestEvent
+): ReturnType<typeof redir>;
+
+export function redirect(
+  status: unknown,
+  location: unknown,
+  message?: unknown,
+  event?: RequestEvent
+): ReturnType<typeof redir> {
+  switch (arguments.length) {
+    case 2:
+      if (typeof status === 'number') {
+        return redir(status, location as string);
+      } else {
+        const message = status as App.PageData['flash'];
+        const event = location as RequestEvent;
+        // Remove the named action, if it exists
+        return realRedirect(303, event.url.toString().replace(/\?\/\w+/, ''), message, event);
+      }
+      break;
+
+    case 3:
+      return realRedirect(
+        303,
+        status as string,
+        location as App.PageData['flash'],
+        message as RequestEvent
+      );
+
+    case 4:
+      return realRedirect(
+        status as number,
+        location as string,
+        message as App.PageData['flash'],
+        event
+      );
+  }
+}
+
+function realRedirect(
   status: number,
   location: string,
   message?: App.PageData['flash'],
@@ -65,17 +121,4 @@ export function redirect(
 
   event.cookies.set(cookieName, JSON.stringify(message), { httpOnly, path, maxAge });
   return redir(status, location);
-}
-
-export function redirect303(
-  message: App.PageData['flash'],
-  event: RequestEvent,
-  location?: string
-) {
-  if (!event) throw new Error('RequestEvent is required for redirecting with flash message');
-
-  // Trim the named action, if it exists
-  const redirectUrl = location ?? event.url.toString().replace(/\?\/\w+/, '');
-
-  return redirect(303, redirectUrl, message, event);
 }

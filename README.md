@@ -99,23 +99,35 @@ Instantiate the client `Flash` class to display the flash message, for example i
 
 ### Server-side
 
-To send a flash message, import and throw `redirect` or `redirect303` from `sveltekit-flash-message/server`, as in [load](https://kit.svelte.dev/docs/load#redirects) and [form actions](https://kit.svelte.dev/docs/form-actions#anatomy-of-an-action-redirects).
+To send a flash message, import `redirect` from `sveltekit-flash-message/server` and throw it, as in [load](https://kit.svelte.dev/docs/load#redirects) and [form actions](https://kit.svelte.dev/docs/form-actions#anatomy-of-an-action-redirects).
 
 ```typescript
-import { redirect, redirect303 } from 'sveltekit-flash-message/server'
+import { redirect } from 'sveltekit-flash-message/server'
 
 throw redirect(
   status: number,
   location: string,
-  message?: App.PageData['flash'],
-  event?: RequestEvent // Must exist if message is set
+  message: App.PageData['flash'],
+  event: RequestEvent
 )
 
-// Makes a 303 redirect to the current URL, unless location is set
-throw redirect303(
+// Makes a 303 redirect
+throw redirect(
+  location: string,
   message: App.PageData['flash'],
-  event: RequestEvent,
-  location?: string
+  event: RequestEvent
+)
+
+// Makes a 303 redirect to the current URL
+throw redirect(
+  message: App.PageData['flash'],
+  event: RequestEvent
+)
+
+// For compatibility, the sveltekit signature can also be used
+throw redirect(
+  status: number,
+  location: string,
 )
 ```
 
@@ -139,7 +151,7 @@ export const POST = async (event: RequestEvent) => {
 
 ```typescript
 import type { RequestEvent } from '@sveltejs/kit';
-import { redirect303 } from 'sveltekit-flash-message/server';
+import { redirect } from 'sveltekit-flash-message/server';
 
 export const actions = {
   default: async (event: RequestEvent) => {
@@ -150,7 +162,7 @@ export const actions = {
     });
 
     const message = { type: 'success', message: "That's the entrepreneur spirit!" };
-    throw redirect303(message, event);
+    throw redirect(message, event);
   }
 };
 ```
