@@ -45,19 +45,17 @@ If you've implemented a `load` function already, you can import `loadFlash` and 
 **src/routes/+layout.server.ts**
 
 ```typescript
-import type { ServerLoadEvent } from '@sveltejs/kit';
+import type { LayoutServerLoad } from './$types';
 import { loadFlash } from 'sveltekit-flash-message/server';
 
-export function load(event: ServerLoadEvent) {
-  const data = {
-    some: 'data'
-  };
+export const load: LayoutServerLoad = async (event) => {
+  const data = { some: 'data' };
 
   // Returns an object: { flash: App.PageData['flash'] | undefined }
   const flashData = loadFlash(event);
 
   return Object.assign(flashData, data);
-}
+};
 ```
 
 ## 3. Display the flash message

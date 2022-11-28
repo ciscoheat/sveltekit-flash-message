@@ -54,6 +54,8 @@ export const load = loadFlash;
 
 /////////////////////////////////////////////////////////////////////
 
+type RedirectStatus = Parameters<typeof redir>[0];
+
 export function redirect(status: number, location: string): ReturnType<typeof redir>;
 
 export function redirect(
@@ -68,7 +70,7 @@ export function redirect(
 ): ReturnType<typeof redir>;
 
 export function redirect(
-  status: number,
+  status: RedirectStatus,
   location: string,
   message: App.PageData['flash'],
   event: RequestEvent
@@ -83,7 +85,7 @@ export function redirect(
   switch (arguments.length) {
     case 2:
       if (typeof status === 'number') {
-        return redir(status, location as string);
+        return redir(status as RedirectStatus, location as string);
       } else {
         const message = status as App.PageData['flash'];
         const event = location as RequestEvent;
@@ -102,16 +104,19 @@ export function redirect(
 
     case 4:
       return realRedirect(
-        status as number,
+        status as RedirectStatus,
         location as string,
         message as App.PageData['flash'],
         event
       );
+
+    default:
+      throw new Error('Invalid redirect arguments');
   }
 }
 
 function realRedirect(
-  status: number,
+  status: RedirectStatus,
   location: string,
   message?: App.PageData['flash'],
   event?: RequestEvent
