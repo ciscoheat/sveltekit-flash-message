@@ -1,6 +1,6 @@
 import type { RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
 import { redirect as redir } from '@sveltejs/kit';
-import { parse } from 'cookie';
+import { parse } from './cookie.js';
 
 //const d = console.debug
 
@@ -11,14 +11,14 @@ const maxAge = 120;
 
 /////////////////////////////////////////////////////////////////////
 
-export function loadFlash(event: ServerLoadEvent) {
+export const loadFlash = (event: ServerLoadEvent): { flash: App.PageData['flash'] | undefined } => {
   const header = event.request.headers.get('cookie') || '';
   if (!header.includes(cookieName + '=')) {
     //d('No flash cookie found.')
     return { [cookieName]: undefined };
   }
 
-  const cookies = parse(header);
+  const cookies = parse(header) as Record<string, string>;
   const dataString = cookies[cookieName];
 
   let data = undefined;
@@ -46,9 +46,9 @@ export function loadFlash(event: ServerLoadEvent) {
   }
 
   return {
-    [cookieName]: data as App.PageData['flash'] | undefined
+    [cookieName]: data
   };
-}
+};
 
 export const load = loadFlash;
 

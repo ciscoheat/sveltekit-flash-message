@@ -1,6 +1,6 @@
 {
 	"name": "sveltekit-flash-message",
-	"version": "0.9.5",
+	"version": "0.9.7",
 	"author": "Andreas Söderlund <ciscoheat@gmail.com> (https://blog.encodeart.dev)",
 	"description": "Send temporary data to the next request after redirect. Works with both SSR and client.",
 	"keywords": [
@@ -46,8 +46,5 @@
 		"@sveltejs/kit": "^1.0.0-next",
 		"svelte": "^3"
 	},
-	"type": "module",
-	"dependencies": {
-		"cookie": "^0.5.0"
-	}
+	"type": "module"
 }
