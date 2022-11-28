@@ -16,20 +16,6 @@ The library is encouraging well-behaved web apps that [Redirects after Post](htt
 
 As usual, there are a few hoops to jump through:
 
-## 0. Add to vite.config.js
-
-Due to [this issue](https://github.com/sveltejs/kit/issues/6501), for now the following needs to be added to the `vite.config.js` file of your project:
-
-```js
-const config = {
-  plugins: [sveltekit()],
-  // === Add the following: ===
-  ssr: {
-    noExternal: ['sveltekit-flash-message']
-  }
-};
-```
-
 ## 1. [Typescript only] Add the flash message to app.d.ts
 
 In `src/app.d.ts` you should add the type for the flash message to `App.PageData` as an optional property called `flash`. It can be as simple as a `string`, or something more advanced. It has to be serializable though, so only JSON-friendly data structures. Here's an example:
