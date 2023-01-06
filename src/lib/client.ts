@@ -99,7 +99,7 @@ export class Flash {
   }
 
   private setFrom(response: FlashResponse, update?: () => Promise<void>) {
-    // Update before setting message, to prevent beforeNavigate to clearing the message
+    // Update before setting message, to prevent beforeNavigate clearing the message
     const promise = update ? update() : Promise.resolve();
     this.message.set(this.messageFrom(response));
 
@@ -107,7 +107,7 @@ export class Flash {
   }
 
   updateFrom(response: FlashResponse, update?: () => Promise<void>) {
-    // Update before setting message, to prevent beforeNavigate to clearing the message
+    // Update before setting message, to prevent beforeNavigate clearing the message
     const promise = update ? update() : Promise.resolve();
     const newMessage = this.messageFrom(response);
 

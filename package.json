@@ -1,50 +1,50 @@
 {
-	"name": "sveltekit-flash-message",
-	"version": "0.9.7",
-	"author": "Andreas Söderlund <ciscoheat@gmail.com> (https://blog.encodeart.dev)",
-	"description": "Send temporary data to the next request after redirect. Works with both SSR and client.",
-	"keywords": [
-		"sveltekit",
-		"svelte",
-		"session",
-		"flash message"
-	],
-	"license": "MIT",
-	"repository": {
-		"url": "https://github.com/ciscoheat/sveltekit-flash-message"
-	},
-	"scripts": {
-		"dev": "vite dev",
-		"build": "svelte-kit sync && svelte-package",
-		"preview": "vite build && vite preview",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write ."
-	},
-	"devDependencies": {
-		"@sveltejs/adapter-auto": "next",
-		"@sveltejs/kit": "next",
-		"@sveltejs/package": "1.0.0-next.5",
-		"@types/cookie": "^0.5.1",
-		"@typescript-eslint/eslint-plugin": "^5.44.0",
-		"@typescript-eslint/parser": "^5.44.0",
-		"eslint": "^8.28.0",
-		"eslint-config-prettier": "^8.5.0",
-		"eslint-plugin-svelte3": "^4.0.0",
-		"prettier": "^2.8.0",
-		"prettier-plugin-svelte": "^2.8.1",
-		"sass": "^1.56.1",
-		"svelte": "^3.53.1",
-		"svelte-check": "^2.9.2",
-		"svelte-preprocess": "^4.10.7",
-		"tslib": "^2.4.1",
-		"typescript": "^4.9.3",
-		"vite": "^3.2.4"
-	},
-	"peerDependencies": {
-		"@sveltejs/kit": "^1.0.0-next",
-		"svelte": "^3"
-	},
-	"type": "module"
+  "name": "sveltekit-flash-message",
+  "version": "0.9.7",
+  "author": "Andreas Söderlund <ciscoheat@gmail.com> (https://blog.encodeart.dev)",
+  "description": "Send temporary data to the next request after redirect. Works with both SSR and client.",
+  "keywords": [
+    "sveltekit",
+    "svelte",
+    "session",
+    "flash message"
+  ],
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/ciscoheat/sveltekit-flash-message"
+  },
+  "scripts": {
+    "dev": "vite dev",
+    "build": "svelte-kit sync && svelte-package",
+    "preview": "vite build && vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "lint": "prettier --check . && eslint .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "^1.0.0",
+    "@sveltejs/kit": "^1.0.5",
+    "@sveltejs/package": "^1.0.2",
+    "@types/cookie": "^0.5.1",
+    "@typescript-eslint/eslint-plugin": "^5.48.0",
+    "@typescript-eslint/parser": "^5.48.0",
+    "eslint": "^8.31.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-svelte3": "^4.0.0",
+    "prettier": "^2.8.1",
+    "prettier-plugin-svelte": "^2.9.0",
+    "sass": "^1.57.1",
+    "svelte": "^3.55.0",
+    "svelte-check": "^3.0.1",
+    "svelte-preprocess": "^5.0.0",
+    "tslib": "^2.4.1",
+    "typescript": "^4.9.4",
+    "vite": "^4.0.4"
+  },
+  "peerDependencies": {
+    "@sveltejs/kit": "^1.0.0",
+    "svelte": "^3"
+  },
+  "type": "module"
 }

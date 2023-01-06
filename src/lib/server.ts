@@ -33,7 +33,7 @@ export const loadFlash = (event: ServerLoadEvent): { flash: App.PageData['flash'
       //d('Possible fetch request, keeping cookie for client.')
     } else {
       //d('Flash cookie found, clearing')
-      event.cookies.delete(cookieName);
+      event.cookies.delete(cookieName, {path});
     }
 
     try {
