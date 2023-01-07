@@ -1,5 +1,4 @@
 import { type Writable, type Readable, writable, get } from 'svelte/store';
-import { setContext, getContext, hasContext } from 'svelte';
 import type { ActionResult, Page } from '@sveltejs/kit';
 
 /**
@@ -33,12 +32,12 @@ const parseCookie = (str: string) => {
 
 /////////////////////////////////////////////////////////////////////
 
-type FlashResponse = Response | ActionResult;
+const pageCache = new WeakMap<Readable<Page>, Writable<App.PageData['flash']>>();
 
 export class Flash {
   readonly message: Writable<App.PageData['flash']>;
 
-  private readonly responseMap = new WeakMap<FlashResponse, App.PageData['flash']>();
+  private readonly responseMap = new WeakMap<Response | ActionResult, App.PageData['flash']>();
   private readonly validate: ((value: unknown) => App.PageData['flash'] | undefined) | undefined;
 
   constructor(
@@ -52,7 +51,7 @@ export class Flash {
       let storeExists: boolean;
       try {
         // Only try/catch hasContext, so actual errors can be thrown.
-        storeExists = hasContext(cookieName);
+        storeExists = pageCache.has(page);
       } catch (e) {
         throw new Error('The Flash class can only be instantiated at component initalization.');
       }
@@ -61,14 +60,14 @@ export class Flash {
         // Get current message from page
         const pageMessage = get(page).data.flash;
         const checkedMessage = this.validate ? this.validate(pageMessage) : pageMessage;
-        this.message = setContext(cookieName, writable(checkedMessage));
+        pageCache.set(page, writable(checkedMessage));
       }
 
-      this.message = getContext(cookieName);
+      this.message = pageCache.get(page) as NonNullable<ReturnType<typeof pageCache.get>>;
     }
   }
 
-  private messageFrom(response: FlashResponse) {
+  private messageFrom(response: Response | ActionResult) {
     if (this.responseMap.has(response)) return this.responseMap.get(response);
 
     function parseFlashCookie(cookieString?: string): unknown {
@@ -98,7 +97,7 @@ export class Flash {
     return newMessage;
   }
 
-  private setFrom(response: FlashResponse, update?: () => Promise<void>) {
+  private setFrom(response: Response | ActionResult, update?: () => Promise<void>) {
     // Update before setting message, to prevent beforeNavigate clearing the message
     const promise = update ? update() : Promise.resolve();
     this.message.set(this.messageFrom(response));
@@ -106,9 +105,9 @@ export class Flash {
     return promise;
   }
 
-  updateFrom(response: FlashResponse, update?: () => Promise<void>) {
+  updateFrom(response: Response | ActionResult, onUpdate?: () => Promise<void>) {
     // Update before setting message, to prevent beforeNavigate clearing the message
-    const promise = update ? update() : Promise.resolve();
+    const promise = onUpdate ? onUpdate() : Promise.resolve();
     const newMessage = this.messageFrom(response);
 
     this.message.update((prevMessage) => {
