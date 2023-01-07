@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { updateFlash } from '$lib/client.js';
-  import { page } from '$app/stores';
   import { enhance } from '$app/forms';
   import type { PageData } from './$types';
+  import { getFlashStore, updateFlashStore } from '$lib/client';
 
   let count = 0;
+  const store = getFlashStore();
 
   function change() {
-    const msg = { status: 'error' as const, text: 'Updated on client ' + ++count };
-    $page.data.flash = $page.data.flash ? [...$page.data.flash, msg] : [msg];
+    const msg = { status: 'ok' as const, text: 'Updated on client ' + ++count };
+    store.update((messages) => messages.concat([msg]));
   }
 
   async function submitForm(e: Event) {
@@ -20,7 +20,7 @@
       body
     });
 
-    updateFlash(response);
+    updateFlashStore();
   }
 
   export let data: PageData;
@@ -46,14 +46,7 @@
     <button id="action-post">Submit to action normally</button>
   </form>
 
-  <form
-    method="POST"
-    action="?/normal"
-    use:enhance={() =>
-      async ({ result, update }) => {
-        //updateFlash(result, update);
-      }}
-  >
+  <form method="POST" action="?/normal" use:enhance>
     <button id="action-post-normal-enhanced">Submit to action with enhanced form</button>
   </form>
 
@@ -76,13 +69,7 @@
     <button id="endpoint-server">Submit to endpoint server-side</button>
   </form>
 
-  <form
-    method="POST"
-    use:enhance={() =>
-      async ({ result, update }) => {
-        //updateFlash(result, update);
-      }}
-  >
+  <form method="POST" use:enhance>
     <button formaction="?/enhanced" id="action-post-enhanced"
       >Submit to different page with enhanced form</button
     >

@@ -3,8 +3,8 @@ import { redirect } from '$lib/server.js';
 import type { PageServerLoad } from './$types';
 import count from './counter.js';
 
-export const load: PageServerLoad = (params) => {
-  if (params.url.searchParams.has('reset')) {
+export const load: PageServerLoad = (event) => {
+  if (event.url.searchParams.has('reset')) {
     count.reset();
     throw redirect(303, '/');
   }

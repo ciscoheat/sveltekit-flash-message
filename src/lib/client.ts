@@ -1,22 +1,37 @@
-import { type Writable, type Readable, writable, get } from 'svelte/store';
-import type { ActionResult, Page } from '@sveltejs/kit';
-import { page } from '$app/stores';
+import { type Writable, type Readable, writable } from 'svelte/store';
+import type { Page } from '@sveltejs/kit';
+import { onDestroy } from 'svelte';
+import { BROWSER as browser } from 'esm-env';
 
-/**
- * Shim for: import { browser } from '$app/environment'
- */
-let browser: boolean;
-try {
-  const SSR = import.meta?.env?.SSR;
-  browser = SSR === undefined ? true : !SSR;
-} catch (e) {
-  browser = true;
+let flashStore: Writable<App.PageData['flash']>;
+
+export function initFlashStore(
+  page: Readable<Page>,
+  defaultValue?: App.PageData['flash']
+): Writable<App.PageData['flash']> {
+  if (flashStore) return flashStore;
+  flashStore = writable(defaultValue);
+
+  const unsubscribe = page.subscribe((pageData) => {
+    _updateFlashStore(pageData.data.flash);
+  });
+
+  onDestroy(unsubscribe);
+  return flashStore;
 }
 
-//const d = console.debug
+const notInitialized =
+  'Flash store must be initialized with initFlashStore(page) before calling getFlashStore.';
 
-const cookieName = 'flash';
-const path = '/';
+export function getFlashStore() {
+  if (!flashStore) throw new Error(notInitialized);
+  return flashStore;
+}
+
+export function updateFlashStore() {
+  if (!flashStore) throw new Error(notInitialized);
+  _updateFlashStore(parseFlashCookie() as App.PageData['flash'] | undefined);
+}
 
 const parseCookie = (str: string) => {
   const output = {} as Record<string, string>;
@@ -33,94 +48,41 @@ const parseCookie = (str: string) => {
 
 /////////////////////////////////////////////////////////////////////
 
-const pageCache = new WeakMap<Readable<Page>, Writable<App.PageData['flash']>>();
+const path = '/';
+const varName = 'flash';
 
-export class Flash {
-  readonly message: Writable<App.PageData['flash']>;
+function parseFlashCookie(cookieString?: string): unknown {
+  if (!cookieString && browser) cookieString = document.cookie;
 
-  private readonly responseMap = new WeakMap<Response | ActionResult, App.PageData['flash']>();
-  private readonly validate: ((value: unknown) => App.PageData['flash'] | undefined) | undefined;
+  if (!cookieString || !cookieString.includes(varName + '=')) return undefined;
 
-  constructor(
-    page: Readable<Page>,
-    validate?: (value: unknown) => App.PageData['flash'] | undefined
-  ) {
-    this.validate = validate;
-
-    {
-      // Use a Svelte Context as a static var, to make it accessible only per request.
-      let storeExists: boolean;
-      try {
-        // Only try/catch hasContext, so actual errors can be thrown.
-        storeExists = pageCache.has(page);
-      } catch (e) {
-        throw new Error('The Flash class can only be instantiated at component initalization.');
-      }
-
-      if (!storeExists) {
-        // Get current message from page
-        const pageMessage = get(page).data.flash;
-        const checkedMessage = this.validate ? this.validate(pageMessage) : pageMessage;
-        pageCache.set(page, writable(checkedMessage));
-      }
-
-      this.message = pageCache.get(page) as NonNullable<ReturnType<typeof pageCache.get>>;
+  const cookies = parseCookie(cookieString);
+  if (cookies[varName]) {
+    try {
+      return JSON.parse(cookies[varName]);
+    } catch (e) {
+      // Ignore value if parsing failed
     }
   }
-
-  private messageFrom(response: Response | ActionResult) {
-    if (this.responseMap.has(response)) return this.responseMap.get(response);
-
-    function parseFlashCookie(cookieString?: string): unknown {
-      if (!cookieString && browser) cookieString = document.cookie;
-
-      if (!cookieString || !cookieString.includes(cookieName + '=')) return undefined;
-
-      const cookies = parseCookie(cookieString);
-      if (cookies[cookieName]) {
-        try {
-          return JSON.parse(cookies[cookieName]);
-        } catch (e) {
-          // Ignore value if parsing failed
-        } finally {
-          if (browser) document.cookie = cookieName + `=; Max-Age=0; Path=${path};`;
-        }
-      }
-      return undefined;
-    }
-
-    const currentMessage = parseFlashCookie();
-    const newMessage = (this.validate ? this.validate(currentMessage) : currentMessage) as
-      | App.PageData['flash']
-      | undefined;
-
-    this.responseMap.set(response, newMessage);
-    return newMessage;
-  }
-
-  private setFrom(response: Response | ActionResult, update?: () => Promise<void>) {
-    // Update before setting message, to prevent beforeNavigate clearing the message
-    const promise = update ? update() : Promise.resolve();
-    this.message.set(this.messageFrom(response));
-
-    return promise;
-  }
-
-  updateFrom(response: Response | ActionResult, onUpdate?: () => Promise<void>) {
-    // Update before setting message, to prevent beforeNavigate clearing the message
-    const promise = onUpdate ? onUpdate() : Promise.resolve();
-    const newMessage = this.messageFrom(response);
-
-    this.message.update((prevMessage) => {
-      if (newMessage === undefined) return prevMessage;
-      else if (Array.isArray(prevMessage)) return prevMessage.concat(newMessage);
-      else return newMessage;
-    });
-
-    return promise;
-  }
+  return undefined;
 }
 
-const flash = new Flash(page);
+function _updateFlashStore(newData: App.PageData['flash'] | undefined) {
+  console.log('Update flash store ', newData);
 
-export const updateFlash = flash.updateFrom;
+  _clearFlashCookie();
+
+  flashStore.update((flash) => {
+    if (newData === undefined) return flash;
+    else if (Array.isArray(flash)) {
+      return flash.concat(newData);
+    } else {
+      return newData;
+    }
+  });
+}
+
+function _clearFlashCookie() {
+  console.log('Clearing flash cookie', browser);
+  if (browser) document.cookie = varName + `=; Max-Age=0; Path=${path};`;
+}

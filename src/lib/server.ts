@@ -2,7 +2,7 @@ import type { RequestEvent, ServerLoad, ServerLoadEvent } from '@sveltejs/kit';
 import { redirect as redir } from '@sveltejs/kit';
 import { parse } from 'cookie';
 
-//const d = console.debug
+const d = console.debug;
 
 const cookieName = 'flash';
 const httpOnly = false;
@@ -15,14 +15,16 @@ export function loadFlashMessage<S extends ServerLoad, E extends ServerLoadEvent
   return async (event: E) => {
     const flash = loadFlash(event).flash;
     const loadFunction = await cb(event);
-    return { flash, ...loadFunction } as ReturnType<S>;
+    return { flash, ...loadFunction };
   };
 }
 
-export const loadFlash = (event: ServerLoadEvent): { flash: App.PageData['flash'] | undefined } => {
+export function loadFlash<T extends ServerLoadEvent>(
+  event: T
+): { flash: App.PageData['flash'] | undefined } {
   const header = event.request.headers.get('cookie') || '';
   if (!header.includes(cookieName + '=')) {
-    //d('No flash cookie found.')
+    d('No flash cookie found.');
     return { [cookieName]: undefined };
   }
 
@@ -34,13 +36,13 @@ export const loadFlash = (event: ServerLoadEvent): { flash: App.PageData['flash'
   if (dataString) {
     // Detect if event is XMLHttpRequest, basically by checking if the browser
     // is honoring the sec-fetch-dest header, or accepting html.
-    if (
-      event.request.headers.get('sec-fetch-dest') == 'empty' ||
-      event.request.headers.get('accept') == '*/*'
-    ) {
-      //d('Possible fetch request, keeping cookie for client.')
+    const setFetchDest = event.request.headers.get('sec-fetch-dest');
+    const accept = event.request.headers.get('accept');
+
+    if (setFetchDest == 'empty' || accept == '*/*' || accept?.includes('application/json')) {
+      d('Possible fetch request, keeping cookie for client.');
     } else {
-      //d('Flash cookie found, clearing')
+      d('Flash cookie found, clearing');
       event.cookies.delete(cookieName, { path });
     }
 
@@ -50,13 +52,13 @@ export const loadFlash = (event: ServerLoadEvent): { flash: App.PageData['flash'
       // Ignore data if parsing error
     }
 
-    //d('setting flash message: ' + data)
+    //d('setting flash message: ' + data);
   }
 
   return {
     [cookieName]: data
   };
-};
+}
 
 export const load = loadFlash;
 

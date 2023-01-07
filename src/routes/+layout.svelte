@@ -1,23 +1,34 @@
 <script lang="ts">
   import './root.scss';
 
-  import { Flash } from '$lib/client.js';
   import { page } from '$app/stores';
   import { beforeNavigate } from '$app/navigation';
   import type { LayoutData } from './$types';
+  import { initFlashStore } from '$lib/client';
 
-  const message = new Flash(page, (v) => {
-    if (!v || typeof v !== 'object') return undefined;
-    return v as App.PageData['flash'];
-  }).message;
+  let messages = initFlashStore(page, []);
+
+  console.log('Messages: ', $messages);
+
+  //let lastMessage: (typeof messages)[0];
+
+  /*
+  $: {
+    const msg = $page.data.flash;
+    if (msg && lastMessage != msg) {
+      messages = [...messages, msg];
+      lastMessage = msg;
+    }
+  }
+  */
 
   function clear() {
-    $message = undefined;
+    $messages = [];
   }
 
   beforeNavigate((nav) => {
-    if ($message && nav.from?.url.toString() != nav.to?.url.toString()) {
-      $message = undefined;
+    if ($messages && nav.from?.url.toString() != nav.to?.url.toString()) {
+      clear();
     }
   });
 
@@ -36,8 +47,8 @@
     </div>
   </header>
   <div id="messages">
-    {#if $message}
-      {#each $message as msg}
+    {#if $messages}
+      {#each $messages as msg}
         {@const bg = msg.status == 'ok' ? '#3D9970' : '#FF4136'}
         <div data-status={msg.status} style:background-color={bg} class="flash">{msg.text}</div>
       {/each}
