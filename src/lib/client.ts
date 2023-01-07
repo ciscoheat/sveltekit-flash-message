@@ -5,6 +5,9 @@ import { BROWSER as browser } from 'esm-env';
 
 let flashStore: Writable<App.PageData['flash']>;
 
+const notInitialized =
+  'Flash store must be initialized with initFlashStore(page) before calling getFlashStore.';
+
 export function initFlashStore(
   page: Readable<Page>,
   defaultValue?: App.PageData['flash']
@@ -20,9 +23,6 @@ export function initFlashStore(
   return flashStore;
 }
 
-const notInitialized =
-  'Flash store must be initialized with initFlashStore(page) before calling getFlashStore.';
-
 export function getFlashStore() {
   if (!flashStore) throw new Error(notInitialized);
   return flashStore;
@@ -32,6 +32,8 @@ export function updateFlashStore() {
   if (!flashStore) throw new Error(notInitialized);
   _updateFlashStore(parseFlashCookie() as App.PageData['flash'] | undefined);
 }
+
+///////////////////////////////////////////////////////////
 
 const parseCookie = (str: string) => {
   const output = {} as Record<string, string>;
@@ -68,21 +70,32 @@ function parseFlashCookie(cookieString?: string): unknown {
 }
 
 function _updateFlashStore(newData: App.PageData['flash'] | undefined) {
-  console.log('Update flash store ', newData);
-
   _clearFlashCookie();
 
   flashStore.update((flash) => {
     if (newData === undefined) return flash;
-    else if (Array.isArray(flash)) {
-      return flash.concat(newData);
-    } else {
-      return newData;
+
+    // Need to do a per-element comparison here, since update will be called
+    // when going to the same route, while keeping the old flash message,
+    // making it display multiple times.
+    if (Array.isArray(flash)) {
+      if (
+        Array.isArray(newData) &&
+        flash.length > 0 &&
+        newData.length > 0 &&
+        flash[flash.length - 1] === newData[newData.length - 1]
+      ) {
+        return flash;
+      } else {
+        return flash.concat(newData);
+      }
     }
+
+    return newData;
   });
 }
 
 function _clearFlashCookie() {
-  console.log('Clearing flash cookie', browser);
+  //console.log('Clearing flash cookie', browser);
   if (browser) document.cookie = varName + `=; Max-Age=0; Path=${path};`;
 }

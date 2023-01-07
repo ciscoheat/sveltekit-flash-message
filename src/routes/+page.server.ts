@@ -3,12 +3,12 @@ import { redirect } from '$lib/server.js';
 import type { PageServerLoad } from './$types';
 import count from './counter.js';
 
-export const load: PageServerLoad = (event) => {
+export const load = ((event) => {
   if (event.url.searchParams.has('reset')) {
     count.reset();
     throw redirect(303, '/');
   }
-};
+}) satisfies PageServerLoad;
 
 export const actions = {
   normal: async (event: RequestEvent) => {

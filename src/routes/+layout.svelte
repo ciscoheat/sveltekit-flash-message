@@ -8,27 +8,13 @@
 
   let messages = initFlashStore(page, []);
 
-  console.log('Messages: ', $messages);
-
-  //let lastMessage: (typeof messages)[0];
-
-  /*
-  $: {
-    const msg = $page.data.flash;
-    if (msg && lastMessage != msg) {
-      messages = [...messages, msg];
-      lastMessage = msg;
-    }
-  }
-  */
-
   function clear() {
     $messages = [];
   }
 
   beforeNavigate((nav) => {
     if ($messages && nav.from?.url.toString() != nav.to?.url.toString()) {
-      clear();
+      $messages = [];
     }
   });
 

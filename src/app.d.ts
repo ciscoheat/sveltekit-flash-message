@@ -6,7 +6,7 @@
 declare namespace App {
   // interface Locals {}
   interface PageData {
-    flash: { status: 'ok' | 'error'; text: string }[];
+    flash?: { status: 'ok' | 'error'; text: string }[];
   }
   // interface Platform {}
 }

@@ -49,29 +49,28 @@ import type { LayoutServerLoad } from './$types';
 import { loadFlashMessage } from 'sveltekit-flash-message/server';
 
 export const load = loadFlashMessage(async (event) => {
-  const data = { some: 'data' };
+  const data = { someOther: 'data' };
   return data;
 }) satisfies LayoutServerLoad;
 ```
 
 ## 3. Display the flash message
 
-Instantiate the client `Flash` class to display the flash message, for example in your layout component:
+Import the client `initFlashStore` class to initialize and display the flash message, for example in your layout component:
 
 **src/routes/+layout.svelte**
 
 ```svelte
 <script lang="ts">
-  import { Flash } from 'sveltekit-flash-message/client';
+  import { initFlashStore } from 'sveltekit-flash-message/client';
   import { page } from '$app/stores';
 
-  const flash = new Flash(page);
-  const message = flash.message;
+  const flash = initFlashStore(page);
 </script>
 
-{#if $message}
-  {@const bg = $message.type == 'success' ? '#3D9970' : '#FF4136'}
-  <div style:background-color={bg} class="flash">{$message.message}</div>
+{#if $flash}
+  {@const bg = $flash.type == 'success' ? '#3D9970' : '#FF4136'}
+  <div style:background-color={bg} class="flash">{$flash.message}</div>
 {/if}
 ```
 
@@ -149,63 +148,40 @@ export const actions = {
 
 ### Client-side
 
-If you want to send a flash message in some other circumstances on the client, you can simply assign a new value to the `Flash::message` property:
+If you want to send a flash message in some other component on the client, use the `getFlashStore` function:
 
 **src/routes/some-route/+page.svelte**
 
 ```svelte
 <script>
-  import { Flash } from 'sveltekit-flash-message/client';
-  import { page } from '$app/stores';
+  import { getFlashStore } from 'sveltekit-flash-message/client';
 
-  const flash = new Flash(page);
-  const message = flash.message;
+  const flash = getFlashStore();
 
   function change() {
-    $message = { type: 'success', message: 'Updated from other component!' };
+    $flash = { type: 'success', message: 'Updated from other component!' };
   }
 </script>
 
 <button on:click={change}>Update message</button>
 ```
 
-Note that importing like this only works on route components (files starting with a `+`), for other components you need to pass the `page` object along to them.
+Note that `initFlashStore` must have been called in a higher-level component before using `getFlashStore`.
 
 ## Client-side fetching and redirecting
 
-If you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhancement-use-enhance) or [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis), the flash message will be passed on to the client, but it won't be displayed automatically. To display it, you can use `Flash::updateFrom` after the fetch is completed:
-
-### Example 1: Enhance
-
-```svelte
-<form
-  method="POST"
-  use:enhance={() =>
-    async ({ result, update }) =>
-      flash.updateFrom(result, update)}
->
-  <button>Submit with enhanced form</button>
-</form>
-```
-
-### Example 2: Fetch
-
-For simplicity, this example works on client-side only.
+If you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhancement-use-enhance) the flash message will be updated automatically, but if you're using [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis) you must use `updateFlashStore` after fetching:
 
 ```svelte
 <script lang="ts">
-  import { Flash } from 'sveltekit-flash-message/client';
-  import { page } from '$app/stores';
+  import { updateFlashStore } from 'sveltekit-flash-message/client';
 
-  const flash = new Flash(page);
-  const message = flash.message;
-
-  async function submitForm(e: SubmitEvent) {
+  async function submitForm(e: Event) {
     const form = e.target as HTMLFormElement;
     const body = new FormData(e.target as HTMLFormElement);
 
-    const response = await fetch(form.action, { method: 'POST', body });
-    flash.updateFrom(response);
+    await fetch(form.action, { method: 'POST', body });
+    updateFlashStore();
   }
 </script>
 
@@ -217,34 +193,7 @@ For simplicity, this example works on client-side only.
 
 ## Securing the flash message
 
-Since the flash message is transferred in a cookie, it can be easily tampered with, so don't trust its content. Treat it like you do with any user data - hanging from a ten-foot pole over a fiery pit. 🔥
-
-To help with that, you can add a parameter to `getFlashStore`, a validation function:
-
-```typescript
-// A bit lazy validation, for the sake of the example
-const validate = (value: unknown) => {
-  const check = value as any;
-  if (
-    typeof check === 'object' &&
-    ['success', 'error'].contains(check.type) &&
-    typeof check.message === 'string'
-  ) {
-    return check;
-  }
-
-  // Validation failed
-  return undefined; // or throw, or return default value, if deemed more useful
-};
-
-const flash = new Flash(page, validate);
-```
-
-This will ensure the integrity of your flash messages. Instead of returning `undefined` you can return a default value, which is useful if you're using the library for displaying multiple messages in an array, like a notification widget.
-
-## So much work, for so little?
-
-It may seem so, but this library works both with SSR and client, which is trickier than it seems (and maybe trickier than what it should be...?)
+Since the flash message is transferred in a cookie, it can be easily tampered with, so don't trust its content. Treat it like you do with any user data - hanging from a ten-foot pole over a fiery pit. 🔥 So never use `{@html}` to display it, and if you need to persist it for some reason, make sure you validate its type.
 
 ## Bonus: Removing flash message when navigating
 
@@ -253,16 +202,15 @@ This little snippet can be useful if you'd like to have the flash message remove
 **src/routes/+layout.svelte**
 
 ```typescript
-import { Flash } from 'sveltekit-flash-message/client';
+import { initFlashStore } from 'sveltekit-flash-message/client';
 import { page } from '$app/stores';
 import { beforeNavigate } from '$app/navigation';
 
-const flash = new Flash(page);
-const message = flash.message;
+const flash = initFlashStore(page);
 
 beforeNavigate((nav) => {
-  if ($message && nav.from?.url.toString() != nav.to?.url.toString()) {
-    $message = undefined;
+  if ($flash && nav.from?.url.toString() != nav.to?.url.toString()) {
+    $flash = undefined;
   }
 });
 ```

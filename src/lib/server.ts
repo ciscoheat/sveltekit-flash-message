@@ -2,7 +2,7 @@ import type { RequestEvent, ServerLoad, ServerLoadEvent } from '@sveltejs/kit';
 import { redirect as redir } from '@sveltejs/kit';
 import { parse } from 'cookie';
 
-const d = console.debug;
+//const d = console.debug;
 
 const cookieName = 'flash';
 const httpOnly = false;
@@ -15,7 +15,7 @@ export function loadFlashMessage<S extends ServerLoad, E extends ServerLoadEvent
   return async (event: E) => {
     const flash = loadFlash(event).flash;
     const loadFunction = await cb(event);
-    return { flash, ...loadFunction };
+    return { flash, ...loadFunction } as ReturnType<S>;
   };
 }
 
@@ -24,7 +24,7 @@ export function loadFlash<T extends ServerLoadEvent>(
 ): { flash: App.PageData['flash'] | undefined } {
   const header = event.request.headers.get('cookie') || '';
   if (!header.includes(cookieName + '=')) {
-    d('No flash cookie found.');
+    //d('No flash cookie found.');
     return { [cookieName]: undefined };
   }
 
@@ -40,9 +40,9 @@ export function loadFlash<T extends ServerLoadEvent>(
     const accept = event.request.headers.get('accept');
 
     if (setFetchDest == 'empty' || accept == '*/*' || accept?.includes('application/json')) {
-      d('Possible fetch request, keeping cookie for client.');
+      //d('Possible fetch request, keeping cookie for client.');
     } else {
-      d('Flash cookie found, clearing');
+      //d('Flash cookie found, clearing');
       event.cookies.delete(cookieName, { path });
     }
 

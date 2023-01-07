@@ -8,7 +8,7 @@
 
   function change() {
     const msg = { status: 'ok' as const, text: 'Updated on client ' + ++count };
-    store.update((messages) => messages.concat([msg]));
+    $store = [...($store ?? []), msg];
   }
 
   async function submitForm(e: Event) {
