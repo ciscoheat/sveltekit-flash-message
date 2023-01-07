@@ -1,19 +1,14 @@
 <script lang="ts">
-  import { Flash } from '$lib/client.js';
+  import { updateFlash } from '$lib/client.js';
   import { page } from '$app/stores';
   import { enhance } from '$app/forms';
   import type { PageData } from './$types';
 
   let count = 0;
 
-  const flash = new Flash(page, (v) => {
-    if (!v || typeof v !== 'object') return undefined;
-    return v as App.PageData['flash'];
-  });
-
   function change() {
     const msg = { status: 'error' as const, text: 'Updated on client ' + ++count };
-    flash.message.update((m) => (m ? [...m, msg] : [msg]));
+    $page.data.flash = $page.data.flash ? [...$page.data.flash, msg] : [msg];
   }
 
   async function submitForm(e: Event) {
@@ -25,7 +20,7 @@
       body
     });
 
-    flash.updateFrom(response);
+    updateFlash(response);
   }
 
   export let data: PageData;
@@ -46,9 +41,22 @@
     egestas non nisi. Vivamus suscipit tortor eget felis porttitor volutpat. Vestibulum ac diam sit amet
     quam vehicula elementum sed sit amet dui.
   </p>
+
   <form method="POST" action="?/normal">
     <button id="action-post">Submit to action normally</button>
   </form>
+
+  <form
+    method="POST"
+    action="?/normal"
+    use:enhance={() =>
+      async ({ result, update }) => {
+        //updateFlash(result, update);
+      }}
+  >
+    <button id="action-post-normal-enhanced">Submit to action with enhanced form</button>
+  </form>
+
   <p>
     Sed porttitor lectus nibh. Curabitur non nulla sit amet nisl tempus convallis quis ac lectus.
     Quisque velit nisi, pretium ut lacinia in, elementum id enim.
@@ -72,11 +80,11 @@
     method="POST"
     use:enhance={() =>
       async ({ result, update }) => {
-        flash.updateFrom(result, update);
+        //updateFlash(result, update);
       }}
   >
     <button formaction="?/enhanced" id="action-post-enhanced"
-      >Submit to action with enhanced form</button
+      >Submit to different page with enhanced form</button
     >
   </form>
 </article>

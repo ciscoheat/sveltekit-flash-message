@@ -100,7 +100,6 @@ export function redirect(
         // Remove the named action, if it exists
         return realRedirect(303, event.url.toString().replace(/\?\/\w+/, ''), message, event);
       }
-      break;
 
     case 3:
       return realRedirect(

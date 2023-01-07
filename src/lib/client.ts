@@ -1,5 +1,6 @@
 import { type Writable, type Readable, writable, get } from 'svelte/store';
 import type { ActionResult, Page } from '@sveltejs/kit';
+import { page } from '$app/stores';
 
 /**
  * Shim for: import { browser } from '$app/environment'
@@ -119,3 +120,7 @@ export class Flash {
     return promise;
   }
 }
+
+const flash = new Flash(page);
+
+export const updateFlash = flash.updateFrom;
