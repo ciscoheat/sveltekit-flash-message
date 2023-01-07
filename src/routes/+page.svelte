@@ -1,11 +1,11 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import type { PageData } from './$types';
-  import { getFlashStore, updateFlashStore } from '$lib/client';
+  import { getFlash, updateFlash } from '$lib/client';
   import { page } from '$app/stores';
 
   let count = 0;
-  const store = getFlashStore(page);
+  const store = getFlash(page);
 
   function change() {
     const msg = { status: 'ok' as const, text: 'Updated on client ' + ++count };
@@ -21,7 +21,7 @@
       body
     });
 
-    updateFlashStore(page);
+    updateFlash(page);
   }
 
   export let data: PageData;

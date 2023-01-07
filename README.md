@@ -52,16 +52,16 @@ export const load = loadFlashMessage(async (event) => {
 
 ## 3. Display the flash message
 
-Import the client `initFlashStore` function to initialize and display the flash message, for example in your layout component:
+Import the client `initFlash` function to initialize and display the flash message, for example in your layout component. This will return a store that you can use to access the message:
 
 **src/routes/+layout.svelte**
 
 ```svelte
 <script lang="ts">
-  import { initFlashStore } from 'sveltekit-flash-message/client';
+  import { initFlash } from 'sveltekit-flash-message/client';
   import { page } from '$app/stores';
 
-  const flash = initFlashStore(page);
+  const flash = initFlash(page);
 </script>
 
 {#if $flash}
@@ -144,16 +144,16 @@ export const actions = {
 
 ### Client-side
 
-If you want to send a flash message in some other component on the client, use the `getFlashStore` function:
+If you want to send a flash message in some other component on the client, use the `getFlash` function:
 
 **src/routes/some-route/+page.svelte**
 
 ```svelte
 <script>
-  import { getFlashStore } from 'sveltekit-flash-message/client';
+  import { getFlash } from 'sveltekit-flash-message/client';
   import { page } from '$app/stores';
 
-  const flash = getFlashStore(page);
+  const flash = getFlash(page);
 
   function change() {
     $flash = { type: 'success', message: 'Updated from other component!' };
@@ -163,15 +163,15 @@ If you want to send a flash message in some other component on the client, use t
 <button on:click={change}>Update message</button>
 ```
 
-Note that `initFlashStore` must have been called in a higher-level component before using `getFlashStore`.
+Note that `initFlash` must have been called in a higher-level component before using `getFlash`.
 
 ## Client-side fetching and redirecting
 
-If you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhancement-use-enhance) the flash message will be updated automatically, but if you're using [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis) you must use `updateFlashStore` after fetching:
+If you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhancement-use-enhance) the flash message will be updated automatically, but if you're using [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis) you must use `updateFlash` after fetching:
 
 ```svelte
 <script lang="ts">
-  import { updateFlashStore } from 'sveltekit-flash-message/client';
+  import { updateFlash } from 'sveltekit-flash-message/client';
   import { page } from '$app/stores';
 
   async function submitForm(e: Event) {
@@ -179,7 +179,7 @@ If you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-e
     const body = new FormData(e.target as HTMLFormElement);
 
     await fetch(form.action, { method: 'POST', body });
-    updateFlashStore(page);
+    updateFlash(page);
   }
 </script>
 
@@ -193,18 +193,18 @@ If you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-e
 
 Since the flash message is transferred in a cookie, it can be easily tampered with, so don't trust its content. Treat it like you do with any user data - hanging from a ten-foot pole over a fiery pit. 🔥 So never use `{@html}` to display it, and if you need to persist it for some reason, make sure you validate its type.
 
-## Bonus: Removing flash message when navigating
+## Removing flash message when navigating
 
 This little snippet can be useful if you'd like to have the flash message removed when the user navigates to another route:
 
 **src/routes/+layout.svelte**
 
 ```typescript
-import { initFlashStore } from 'sveltekit-flash-message/client';
+import { initFlash } from 'sveltekit-flash-message/client';
 import { page } from '$app/stores';
 import { beforeNavigate } from '$app/navigation';
 
-const flash = initFlashStore(page);
+const flash = initFlash(page);
 
 beforeNavigate((nav) => {
   if ($flash && nav.from?.url.toString() != nav.to?.url.toString()) {

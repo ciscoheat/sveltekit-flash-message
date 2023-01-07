@@ -6,9 +6,9 @@ import { BROWSER as browser } from 'esm-env';
 const flashStores = new WeakMap<Readable<Page>, Writable<App.PageData['flash']>>();
 
 const notInitialized =
-  'Flash store must be initialized with initFlashStore(page) before calling getFlashStore.';
+  'Flash store must be initialized with initFlash(page) before calling getFlash.';
 
-export function initFlashStore(
+export function initFlash(
   page: Readable<Page>,
   defaultValue?: App.PageData['flash']
 ): Writable<App.PageData['flash']> {
@@ -27,13 +27,13 @@ export function initFlashStore(
   return store;
 }
 
-export function getFlashStore(page: Readable<Page>) {
+export function getFlash(page: Readable<Page>) {
   const store = flashStores.get(page);
   if (!store) throw new Error(notInitialized);
   return store;
 }
 
-export function updateFlashStore(page: Readable<Page>) {
+export function updateFlash(page: Readable<Page>) {
   const store = flashStores.get(page);
   if (!store) throw new Error(notInitialized);
   _updateFlashStore(store, parseFlashCookie() as App.PageData['flash'] | undefined);

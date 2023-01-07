@@ -4,9 +4,9 @@
   import { page } from '$app/stores';
   import { beforeNavigate } from '$app/navigation';
   import type { LayoutData } from './$types';
-  import { initFlashStore } from '$lib/client';
+  import { initFlash } from '$lib/client';
 
-  let messages = initFlashStore(page, []);
+  let messages = initFlash(page, []);
 
   function clear() {
     $messages = [];
