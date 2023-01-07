@@ -2,9 +2,7 @@
 
 This is a [Sveltekit](https://kit.svelte.dev/) library that passes temporary data to the next request, usually from [Actions](https://kit.svelte.dev/docs/routing#page-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful when you want a "success" message displayed after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
 
-This is known as a "flash message", especially known from PHP apps, since it's easy to add this functionality with PHP's built-in session handling. With Sveltekit it's a bit harder, but this library was made to alleviate that.
-
-The library is encouraging well-behaved web apps that [Redirects after Post](https://www.theserverside.com/news/1365146/Redirect-After-Post), so a redirect is _required_ for a flash message to be displayed.
+This is known as a "flash message", especially known from PHP apps, since it's easy to add this functionality with PHP's built-in session handling. With Sveltekit it's a bit harder, but this library was made to alleviate that, encouraging well-behaved web apps that [Redirects after Post](https://www.theserverside.com/news/1365146/Redirect-After-Post).
 
 ## Installation
 
@@ -13,8 +11,6 @@ The library is encouraging well-behaved web apps that [Redirects after Post](htt
 ```
 
 ## Configuration
-
-As usual, there are a few hoops to jump through:
 
 ## 1. [Typescript only] Add the flash message to app.d.ts
 
@@ -40,7 +36,7 @@ If you're not using any [load functions](https://kit.svelte.dev/docs/load), this
 export { load } from 'sveltekit-flash-message/server';
 ```
 
-If you've implemented a `load` function already, you can import `loadFlashMessage` instead and pass your load function to it:
+More likely you've implemented a top-level `load` function, in that case you can import `loadFlashMessage` and pass your load function to it:
 
 **src/routes/+layout.server.ts**
 
@@ -56,7 +52,7 @@ export const load = loadFlashMessage(async (event) => {
 
 ## 3. Display the flash message
 
-Import the client `initFlashStore` class to initialize and display the flash message, for example in your layout component:
+Import the client `initFlashStore` function to initialize and display the flash message, for example in your layout component:
 
 **src/routes/+layout.svelte**
 
@@ -155,8 +151,9 @@ If you want to send a flash message in some other component on the client, use t
 ```svelte
 <script>
   import { getFlashStore } from 'sveltekit-flash-message/client';
+  import { page } from '$app/stores';
 
-  const flash = getFlashStore();
+  const flash = getFlashStore(page);
 
   function change() {
     $flash = { type: 'success', message: 'Updated from other component!' };
@@ -175,13 +172,14 @@ If you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-e
 ```svelte
 <script lang="ts">
   import { updateFlashStore } from 'sveltekit-flash-message/client';
+  import { page } from '$app/stores';
 
   async function submitForm(e: Event) {
     const form = e.target as HTMLFormElement;
     const body = new FormData(e.target as HTMLFormElement);
 
     await fetch(form.action, { method: 'POST', body });
-    updateFlashStore();
+    updateFlashStore(page);
   }
 </script>
 

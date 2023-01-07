@@ -3,7 +3,7 @@ import type { Page } from '@sveltejs/kit';
 import { onDestroy } from 'svelte';
 import { BROWSER as browser } from 'esm-env';
 
-let flashStore: Writable<App.PageData['flash']>;
+const flashStores = new WeakMap<Readable<Page>, Writable<App.PageData['flash']>>();
 
 const notInitialized =
   'Flash store must be initialized with initFlashStore(page) before calling getFlashStore.';
@@ -12,25 +12,31 @@ export function initFlashStore(
   page: Readable<Page>,
   defaultValue?: App.PageData['flash']
 ): Writable<App.PageData['flash']> {
-  if (flashStore) return flashStore;
-  flashStore = writable(defaultValue);
+  if (flashStores.has(page)) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return flashStores.get(page)!;
+  }
+  const store = writable(defaultValue);
+  flashStores.set(page, store);
 
   const unsubscribe = page.subscribe((pageData) => {
-    _updateFlashStore(pageData.data.flash);
+    _updateFlashStore(store, pageData.data.flash);
   });
 
   onDestroy(unsubscribe);
-  return flashStore;
+  return store;
 }
 
-export function getFlashStore() {
-  if (!flashStore) throw new Error(notInitialized);
-  return flashStore;
+export function getFlashStore(page: Readable<Page>) {
+  const store = flashStores.get(page);
+  if (!store) throw new Error(notInitialized);
+  return store;
 }
 
-export function updateFlashStore() {
-  if (!flashStore) throw new Error(notInitialized);
-  _updateFlashStore(parseFlashCookie() as App.PageData['flash'] | undefined);
+export function updateFlashStore(page: Readable<Page>) {
+  const store = flashStores.get(page);
+  if (!store) throw new Error(notInitialized);
+  _updateFlashStore(store, parseFlashCookie() as App.PageData['flash'] | undefined);
 }
 
 ///////////////////////////////////////////////////////////
@@ -69,10 +75,13 @@ function parseFlashCookie(cookieString?: string): unknown {
   return undefined;
 }
 
-function _updateFlashStore(newData: App.PageData['flash'] | undefined) {
+function _updateFlashStore(
+  store: Writable<App.PageData['flash']>,
+  newData: App.PageData['flash'] | undefined
+) {
   _clearFlashCookie();
 
-  flashStore.update((flash) => {
+  store.update((flash) => {
     if (newData === undefined) return flash;
     //console.log('Updating flash store:', newData);
 
