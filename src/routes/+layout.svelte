@@ -4,6 +4,7 @@
   import { Flash } from '$lib/client.js';
   import { page } from '$app/stores';
   import { beforeNavigate } from '$app/navigation';
+  import type { LayoutData } from './$types';
 
   const message = new Flash(page, (v) => {
     if (!v || typeof v !== 'object') return undefined;
@@ -19,6 +20,8 @@
       $message = undefined;
     }
   });
+
+  export let data: LayoutData;
 </script>
 
 <div class="app">
@@ -45,10 +48,7 @@
   </main>
 
   <footer>
-    <p>
-      Donec sollicitudin molestie malesuada. Donec sollicitudin molestie malesuada. Cras ultricies
-      ligula sed magna dictum porta.
-    </p>
+    <p>{data.test}</p>
     <p>
       Sed porttitor lectus nibh. Nulla quis lorem ut libero malesuada feugiat. Curabitur non nulla
       sit amet nisl tempus convallis quis ac lectus.

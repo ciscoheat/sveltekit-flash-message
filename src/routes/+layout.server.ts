@@ -1,7 +1,6 @@
-import { loadFlash } from '$lib/server.js';
+import { loadFlashMessage } from '$lib/server.js';
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async (event) => {
-  const flashData = loadFlash(event);
-  return flashData;
-};
+export const load = loadFlashMessage(async (event) => {
+  return { test: 'TESTFLASH:' + event.route.id };
+}) satisfies LayoutServerLoad;

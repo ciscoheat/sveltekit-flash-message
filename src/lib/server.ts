@@ -1,6 +1,6 @@
-import type { RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
+import type { RequestEvent, ServerLoad, ServerLoadEvent } from '@sveltejs/kit';
 import { redirect as redir } from '@sveltejs/kit';
-import { parse } from './cookie.js';
+import { parse } from 'cookie';
 
 //const d = console.debug
 
@@ -10,6 +10,14 @@ const path = '/';
 const maxAge = 120;
 
 /////////////////////////////////////////////////////////////////////
+
+export function loadFlashMessage<S extends ServerLoad, E extends ServerLoadEvent>(cb: S) {
+  return async (event: E) => {
+    const flash = loadFlash(event).flash;
+    const loadFunction = await cb(event);
+    return { flash, ...loadFunction } as ReturnType<S>;
+  };
+}
 
 export const loadFlash = (event: ServerLoadEvent): { flash: App.PageData['flash'] | undefined } => {
   const header = event.request.headers.get('cookie') || '';
@@ -33,7 +41,7 @@ export const loadFlash = (event: ServerLoadEvent): { flash: App.PageData['flash'
       //d('Possible fetch request, keeping cookie for client.')
     } else {
       //d('Flash cookie found, clearing')
-      event.cookies.delete(cookieName, {path});
+      event.cookies.delete(cookieName, { path });
     }
 
     try {

@@ -2,6 +2,7 @@
   import { Flash } from '$lib/client.js';
   import { page } from '$app/stores';
   import { enhance } from '$app/forms';
+  import type { PageData } from './$types';
 
   let count = 0;
 
@@ -15,7 +16,7 @@
     flash.message.update((m) => (m ? [...m, msg] : [msg]));
   }
 
-  async function submitForm(e: SubmitEvent) {
+  async function submitForm(e: Event) {
     const form = e.target as HTMLFormElement;
     const body = new FormData(e.target as HTMLFormElement);
 
@@ -26,6 +27,8 @@
 
     flash.updateFrom(response);
   }
+
+  export let data: PageData;
 </script>
 
 <aside class="interactions">
@@ -36,6 +39,7 @@
 
 <article>
   <h1>sveltekit-flash-message testing ground</h1>
+  <h2>{data.test}</h2>
   <p>
     <a href="/">Link to here</a> <a href="/posted">Link to posted</a>
     <a href="/?reset">Reset counter</a>

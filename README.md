@@ -40,22 +40,18 @@ If you're not using any [load functions](https://kit.svelte.dev/docs/load), this
 export { load } from 'sveltekit-flash-message/server';
 ```
 
-If you've implemented a `load` function already, you can import `loadFlash` and use it in the load function instead:
+If you've implemented a `load` function already, you can import `loadFlashMessage` instead and pass your load function to it:
 
 **src/routes/+layout.server.ts**
 
 ```typescript
 import type { LayoutServerLoad } from './$types';
-import { loadFlash } from 'sveltekit-flash-message/server';
+import { loadFlashMessage } from 'sveltekit-flash-message/server';
 
-export const load: LayoutServerLoad = async (event) => {
+export const load = loadFlashMessage(async (event) => {
   const data = { some: 'data' };
-
-  // Returns an object: { flash: App.PageData['flash'] | undefined }
-  const flashData = loadFlash(event);
-
-  return Object.assign(flashData, data);
-};
+  return data;
+}) satisfies LayoutServerLoad;
 ```
 
 ## 3. Display the flash message
