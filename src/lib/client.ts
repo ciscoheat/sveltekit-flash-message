@@ -74,20 +74,22 @@ function _updateFlashStore(newData: App.PageData['flash'] | undefined) {
 
   flashStore.update((flash) => {
     if (newData === undefined) return flash;
+    //console.log('Updating flash store:', newData);
 
     // Need to do a per-element comparison here, since update will be called
     // when going to the same route, while keeping the old flash message,
     // making it display multiple times.
-    if (Array.isArray(flash)) {
-      if (
-        Array.isArray(newData) &&
-        flash.length > 0 &&
-        newData.length > 0 &&
-        flash[flash.length - 1] === newData[newData.length - 1]
-      ) {
-        return flash;
-      } else {
-        return flash.concat(newData);
+    if (Array.isArray(newData)) {
+      if (Array.isArray(flash)) {
+        if (
+          flash.length > 0 &&
+          newData.length > 0 &&
+          flash[flash.length - 1] === newData[newData.length - 1]
+        ) {
+          return flash;
+        } else {
+          return flash.concat(newData) as unknown as App.PageData['flash'];
+        }
       }
     }
 
