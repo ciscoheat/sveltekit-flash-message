@@ -21,13 +21,7 @@
       body
     });
 
-    updateFlash(page, (newValue) => {
-      if (Array.isArray(newValue)) {
-        return [{ status: newValue[0].status, text: '###' + newValue[0].text }];
-      } else {
-        return newValue as App.PageData['flash'];
-      }
-    });
+    updateFlash(page);
   }
 
   export let data: PageData;

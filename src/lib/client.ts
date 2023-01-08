@@ -53,16 +53,11 @@ export function getFlash(page: Readable<Page>): Writable<App.PageData['flash']> 
   return context.store;
 }
 
-export function updateFlash(
-  page: Readable<Page>,
-  validate?: (data: unknown) => App.PageData['flash'] | undefined
-): void {
+export function updateFlash(page: Readable<Page>): void {
   const store = flashStores.get(page);
   if (!store) throw new Error(notInitialized);
 
-  let newValue = parseFlashCookie() as App.PageData['flash'] | undefined;
-  if (validate) newValue = validate(newValue);
-
+  const newValue = parseFlashCookie() as App.PageData['flash'] | undefined;
   updateStore(store, newValue);
 }
 
