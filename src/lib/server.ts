@@ -1,6 +1,6 @@
 import type { RequestEvent, ServerLoad, ServerLoadEvent } from '@sveltejs/kit';
 import { redirect as redir } from '@sveltejs/kit';
-import { parse } from 'cookie-es';
+import { parse } from './cookie-es-main';
 
 //const d = console.debug;
 
