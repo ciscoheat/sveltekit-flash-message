@@ -29,7 +29,7 @@
     "@types/cookie": "^0.5.1",
     "@typescript-eslint/eslint-plugin": "^5.48.0",
     "@typescript-eslint/parser": "^5.48.0",
-    "cookie": "^0.5.0",
+    "cookie-es": "^0.5.0",
     "eslint": "^8.31.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-svelte3": "^4.0.0",
@@ -46,7 +46,6 @@
   },
   "peerDependencies": {
     "@sveltejs/kit": "^1.0.0",
-    "cookie": "^0.5.0",
     "svelte": "^3"
   },
   "type": "module"
