@@ -3,45 +3,72 @@ import type { Page } from '@sveltejs/kit';
 import { onDestroy } from 'svelte';
 import { BROWSER as browser } from 'esm-env';
 
-const flashStores = new WeakMap<Readable<Page>, Writable<App.PageData['flash']>>();
+type FlashContext = {
+  store: Writable<App.PageData['flash']>;
+  clearArray: boolean;
+};
+
+const flashStores = new WeakMap<Readable<Page>, FlashContext>();
 
 const notInitialized =
   'Flash store must be initialized with initFlash(page) before calling getFlash.';
 
 export function initFlash(
   page: Readable<Page>,
-  defaultValue?: App.PageData['flash']
+  options: {
+    clearArray?: boolean;
+  } = {
+    clearArray: false
+  }
 ): Writable<App.PageData['flash']> {
   if (flashStores.has(page)) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return flashStores.get(page)!;
+    return flashStores.get(page)!.store;
   }
-  const store = writable(defaultValue);
-  flashStores.set(page, store);
+
+  if (!options.clearArray) options.clearArray = false;
+
+  const { clearArray } = options;
+
+  const store = writable<App.PageData['flash']>();
+  const context = { store, clearArray };
+
+  flashStores.set(page, context);
 
   const unsubscribe = page.subscribe((pageData) => {
-    _updateFlashStore(store, pageData.data.flash);
+    updateStore(context, pageData.data.flash);
   });
 
-  onDestroy(unsubscribe);
+  onDestroy(() => {
+    flashStores.delete(page);
+    unsubscribe();
+  });
+
   return store;
 }
 
-export function getFlash(page: Readable<Page>) {
-  const store = flashStores.get(page);
-  if (!store) throw new Error(notInitialized);
-  return store;
+export function getFlash(page: Readable<Page>): Writable<App.PageData['flash']> {
+  const context = flashStores.get(page);
+  if (!context) throw new Error(notInitialized);
+  return context.store;
 }
 
-export function updateFlash(page: Readable<Page>) {
+export function updateFlash(
+  page: Readable<Page>,
+  validate?: (data: unknown) => App.PageData['flash'] | undefined
+): void {
   const store = flashStores.get(page);
   if (!store) throw new Error(notInitialized);
-  _updateFlashStore(store, parseFlashCookie() as App.PageData['flash'] | undefined);
+
+  let newValue = parseFlashCookie() as App.PageData['flash'] | undefined;
+  if (validate) newValue = validate(newValue);
+
+  updateStore(store, newValue);
 }
 
 ///////////////////////////////////////////////////////////
 
-const parseCookie = (str: string) => {
+const parseCookieString = (str: string) => {
   const output = {} as Record<string, string>;
   if (!str) return output;
 
@@ -64,7 +91,7 @@ function parseFlashCookie(cookieString?: string): unknown {
 
   if (!cookieString || !cookieString.includes(varName + '=')) return undefined;
 
-  const cookies = parseCookie(cookieString);
+  const cookies = parseCookieString(cookieString);
   if (cookies[varName]) {
     try {
       return JSON.parse(cookies[varName]);
@@ -75,20 +102,17 @@ function parseFlashCookie(cookieString?: string): unknown {
   return undefined;
 }
 
-function _updateFlashStore(
-  store: Writable<App.PageData['flash']>,
-  newData: App.PageData['flash'] | undefined
-) {
-  _clearFlashCookie();
+function updateStore(context: FlashContext, newData: App.PageData['flash'] | undefined) {
+  clearCookie();
 
-  store.update((flash) => {
+  context.store.update((flash) => {
     if (newData === undefined) return flash;
     //console.log('Updating flash store:', newData);
 
     // Need to do a per-element comparison here, since update will be called
     // when going to the same route, while keeping the old flash message,
     // making it display multiple times.
-    if (Array.isArray(newData)) {
+    if (!context.clearArray && Array.isArray(newData)) {
       if (Array.isArray(flash)) {
         if (
           flash.length > 0 &&
@@ -106,7 +130,7 @@ function _updateFlashStore(
   });
 }
 
-function _clearFlashCookie() {
+function clearCookie() {
   //console.log('Clearing flash cookie', browser);
   if (browser) document.cookie = varName + `=; Max-Age=0; Path=${path};`;
 }

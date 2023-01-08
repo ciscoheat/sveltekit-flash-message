@@ -189,9 +189,19 @@ If you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-e
 </form>
 ```
 
+## Multiple messages
+
+If you specify `App.PageData['flash']` as an array, the library will accomodate for that and will concatenate messages into the array instead of replacing them. But if you want to always clear the previous messages, set the `clearArray` option to `true`.
+
+```typescript
+const messages = initFlash(page, {
+  clearArray: true
+});
+```
+
 ## Securing the flash message
 
-Since the flash message is transferred in a cookie, it can be easily tampered with, so don't trust its content. Treat it like you do with any user data - hanging from a ten-foot pole over a fiery pit. 🔥 So never use `{@html}` to display it, and if you need to persist it for some reason, make sure you validate its type.
+Since the flash message is transferred in a cookie, it can be easily tampered with, so don't trust its content. Treat it like you do with any user data - hanging from a ten-foot pole over a fiery pit. 🔥 So never use `{@html}` to display it, and if you need to persist it for some reason, make sure you validate it.
 
 ## Removing flash message when navigating
 

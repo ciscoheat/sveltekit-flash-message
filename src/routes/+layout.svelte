@@ -6,7 +6,7 @@
   import type { LayoutData } from './$types';
   import { initFlash } from '$lib/client';
 
-  let messages = initFlash(page, []);
+  let messages = initFlash(page);
 
   function clear() {
     $messages = [];
