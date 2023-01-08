@@ -1,6 +1,6 @@
 # sveltekit-flash-message ⚡
 
-This is a [Sveltekit](https://kit.svelte.dev/) library that passes temporary data to the next request, usually from [Actions](https://kit.svelte.dev/docs/routing#page-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful when you want a "success" message displayed after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
+This is a [Sveltekit](https://kit.svelte.dev/) library that passes temporary data to the next request, usually from [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful when you want a "success" message displayed after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
 
 This is known as a "flash message", especially known from PHP apps, since it's easy to add this functionality with PHP's built-in session handling. With Sveltekit it's a bit harder, but this library was made to alleviate that, encouraging well-behaved web apps that [Redirects after Post](https://www.theserverside.com/news/1365146/Redirect-After-Post).
 
@@ -99,7 +99,8 @@ throw redirect(
   event: RequestEvent
 )
 
-// For compatibility, the sveltekit signature can also be used
+// For compatibility, the sveltekit signature can also be used,
+// which will send no flash message.
 throw redirect(
   status: number,
   location: string,
@@ -167,7 +168,27 @@ Note that `initFlash` must have been called in a higher-level component before u
 
 ## Client-side fetching and redirecting
 
-If you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhancement-use-enhance) the flash message will be updated automatically, but if you're using [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis) you must use `updateFlash` after fetching:
+If you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhancement-use-enhance) or [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis) the flash message will be available on the client, but you must use `updateFlash` after fetching:
+
+### Example 1: Enhance
+
+```svelte
+<script lang="ts">
+  import { updateFlash } from 'sveltekit-flash-message/client';
+  import { page } from '$app/stores';
+</script>
+
+<form
+  method="POST"
+  use:enhance={() =>
+    ({ update }) =>
+      updateFlash(page, update)}
+>
+  <button>Submit with enhanced form</button>
+</form>
+```
+
+### Example 2: Fetch
 
 ```svelte
 <script lang="ts">
@@ -179,7 +200,7 @@ If you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-e
     const body = new FormData(e.target as HTMLFormElement);
 
     await fetch(form.action, { method: 'POST', body });
-    updateFlash(page);
+    await updateFlash(page);
   }
 </script>
 

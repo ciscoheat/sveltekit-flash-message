@@ -1,6 +1,6 @@
-import { type Writable, type Readable, writable } from 'svelte/store';
+import { type Writable, type Readable, writable, get } from 'svelte/store';
 import type { Page } from '@sveltejs/kit';
-import { onDestroy } from 'svelte';
+import { onDestroy, tick } from 'svelte';
 import { BROWSER as browser } from 'esm-env';
 
 type FlashContext = {
@@ -34,16 +34,9 @@ export function initFlash(
   const context = { store, clearArray };
 
   flashStores.set(page, context);
+  updateStore(context, get(page).data.flash);
 
-  const unsubscribe = page.subscribe((pageData) => {
-    updateStore(context, pageData.data.flash);
-  });
-
-  onDestroy(() => {
-    flashStores.delete(page);
-    unsubscribe();
-  });
-
+  onDestroy(() => flashStores.delete(page));
   return store;
 }
 
@@ -53,12 +46,14 @@ export function getFlash(page: Readable<Page>): Writable<App.PageData['flash']> 
   return context.store;
 }
 
-export function updateFlash(page: Readable<Page>): void {
+export async function updateFlash(page: Readable<Page>, update?: () => Promise<void>) {
   const store = flashStores.get(page);
   if (!store) throw new Error(notInitialized);
 
-  const newValue = parseFlashCookie() as App.PageData['flash'] | undefined;
-  updateStore(store, newValue);
+  // Update before setting the new message, so navigation events can pass through first.
+  if (update) await update();
+  await tick();
+  updateStore(store, parseFlashCookie() as App.PageData['flash'] | undefined);
 }
 
 ///////////////////////////////////////////////////////////

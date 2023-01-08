@@ -47,7 +47,13 @@
     <button id="action-post">Submit to action normally</button>
   </form>
 
-  <form method="POST" action="?/normal" use:enhance>
+  <form
+    method="POST"
+    action="?/normal"
+    use:enhance={() =>
+      ({ update }) =>
+        updateFlash(page, update)}
+  >
     <button id="action-post-normal-enhanced">Submit to action with enhanced form</button>
   </form>
 
@@ -70,7 +76,12 @@
     <button id="endpoint-server">Submit to endpoint server-side</button>
   </form>
 
-  <form method="POST" use:enhance>
+  <form
+    method="POST"
+    use:enhance={() =>
+      ({ update }) =>
+        updateFlash(page, update)}
+  >
     <button formaction="?/enhanced" id="action-post-enhanced"
       >Submit to different page with enhanced form</button
     >
