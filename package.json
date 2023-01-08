@@ -26,7 +26,6 @@
     "@sveltejs/adapter-auto": "^1.0.0",
     "@sveltejs/kit": "^1.0.7",
     "@sveltejs/package": "^1.0.2",
-    "@types/cookie": "^0.5.1",
     "@typescript-eslint/eslint-plugin": "^5.48.0",
     "@typescript-eslint/parser": "^5.48.0",
     "cookie-es": "^0.5.0",
@@ -46,7 +45,8 @@
   },
   "peerDependencies": {
     "@sveltejs/kit": "^1.0.0",
-    "svelte": "^3"
+    "svelte": "^3",
+    "cookie-es": "^0.5.0"
   },
   "type": "module"
 }
