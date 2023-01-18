@@ -35,11 +35,17 @@ export function loadFlash<T extends ServerLoadEvent>(
 
   if (dataString) {
     // Detect if event is XMLHttpRequest, basically by checking if the browser
-    // is honoring the sec-fetch-dest header, or accepting html.
+    // is honoring the sec-fetch-dest header, or accepting json.
+    // event.isDataRequest is also used.
     const setFetchDest = event.request.headers.get('sec-fetch-dest');
     const accept = event.request.headers.get('accept');
 
-    if (setFetchDest == 'empty' || accept == '*/*' || accept?.includes('application/json')) {
+    if (
+      event.isDataRequest ||
+      setFetchDest == 'empty' ||
+      accept == '*/*' ||
+      accept?.includes('application/json')
+    ) {
       //d('Possible fetch request, keeping cookie for client.');
     } else {
       //d('Flash cookie found, clearing');
