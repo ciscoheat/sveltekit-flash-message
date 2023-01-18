@@ -248,6 +248,8 @@ beforeNavigate((nav) => {
 
 ### Removing the flash message after a certain time
 
+**src/routes/+layout.svelte**
+
 ```typescript
 import { initFlash } from 'sveltekit-flash-message/client';
 import { page } from '$app/stores';
