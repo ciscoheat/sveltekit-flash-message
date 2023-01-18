@@ -4,12 +4,13 @@
   import { getFlash, updateFlash } from '$lib/client';
   import { page } from '$app/stores';
 
+  const flash = getFlash(page);
+
   let count = 0;
-  const store = getFlash(page);
 
   function change() {
     const msg = { status: 'ok' as const, text: 'Updated on client ' + ++count };
-    $store = [...($store ?? []), msg];
+    $flash = [...($flash ?? []), msg];
   }
 
   async function submitForm(e: Event) {

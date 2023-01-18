@@ -8,6 +8,14 @@
 
   let messages = initFlash(page);
 
+  const timeoutMs = 5000;
+  let flashTimeout: ReturnType<typeof setTimeout>;
+
+  $: if ($messages) {
+    clearTimeout(flashTimeout);
+    flashTimeout = setTimeout(() => ($messages = undefined), timeoutMs);
+  }
+
   function clear() {
     $messages = [];
   }

@@ -121,7 +121,7 @@ export const POST = async (event: RequestEvent) => {
 };
 ```
 
-### Action example
+### Form action example
 
 **src/routes/todos/+page.server.ts**
 
@@ -224,7 +224,9 @@ const messages = initFlash(page, {
 
 Since the flash message is transferred in a cookie, it can be easily tampered with, so don't trust its content. Treat it like you do with any user data - hanging from a ten-foot pole over a fiery pit. 🔥 So never use `{@html}` to display it, and if you need to persist it for some reason, make sure you validate it.
 
-## Removing flash message when navigating
+## Useful snippets
+
+### Removing flash message when navigating
 
 This little snippet can be useful if you'd like to have the flash message removed when the user navigates to another route:
 
@@ -242,6 +244,22 @@ beforeNavigate((nav) => {
     $flash = undefined;
   }
 });
+```
+
+## Removing flash message after a certain time
+
+```typescript
+import { initFlash } from 'sveltekit-flash-message/client';
+import { page } from '$app/stores';
+
+const flash = initFlash(page);
+const flashTimeoutMs = 5000;
+
+let flashTimeout: ReturnType<typeof setTimeout>;
+$: if ($flash) {
+  clearTimeout(flashTimeout);
+  flashTimeout = setTimeout(() => ($flash = undefined), flashTimeoutMs);
+}
 ```
 
 Enjoy the library, and please [open a github issue](https://github.com/ciscoheat/sveltekit-flash-message/issues) if you have suggestions or feedback in general!
