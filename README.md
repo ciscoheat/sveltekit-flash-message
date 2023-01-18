@@ -226,7 +226,7 @@ Since the flash message is transferred in a cookie, it can be easily tampered wi
 
 ## Useful snippets
 
-### Removing flash message when navigating
+### Removing the flash message when navigating
 
 This little snippet can be useful if you'd like to have the flash message removed when the user navigates to another route:
 
@@ -246,7 +246,7 @@ beforeNavigate((nav) => {
 });
 ```
 
-## Removing flash message after a certain time
+### Removing the flash message after a certain time
 
 ```typescript
 import { initFlash } from 'sveltekit-flash-message/client';
@@ -261,5 +261,7 @@ $: if ($flash) {
   flashTimeout = setTimeout(() => ($flash = undefined), flashTimeoutMs);
 }
 ```
+
+If you use both of these, call `clearTimeout` in `beforeNavigate` too.
 
 Enjoy the library, and please [open a github issue](https://github.com/ciscoheat/sveltekit-flash-message/issues) if you have suggestions or feedback in general!
