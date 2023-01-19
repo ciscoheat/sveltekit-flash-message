@@ -116,7 +116,7 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { redirect } from 'sveltekit-flash-message/server';
 
 export const POST = async (event: RequestEvent) => {
-  const message = { type: 'success', message: 'Endpoint POST successful!' };
+  const message = { type: 'success', message: 'Endpoint POST successful!' } as const;
   throw redirect(303, '/', message, event);
 };
 ```
@@ -137,7 +137,7 @@ export const actions = {
       text: form.get('text')
     });
 
-    const message = { type: 'success', message: "That's the entrepreneur spirit!" };
+    const message = { type: 'success', message: "That's the entrepreneur spirit!" } as const;
     throw redirect(message, event);
   }
 };
