@@ -72,7 +72,7 @@ export const load = loadFlash;
 
 type RedirectStatus = Parameters<typeof redir>[0];
 
-export function redirect(status: number, location: string): ReturnType<typeof redir>;
+export function redirect(status: RedirectStatus, location: string | URL): ReturnType<typeof redir>;
 
 export function redirect(
   message: App.PageData['flash'],
@@ -80,14 +80,14 @@ export function redirect(
 ): ReturnType<typeof redir>;
 
 export function redirect(
-  location: string,
+  location: string | URL,
   message: App.PageData['flash'],
   event: RequestEvent
 ): ReturnType<typeof redir>;
 
 export function redirect(
   status: RedirectStatus,
-  location: string,
+  location: string | URL,
   message: App.PageData['flash'],
   event: RequestEvent
 ): ReturnType<typeof redir>;
@@ -101,18 +101,25 @@ export function redirect(
   switch (arguments.length) {
     case 2:
       if (typeof status === 'number') {
-        return redir(status as RedirectStatus, location as string);
+        return realRedirect(status as RedirectStatus, `${location}`);
       } else {
         const message = status as App.PageData['flash'];
         const event = location as RequestEvent;
         // Remove the named action, if it exists
-        return realRedirect(303, event.url.toString().replace(/\?\/\w+/, ''), message, event);
+        const redirectUrl = new URL(event.url);
+        for (const [key, _] of redirectUrl.searchParams) {
+          if (key.startsWith('/')) {
+            redirectUrl.searchParams.delete(key);
+          }
+          break;
+        }
+        return realRedirect(303, redirectUrl, message, event);
       }
 
     case 3:
       return realRedirect(
         303,
-        status as string,
+        status as string | URL,
         location as App.PageData['flash'],
         message as RequestEvent
       );
@@ -120,7 +127,7 @@ export function redirect(
     case 4:
       return realRedirect(
         status as RedirectStatus,
-        location as string,
+        location as string | URL,
         message as App.PageData['flash'],
         event
       );
@@ -132,13 +139,13 @@ export function redirect(
 
 function realRedirect(
   status: RedirectStatus,
-  location: string,
+  location: string | URL,
   message?: App.PageData['flash'],
   event?: RequestEvent
 ) {
-  if (!message) return redir(status, location);
+  if (!message) return redir(status, location.toString());
   if (!event) throw new Error('RequestEvent is required for redirecting with flash message');
 
   event.cookies.set(cookieName, JSON.stringify(message), { httpOnly, path, maxAge });
-  return redir(status, location);
+  return redir(status, location.toString());
 }
