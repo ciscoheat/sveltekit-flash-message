@@ -87,6 +87,15 @@
       >Submit to different page with enhanced form</button
     >
   </form>
+
+  <form
+    method="POST"
+    use:enhance={() =>
+      ({ update }) =>
+        updateFlash(page, update)}
+  >
+    <button formaction="?/noRedirect" id="action-post-no-redirect">Submit without redirect</button>
+  </form>
 </article>
 
 <aside class="info">

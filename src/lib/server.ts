@@ -1,4 +1,4 @@
-import type { RequestEvent, ServerLoad, ServerLoadEvent } from '@sveltejs/kit';
+import type { Cookies, RequestEvent, ServerLoad, ServerLoadEvent } from '@sveltejs/kit';
 import { redirect as redir } from '@sveltejs/kit';
 import { parse } from './cookie-es-main';
 
@@ -148,4 +148,9 @@ function realRedirect(
 
   event.cookies.set(cookieName, JSON.stringify(message), { httpOnly, path, maxAge });
   return redir(status, location.toString());
+}
+
+export function setFlash(message: App.PageData['flash'], event: RequestEvent | Cookies) {
+  const cookies = 'cookies' in event ? event.cookies : event;
+  cookies.set(cookieName, JSON.stringify(message), { httpOnly, path, maxAge });
 }

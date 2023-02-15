@@ -1,6 +1,6 @@
-import type { RequestEvent } from '@sveltejs/kit';
-import { redirect } from '$lib/server.js';
-import type { PageServerLoad } from './$types';
+import { fail } from '@sveltejs/kit';
+import { redirect, setFlash } from '$lib/server.js';
+import type { Actions, PageServerLoad } from './$types';
 import count from './counter.js';
 
 export const load = ((event) => {
@@ -11,7 +11,7 @@ export const load = ((event) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
-  normal: async (event: RequestEvent) => {
+  normal: async (event) => {
     throw redirect(
       [
         {
@@ -23,7 +23,7 @@ export const actions = {
     );
   },
 
-  enhanced: async (event: RequestEvent) => {
+  enhanced: async (event) => {
     throw redirect(
       '/posted',
       [
@@ -34,5 +34,13 @@ export const actions = {
       ],
       event
     );
+  },
+
+  async noRedirect(event) {
+    setFlash(
+      [{ status: 'error', text: '+page.server.ts POST no redirect ' + count.next() }],
+      event
+    );
+    return fail(400);
   }
-};
+} satisfies Actions;

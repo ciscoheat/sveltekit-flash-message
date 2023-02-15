@@ -126,11 +126,11 @@ export const POST = async (event: RequestEvent) => {
 **src/routes/todos/+page.server.ts**
 
 ```typescript
-import type { RequestEvent } from '@sveltejs/kit';
+import type { Actions } from './$types';
 import { redirect } from 'sveltekit-flash-message/server';
 
 export const actions = {
-  default: async (event: RequestEvent) => {
+  default: async (event) => {
     const form = await event.request.formData();
 
     await api('POST', `/todos/${event.locals.userid}`, {
@@ -140,7 +140,28 @@ export const actions = {
     const message = { type: 'success', message: "That's the entrepreneur spirit!" } as const;
     throw redirect(message, event);
   }
-};
+} satisfies Actions;
+```
+
+### Setting without redirecting
+
+If you want to display a flash message without redirecting, as a general error message when validation fails for example, you can use the `setFlash` function:
+
+```typescript
+import { fail } from '@sveltejs/kit';
+import type { Actions } from './$types';
+import { setFlash } from 'sveltekit-flash-message/server';
+
+export const actions = {
+  default: async (event) => {
+    const form = await event.request.formData();
+
+    if (!form.get('text')) {
+      setFlash({ type: 'error', message: 'Please enter text.' }, event);
+      return fail(400);
+    }
+  }
+} satisfies Actions;
 ```
 
 ### Client-side
