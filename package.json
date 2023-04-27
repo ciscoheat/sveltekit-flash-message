@@ -15,7 +15,7 @@
   },
   "scripts": {
     "dev": "vite dev --open",
-    "build": "svelte-kit sync && svelte-package",
+    "build": "svelte-kit sync && svelte-package -o package",
     "preview": "vite build && vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -25,7 +25,7 @@
   "devDependencies": {
     "@sveltejs/adapter-auto": "^1.0.0",
     "@sveltejs/kit": "^1.0.7",
-    "@sveltejs/package": "^1.0.2",
+    "@sveltejs/package": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.48.0",
     "@typescript-eslint/parser": "^5.48.0",
     "eslint": "^8.31.0",
@@ -46,5 +46,35 @@
     "@sveltejs/kit": "^1.0.0",
     "svelte": "^3"
   },
-  "type": "module"
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json",
+    "./client": {
+      "types": "./package/client.d.ts",
+      "default": "./package/client.js"
+    },
+    "./server": {
+      "types": "./package/server.d.ts",
+      "default": "./package/server.js"
+    }
+  },
+  "files": [
+    "package"
+  ],
+  "typesVersions": {
+    ">4.0": {
+      "client": [
+        "./package/client.d.ts"
+      ],
+      "cookie-es-main": [
+        "./package/cookie-es-main/index.d.ts"
+      ],
+      "cookie-es-main/types": [
+        "./package/cookie-es-main/types.d.ts"
+      ],
+      "server": [
+        "./package/server.d.ts"
+      ]
+    }
+  }
 }
