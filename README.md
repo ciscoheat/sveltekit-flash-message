@@ -235,7 +235,7 @@ As you see, `updateFlash` can take a second parameter, which is used to run a fu
 
 ## Multiple messages
 
-If you specify `App.PageData['flash']` as an array, the library will accomodate for that and will concatenate messages into the array instead of replacing them. But if you want to always clear the previous messages, set the `clearArray` option to `true`.
+If you specify `App.PageData['flash']` as an array, the library will accomodate for that and will concatenate messages into the array instead of replacing them, suitable for toast notifications. But if you want to always clear the previous messages, set the `clearArray` option to `true`.
 
 ```typescript
 const messages = initFlash(page, {
@@ -246,6 +246,10 @@ const messages = initFlash(page, {
 ## Securing the flash message
 
 Since the flash message is transferred in a cookie, it can be easily tampered with, so don't trust its content. Treat it like you do with any user data - hanging from a ten-foot pole over a fiery pit. 🔥 So never use `{@html}` to display it, and if you need to persist it for some reason, make sure you validate it.
+
+## Together with Superforms
+
+The sister library to sveltekit-flash-message is **Superforms**, the all-in-one solution for forms in SvelteKit. You can use them together with just a little bit of extra configuration, [found here](https://superforms.vercel.app/flash-messages) on the Superforms website.
 
 ## Useful snippets
 
