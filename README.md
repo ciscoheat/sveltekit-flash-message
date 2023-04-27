@@ -209,6 +209,8 @@ If you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-e
 </form>
 ```
 
+As you see, `updateFlash` can take a second parameter, which is used to run a function before updating, so navigation events will pass through before showing the flash message, for example. If you're using fetch, this is usually not needed:
+
 ### Example 2: Fetch
 
 ```svelte

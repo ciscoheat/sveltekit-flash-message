@@ -107,7 +107,7 @@ export function redirect(
         const event = location as RequestEvent;
         // Remove the named action, if it exists
         const redirectUrl = new URL(event.url);
-        for (const [key, _] of redirectUrl.searchParams) {
+        for (const [key] of redirectUrl.searchParams) {
           if (key.startsWith('/')) {
             redirectUrl.searchParams.delete(key);
           }
