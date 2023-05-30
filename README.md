@@ -7,7 +7,11 @@ This is known as a "flash message", especially known from PHP apps, since it's e
 ## Installation
 
 ```
-(p)npm i sveltekit-flash-message
+npm i -D sveltekit-flash-message
+```
+
+```
+pnpm i -D sveltekit-flash-message
 ```
 
 ## Configuration
@@ -36,18 +40,17 @@ If you're not using any [load functions](https://kit.svelte.dev/docs/load), this
 export { load } from 'sveltekit-flash-message/server';
 ```
 
-More likely you've implemented a top-level `load` function, in that case you can import `loadFlashMessage` and pass your load function to it:
+But most likely you've implemented a top-level `load` function, in that case you can import `loadFlashMessage` and pass your load function to it:
 
 **src/routes/+layout.server.ts**
 
 ```typescript
-import type { LayoutServerLoad } from './$types';
 import { loadFlashMessage } from 'sveltekit-flash-message/server';
 
 export const load = loadFlashMessage(async (event) => {
   const data = { someOther: 'data' };
   return data;
-}) satisfies LayoutServerLoad;
+});
 ```
 
 ## 3. Display the flash message
@@ -115,7 +118,7 @@ throw redirect(
 import type { RequestEvent } from '@sveltejs/kit';
 import { redirect } from 'sveltekit-flash-message/server';
 
-export const POST = async (event: RequestEvent) => {
+export const POST = async (event) => {
   const message = { type: 'success', message: 'Endpoint POST successful!' } as const;
   throw redirect(303, '/', message, event);
 };
@@ -126,7 +129,6 @@ export const POST = async (event: RequestEvent) => {
 **src/routes/todos/+page.server.ts**
 
 ```typescript
-import type { Actions } from './$types';
 import { redirect } from 'sveltekit-flash-message/server';
 
 export const actions = {
@@ -140,7 +142,7 @@ export const actions = {
     const message = { type: 'success', message: "That's the entrepreneur spirit!" } as const;
     throw redirect(message, event);
   }
-} satisfies Actions;
+};
 ```
 
 ### Setting without redirecting
@@ -149,7 +151,6 @@ If you want to display a flash message without redirecting, as a general error m
 
 ```typescript
 import { fail } from '@sveltejs/kit';
-import type { Actions } from './$types';
 import { setFlash } from 'sveltekit-flash-message/server';
 
 export const actions = {
@@ -161,7 +162,7 @@ export const actions = {
       return fail(400);
     }
   }
-} satisfies Actions;
+};
 ```
 
 ### Client-side
@@ -209,7 +210,7 @@ If you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-e
 </form>
 ```
 
-As you see, `updateFlash` can take a second parameter, which is used to run a function before updating, so navigation events will pass through before showing the flash message, for example. If you're using fetch, this is usually not needed:
+As you see, `updateFlash` can take a second parameter, which is used to run a function **before** updating, so navigation events will pass through before showing the flash message, for example. If you're using fetch, this is usually not needed:
 
 ### Example 2: Fetch
 
