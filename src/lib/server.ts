@@ -22,6 +22,8 @@ export function loadFlashMessage<S extends ServerLoad, E extends ServerLoadEvent
 export function loadFlash<T extends ServerLoadEvent>(
   event: T
 ): { flash: App.PageData['flash'] | undefined } {
+  //d('=== loadFlash: ' + event.route.id + ' ===');
+
   const header = event.request.headers.get('cookie') || '';
   if (!header.includes(cookieName + '=')) {
     //d('No flash cookie found.');
@@ -58,7 +60,7 @@ export function loadFlash<T extends ServerLoadEvent>(
       // Ignore data if parsing error
     }
 
-    //d('setting flash message: ' + data);
+    //d('Setting flash message: ', data);
   }
 
   return {

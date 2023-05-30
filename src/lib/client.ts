@@ -2,6 +2,7 @@ import { type Writable, type Readable, writable, get } from 'svelte/store';
 import type { Page } from '@sveltejs/kit';
 import { onDestroy, tick } from 'svelte';
 import { BROWSER as browser } from 'esm-env';
+import { afterNavigate } from '$app/navigation';
 
 type FlashContext = {
   store: Writable<App.PageData['flash']>;
@@ -37,6 +38,17 @@ export function initFlash(
   updateStore(context, get(page).data.flash);
 
   onDestroy(() => flashStores.delete(page));
+
+  page.subscribe(($page) => {
+    if ($page.data.flash !== undefined) updateFlash(page);
+  });
+
+  afterNavigate((nav) => {
+    if (['enter', 'form', 'goto'].includes(nav.type as string)) {
+      updateFlash(page);
+    }
+  });
+
   return store;
 }
 

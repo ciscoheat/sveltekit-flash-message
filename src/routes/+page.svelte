@@ -48,13 +48,7 @@
     <button id="action-post">Submit to action normally</button>
   </form>
 
-  <form
-    method="POST"
-    action="?/normal"
-    use:enhance={() =>
-      ({ update }) =>
-        updateFlash(page, update)}
-  >
+  <form method="POST" action="?/normal" use:enhance>
     <button id="action-post-normal-enhanced">Submit to action with enhanced form</button>
   </form>
 
@@ -77,25 +71,18 @@
     <button id="endpoint-server">Submit to endpoint server-side</button>
   </form>
 
-  <form
-    method="POST"
-    use:enhance={() =>
-      ({ update }) =>
-        updateFlash(page, update)}
-  >
+  <form method="POST" use:enhance>
     <button formaction="?/enhanced" id="action-post-enhanced"
       >Submit to different page with enhanced form</button
     >
   </form>
 
-  <form
-    method="POST"
-    use:enhance={() =>
-      ({ update }) =>
-        updateFlash(page, update)}
-  >
+  <form method="POST" use:enhance>
     <button formaction="?/noRedirect" id="action-post-no-redirect">Submit without redirect</button>
   </form>
+
+  <h3>Github issues</h3>
+  <a href="/issue-11">#11 instant redirect</a>
 </article>
 
 <aside class="info">
