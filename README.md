@@ -188,6 +188,54 @@ If you want to send a flash message in some other component on the client, use t
 
 Note that `initFlash` must have been called in a higher-level component before using `getFlash`.
 
+## Client-side fetching and redirecting
+
+**NOTE:** If you're using v1.0, this section is **not required**. The flash message will update automatically.
+
+For version 0.x, if you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhancement-use-enhance) or [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis) the flash message will be available on the client, but you must use `updateFlash` after fetching:
+
+### Example 1: Enhance
+
+```svelte
+<script lang="ts">
+  import { updateFlash } from 'sveltekit-flash-message/client';
+  import { page } from '$app/stores';
+</script>
+
+<form
+  method="POST"
+  use:enhance={() =>
+    ({ update }) =>
+      updateFlash(page, update)}
+>
+  <button>Submit with enhanced form</button>
+</form>
+```
+
+As you see, `updateFlash` can take a second parameter, which is used to run a function **before** updating, so navigation events will pass through before showing the flash message, for example. If you're using fetch, this is usually not needed:
+
+### Example 2: Fetch
+
+```svelte
+<script lang="ts">
+  import { updateFlash } from 'sveltekit-flash-message/client';
+  import { page } from '$app/stores';
+
+  async function submitForm(e: Event) {
+    const form = e.target as HTMLFormElement;
+    const body = new FormData(e.target as HTMLFormElement);
+
+    await fetch(form.action, { method: 'POST', body });
+    await updateFlash(page);
+  }
+</script>
+
+<form method="POST" action="/test" on:submit|preventDefault={submitForm}>
+  <input type="text" name="test" value="TEST" />
+  <button>Submit with fetch</button>
+</form>
+```
+
 ## Multiple messages
 
 If you specify `App.PageData['flash']` as an array, the library will accomodate for that and will concatenate messages into the array instead of replacing them, suitable for toast notifications. But if you want to always clear the previous messages, set the `clearArray` option to `true`.
