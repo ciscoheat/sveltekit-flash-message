@@ -32,7 +32,6 @@ export function initFlash(
   const { clearArray } = options;
 
   const store = writable<App.PageData['flash']>();
-  //currentMessage = get(page).data.flash;
 
   const context = { store, clearArray };
 
@@ -46,7 +45,6 @@ export function initFlash(
   });
 
   afterNavigate((nav) => {
-    //console.log('🚀 ~ file: client.ts:49 ~ afterNavigate ~ nav:', nav);
     if (['form', 'goto'].includes(nav.type as string)) {
       updateFlash(page);
     }
