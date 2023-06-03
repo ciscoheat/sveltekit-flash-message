@@ -14,8 +14,6 @@ const flashStores = new WeakMap<Readable<Page>, FlashContext>();
 const notInitialized =
   'Flash store must be initialized with initFlash(page) before calling getFlash.';
 
-let currentMessage: App.PageData['flash'] = undefined;
-
 export function initFlash(
   page: Readable<Page>,
   options: {
@@ -42,11 +40,6 @@ export function initFlash(
   updateStore(context, get(page).data.flash);
 
   onDestroy(() => flashStores.delete(page));
-
-  store.subscribe(($flash) => {
-    //console.log('🚀 ~ file: LIBRARY client.ts:47 ~ $flash update currentMessage:', $flash);
-    currentMessage = $flash;
-  });
 
   page.subscribe(($page) => {
     if ($page.data.flash !== undefined) updateFlash(page);
@@ -118,7 +111,7 @@ function parseFlashCookie(cookieString?: string): unknown {
 
 function updateStore(context: FlashContext, newData: App.PageData['flash'] | undefined) {
   clearCookie();
-  if (newData === undefined || newData === currentMessage) return;
+  if (newData === undefined) return;
 
   context.store.update((flash) => {
     //console.log("🚀 ~ file: client.ts:120 ~ updateStore ~ newData:", newData)
