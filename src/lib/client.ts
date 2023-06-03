@@ -14,6 +14,8 @@ const flashStores = new WeakMap<Readable<Page>, FlashContext>();
 const notInitialized =
   'Flash store must be initialized with initFlash(page) before calling getFlash.';
 
+let currentMessage: App.PageData['flash'] = undefined;
+
 export function initFlash(
   page: Readable<Page>,
   options: {
@@ -32,6 +34,8 @@ export function initFlash(
   const { clearArray } = options;
 
   const store = writable<App.PageData['flash']>();
+  //currentMessage = get(page).data.flash;
+
   const context = { store, clearArray };
 
   flashStores.set(page, context);
@@ -39,12 +43,18 @@ export function initFlash(
 
   onDestroy(() => flashStores.delete(page));
 
+  store.subscribe(($flash) => {
+    //console.log('🚀 ~ file: LIBRARY client.ts:47 ~ $flash update currentMessage:', $flash);
+    currentMessage = $flash;
+  });
+
   page.subscribe(($page) => {
     if ($page.data.flash !== undefined) updateFlash(page);
   });
 
   afterNavigate((nav) => {
-    if (['enter', 'form', 'goto'].includes(nav.type as string)) {
+    //console.log('🚀 ~ file: client.ts:49 ~ afterNavigate ~ nav:', nav);
+    if (['form', 'goto'].includes(nav.type as string)) {
       updateFlash(page);
     }
   });
@@ -65,7 +75,9 @@ export async function updateFlash(page: Readable<Page>, update?: () => Promise<v
   // Update before setting the new message, so navigation events can pass through first.
   if (update) await update();
   await tick();
-  updateStore(store, parseFlashCookie() as App.PageData['flash'] | undefined);
+
+  const flashMessage = parseFlashCookie() as App.PageData['flash'] | undefined;
+  updateStore(store, flashMessage);
 }
 
 ///////////////////////////////////////////////////////////
@@ -106,10 +118,10 @@ function parseFlashCookie(cookieString?: string): unknown {
 
 function updateStore(context: FlashContext, newData: App.PageData['flash'] | undefined) {
   clearCookie();
+  if (newData === undefined || newData === currentMessage) return;
 
   context.store.update((flash) => {
-    if (newData === undefined) return flash;
-    //console.log('Updating flash store:', newData);
+    //console.log("🚀 ~ file: client.ts:120 ~ updateStore ~ newData:", newData)
 
     // Need to do a per-element comparison here, since update will be called
     // when going to the same route, while keeping the old flash message,

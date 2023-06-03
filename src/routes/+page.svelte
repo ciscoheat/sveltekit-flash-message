@@ -3,6 +3,7 @@
   import type { PageData } from './$types';
   import { getFlash, updateFlash } from '$lib/client';
   import { page } from '$app/stores';
+  import { writable } from 'svelte/store';
 
   const flash = getFlash(page);
 
@@ -12,6 +13,8 @@
     const msg = { status: 'ok' as const, text: 'Updated on client ' + ++count };
     $flash = [...($flash ?? []), msg];
   }
+
+  const events = writable<(string | undefined)[]>([]);
 
   async function submitForm(e: Event) {
     const form = e.target as HTMLFormElement;
@@ -24,6 +27,11 @@
 
     updateFlash(page);
   }
+
+  flash.subscribe(($flash) => {
+    //console.log('🚀 ~ file: +page.svelte:31 ~ flash:', $flash);
+    $events = [...$events, $flash?.[$flash.length - 1]?.text];
+  });
 
   export let data: PageData;
 </script>
@@ -93,16 +101,22 @@
     </p>
   </section>
   <section>
-    <h3>More from Lorem Ipsum</h3>
-    <p>
-      Vivamus magna justo, lacinia eget consectetur sed, convallis at tellus. Praesent sapien massa,
-      convallis a pellentesque nec, egestas non nisi.
-    </p>
+    <h3>Events</h3>
+    <div class="events">
+      {#each $events as message}
+        <div>{message}</div>
+      {/each}
+    </div>
   </section>
 </aside>
 
 <style lang="scss">
   @import './mixins.scss';
+
+  .events {
+    display: flex;
+    flex-direction: column;
+  }
 
   aside {
     @include stack-vertical;

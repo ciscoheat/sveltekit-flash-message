@@ -190,11 +190,11 @@ Note that `initFlash` must have been called in a higher-level component before u
 
 ## Client-side fetching and redirecting
 
-**NOTE:** If you're using v1.0, this section is **not required**. The flash message will update automatically.
+The flash message will be available on the client when using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhancement-use-enhance) or [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis), but you must use `updateFlash` in certain cases after fetching:
 
-For version 0.x, if you're using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhancement-use-enhance) or [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis) the flash message will be available on the client, but you must use `updateFlash` after fetching:
+### use:enhance
 
-### Example 1: Enhance
+If you're using v1.0, this section is **not required**. The flash message will update automatically.
 
 ```svelte
 <script lang="ts">
@@ -212,9 +212,11 @@ For version 0.x, if you're using [enhance](https://kit.svelte.dev/docs/form-acti
 </form>
 ```
 
-As you see, `updateFlash` can take a second parameter, which is used to run a function **before** updating, so navigation events will pass through before showing the flash message, for example. If you're using fetch, this is usually not needed:
+`updateFlash` can take a second parameter, which is used to run a function **before** updating, so navigation events will pass through before showing the flash message, for example. If you're using fetch, this is usually not needed:
 
-### Example 2: Fetch
+### Fetch
+
+Since nothing on the page will update if you're using `fetch`, you **must** call `updateFlash` afterwards, both on v0.x and v1.0:
 
 ```svelte
 <script lang="ts">
