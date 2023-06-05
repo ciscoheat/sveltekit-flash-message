@@ -238,9 +238,35 @@ Since nothing on the page will update if you're using `fetch`, you **must** call
 </form>
 ```
 
+## Event-style messaging with toasts
+
+A common use case for flash messages is to show a toast notification, but a toast is more of an event than data that should be displayed on the page, as we've done previously. But you can use the `flash` store as an event handler by subscribing to it:
+
+**src/routes/+layout.svelte**
+
+```typescript
+import { initFlash } from 'sveltekit-flash-message/client';
+import { page } from '$app/stores';
+import toast, { Toaster } from 'svelte-french-toast';
+
+const flash = initFlash(page);
+
+flash.subscribe(($flash) => {
+  if (!$flash) return;
+
+  toast($flash.message, {
+    icon: $flash.type == 'success' ? '✅' : '❌'
+  });
+
+  // Clearing the flash message could sometimes
+  // be needed here to avoid double-toasting.
+  flash.set(undefined);
+});
+```
+
 ## Multiple messages
 
-If you specify `App.PageData['flash']` as an array, the library will accomodate for that and will concatenate messages into the array instead of replacing them, suitable for toast notifications. But if you want to always clear the previous messages, set the `clearArray` option to `true`.
+If you specify `App.PageData['flash']` as an array, the library will accomodate for that and will concatenate messages into the array instead of replacing them. But if you want to always clear the previous messages, set the `clearArray` option to `true`.
 
 ```typescript
 const messages = initFlash(page, {
