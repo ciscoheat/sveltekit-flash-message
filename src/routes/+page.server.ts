@@ -42,5 +42,17 @@ export const actions = {
       event
     );
     return fail(400);
+  },
+
+  async toast(event) {
+    throw redirect(
+      [
+        {
+          status: 'ok',
+          text: 'A toast to you all'
+        }
+      ],
+      event
+    );
   }
 } satisfies Actions;

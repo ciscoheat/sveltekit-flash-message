@@ -89,6 +89,10 @@
     <button formaction="?/noRedirect" id="action-post-no-redirect">Submit without redirect</button>
   </form>
 
+  <form method="POST" use:enhance>
+    <button formaction="?/toast" id="action-post-toast">Post a toast</button>
+  </form>
+
   <h3>Github issues</h3>
   <a href="/issue-11">#11 instant redirect</a>
 </article>

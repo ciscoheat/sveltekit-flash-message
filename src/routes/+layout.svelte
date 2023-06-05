@@ -5,24 +5,35 @@
   import { beforeNavigate } from '$app/navigation';
   import type { LayoutData } from './$types';
   import { initFlash } from '$lib/client';
+  import toast, { Toaster } from 'svelte-french-toast';
 
-  let messages = initFlash(page);
+  let flash = initFlash(page);
 
   const timeoutMs = 5000;
   let flashTimeout: ReturnType<typeof setTimeout>;
 
-  $: if ($messages) {
+  flash.subscribe(($flash) => {
+    console.log($flash);
+    if ($flash && $flash.length && $flash[$flash.length - 1].text.toLowerCase().includes('toast')) {
+      toast($flash[$flash.length - 1].text, {
+        icon: '✅'
+      });
+      flash.set(undefined);
+    }
+  });
+
+  $: if ($flash) {
     clearTimeout(flashTimeout);
-    flashTimeout = setTimeout(() => ($messages = undefined), timeoutMs);
+    flashTimeout = setTimeout(() => ($flash = undefined), timeoutMs);
   }
 
   function clear() {
-    $messages = [];
+    $flash = undefined;
   }
 
   beforeNavigate((nav) => {
-    if ($messages && nav.from?.url.toString() != nav.to?.url.toString()) {
-      $messages = [];
+    if ($flash && nav.from?.url.toString() != nav.to?.url.toString()) {
+      $flash = undefined;
     }
   });
 
@@ -41,13 +52,14 @@
     </div>
   </header>
   <div id="messages">
-    {#if $messages}
-      {#each $messages as msg}
+    {#if $flash}
+      {#each $flash as msg}
         {@const bg = msg.status == 'ok' ? '#3D9970' : '#FF4136'}
         <div data-status={msg.status} style:background-color={bg} class="flash">{msg.text}</div>
       {/each}
     {/if}
   </div>
+  <Toaster />
   <main>
     <slot />
   </main>

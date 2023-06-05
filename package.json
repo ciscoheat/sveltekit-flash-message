@@ -43,6 +43,7 @@
     "sass": "^1.62.1",
     "svelte": "^3.59.1",
     "svelte-check": "^3.4.3",
+    "svelte-french-toast": "1.0.4-beta.0",
     "svelte-preprocess": "^5.0.4",
     "tslib": "^2.5.2",
     "typescript": "^5.0.4",
