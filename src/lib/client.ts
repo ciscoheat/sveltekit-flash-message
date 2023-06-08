@@ -40,13 +40,33 @@ export function initFlash(
 
   onDestroy(() => flashStores.delete(page));
 
-  page.subscribe(($page) => {
-    if ($page.data.flash !== undefined) updateFlash(page);
+  let lastUpdate: 'page' | 'navigation' | null = null;
+
+  page.subscribe(async ($page) => {
+    console.log('🚀 ~ page.subscribe: ', $page.data.flash?.[0].text, lastUpdate);
+
+    if (!browser && $page.data.flash !== undefined) {
+      updateFlash(page);
+    } else if (browser) {
+      // Wait for eventual navigation event
+      await tick();
+      setTimeout(async () => {
+        if (await updateFlash(page)) {
+          lastUpdate = 'page';
+          console.log('::: page update');
+        } else {
+          lastUpdate = null;
+        }
+      });
+    }
   });
 
-  afterNavigate((nav) => {
+  afterNavigate(async (nav) => {
+    console.log('(🚀 ~ afterNavigate: ' + nav.type + ')', get(page).data.flash, lastUpdate);
     if (['form', 'goto'].includes(nav.type as string)) {
-      updateFlash(page);
+      if (lastUpdate != 'page') {
+        if (await updateFlash(page)) console.log('::: afterNavigate update');
+      }
     }
   });
 
@@ -69,6 +89,8 @@ export async function updateFlash(page: Readable<Page>, update?: () => Promise<v
 
   const flashMessage = parseFlashCookie() as App.PageData['flash'] | undefined;
   updateStore(store, flashMessage);
+
+  return !!flashMessage;
 }
 
 ///////////////////////////////////////////////////////////

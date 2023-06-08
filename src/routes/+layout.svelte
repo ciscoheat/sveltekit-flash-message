@@ -6,14 +6,16 @@
   import type { LayoutData } from './$types';
   import { initFlash } from '$lib/client';
   import toast, { Toaster } from 'svelte-french-toast';
+  import { browser } from '$app/environment';
 
   let flash = initFlash(page);
 
-  const timeoutMs = 5000;
+  const timeoutMs = 75000;
   let flashTimeout: ReturnType<typeof setTimeout>;
 
   flash.subscribe(($flash) => {
-    console.log($flash);
+    console.log('FLASH EVENT ' + (browser ? '[browser]' : '[SSR]') + ':', $flash?.[0].text);
+    // Toast event handling
     if ($flash && $flash.length && $flash[$flash.length - 1].text.toLowerCase().includes('toast')) {
       toast($flash[$flash.length - 1].text, {
         icon: '✅'
