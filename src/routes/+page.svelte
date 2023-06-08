@@ -93,10 +93,6 @@
     <button formaction="?/toast" id="action-post-toast">Post a toast</button>
   </form>
 
-  <form method="POST" use:enhance>
-    <button formaction="?/normal-delay" id="action-post-delayed">Post with a client delay</button>
-  </form>
-
   <h3>Github issues</h3>
   <a href="/issue-11">#11 instant redirect</a>
 </article>

@@ -40,11 +40,10 @@ export function initFlash(
 
   onDestroy(() => flashStores.delete(page));
 
-  let lastUpdate: 'page' | 'navigation' | null = null;
+  let lastUpdate: 'page' | null = null;
 
   page.subscribe(async ($page) => {
-    console.log('🚀 ~ page.subscribe: ', $page.data.flash?.[0].text, lastUpdate);
-
+    //console.log('🚀 ~ page.subscribe: ', $page.data.flash?.[0].text, lastUpdate);
     if (!browser && $page.data.flash !== undefined) {
       updateFlash(page);
     } else if (browser) {
@@ -53,7 +52,6 @@ export function initFlash(
       setTimeout(async () => {
         if (await updateFlash(page)) {
           lastUpdate = 'page';
-          console.log('::: page update');
         } else {
           lastUpdate = null;
         }
@@ -62,10 +60,11 @@ export function initFlash(
   });
 
   afterNavigate(async (nav) => {
-    console.log('(🚀 ~ afterNavigate: ' + nav.type + ')', get(page).data.flash, lastUpdate);
+    //console.log('(🚀 ~ afterNavigate: ' + nav.type + ')', get(page).data.flash, lastUpdate);
     if (['form', 'goto'].includes(nav.type as string)) {
       if (lastUpdate != 'page') {
-        if (await updateFlash(page)) console.log('::: afterNavigate update');
+        //if (await updateFlash(page)) console.log('::: afterNavigate update');
+        updateFlash(page);
       }
     }
   });
