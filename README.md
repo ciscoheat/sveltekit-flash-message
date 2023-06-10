@@ -1,5 +1,7 @@
 # sveltekit-flash-message ⚡
 
+> sveltekit-flash-message 1.0 has just been released. See the end of this document for a simple migration guide.
+
 This is a [Sveltekit](https://kit.svelte.dev/) library that passes temporary data to the next request, usually from [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful when you want a success or failure message displayed after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
 
 This is known as a "flash message", especially known from PHP apps, since it's easy to add this functionality with PHP's built-in session handling. With SvelteKit it's a bit harder, but this library was made to alleviate that, encouraging well-behaved web apps that [Redirects after Post](https://www.theserverside.com/news/1365146/Redirect-After-Post).
@@ -190,11 +192,11 @@ Note that `initFlash` must have been called in a higher-level component before u
 
 ## Client-side fetching and redirecting
 
-The flash message will be available on the client when using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhancement-use-enhance) or [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis), but you must use `updateFlash` in certain cases after fetching:
+When using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhancement-use-enhance) or [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis), in certain cases you must use `updateFlash` afterwards:
 
 ### use:enhance
 
-If you're using v1.0, this section is **not required**. The flash message will update automatically.
+> If you're using v1.0, **this is not required**. The flash message will update automatically when using `use:enhance`.
 
 ```svelte
 <script lang="ts">
@@ -212,11 +214,11 @@ If you're using v1.0, this section is **not required**. The flash message will u
 </form>
 ```
 
-`updateFlash` can take a second parameter, which is used to run a function **before** updating, so navigation events will pass through before showing the flash message, for example. If you're using fetch, this is usually not needed:
+`updateFlash` can take a second parameter, which is used to run a function **before** updating, so navigation events will pass through before showing the flash message, for example. If you're using fetch, this is usually not needed.
 
 ### Fetch
 
-Since nothing on the page will update if you're using `fetch`, you **must** call `updateFlash` afterwards, both on v0.x and v1.0:
+Since nothing on the page will update if you're using `fetch`, you must call `updateFlash` afterwards, both on v0.x and v1.0:
 
 ```svelte
 <script lang="ts">
@@ -259,7 +261,7 @@ flash.subscribe(($flash) => {
   });
 
   // Clearing the flash message could sometimes
-  // be needed here to avoid double-toasting.
+  // be required here to avoid double-toasting.
   flash.set(undefined);
 });
 ```
@@ -323,5 +325,19 @@ $: if ($flash) {
 ```
 
 If you use both of these, call `clearTimeout` in `beforeNavigate` too.
+
+## Migration guide to 1.0
+
+The only thing you need to do when upgrading to 1.0 is to remove all calls to `updateFlash` in `use:enhance`.
+
+```diff
+ <form
+    method="POST"
+-   use:enhance={() =>
+-     ({ update }) =>
+-       updateFlash(page, update)}
++   use:enhance
+ >
+```
 
 Enjoy the library, and please [open a github issue](https://github.com/ciscoheat/sveltekit-flash-message/issues) if you have suggestions or feedback in general!
