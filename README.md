@@ -196,7 +196,7 @@ When using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhanc
 
 ### use:enhance
 
-> If you're using v1.0, **this is not required**. The flash message will update automatically when using `use:enhance`.
+**If you're using v1.0, this is not required.** The flash message will update automatically when using `use:enhance`.
 
 ```svelte
 <script lang="ts">
@@ -213,8 +213,6 @@ When using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhanc
   <button>Submit with enhanced form</button>
 </form>
 ```
-
-`updateFlash` can take a second parameter, which is used to run a function **before** updating, so navigation events will pass through before showing the flash message, for example. If you're using fetch, this is usually not needed.
 
 ### Fetch
 
@@ -238,6 +236,17 @@ Since nothing on the page will update if you're using `fetch`, you must call `up
   <input type="text" name="test" value="TEST" />
   <button>Submit with fetch</button>
 </form>
+```
+
+`updateFlash` can take a second parameter, which is used to run a function **before** updating, so navigation events will pass through before showing the flash message. This is useful when you want to redirect based on the fetch response:
+
+```ts
+async function submitForm(e: Event) {
+  const response = await fetch(new URL('/logout', $page.url), { method: 'POST' });
+  if (response.redirected) {
+    await updateFlash(page, () => goto(response.url, { invalidateAll: true }));
+  }
+}
 ```
 
 ## Event-style messaging with toasts
