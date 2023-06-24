@@ -38,11 +38,9 @@ export function initFlash(
   flashStores.set(page, context);
   updateStore(context, get(page).data.flash);
 
-  onDestroy(() => flashStores.delete(page));
-
   let lastUpdate: 'page' | null = null;
 
-  page.subscribe(async ($page) => {
+  const pageSubscription = page.subscribe(async ($page) => {
     //console.log('🚀 ~ page.subscribe: ', $page.data.flash?.[0].text, lastUpdate);
     if (!browser && $page.data.flash !== undefined) {
       updateFlash(page);
@@ -57,6 +55,11 @@ export function initFlash(
         }
       });
     }
+  });
+
+  onDestroy(() => {
+    pageSubscription();
+    flashStores.delete(page);
   });
 
   afterNavigate(async (nav) => {
