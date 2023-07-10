@@ -1,5 +1,5 @@
-import type { CookieParseOptions, CookieSerializeOptions } from './types'
-export type { CookieParseOptions, CookieSerializeOptions } from './types'
+import type { CookieParseOptions, CookieSerializeOptions } from './types';
+export type { CookieParseOptions, CookieSerializeOptions } from './types';
 
 /**
  * Module letiables.
@@ -21,18 +21,18 @@ const pairSplitRegExp = /; */;
 const fieldContentRegExp = /^[\u0009\u0020-\u007e\u0080-\u00ff]+$/;
 
 /**
-* Parse an HTTP Cookie header string and returning an object of all cookie
-* name-value pairs.
-*
-* @param str the string representing a `Cookie` header value
-* @param [options] object containing parsing options
-*/
+ * Parse an HTTP Cookie header string and returning an object of all cookie
+ * name-value pairs.
+ *
+ * @param str the string representing a `Cookie` header value
+ * @param [options] object containing parsing options
+ */
 export function parse(str: string, options?: CookieParseOptions) {
   if (typeof str !== 'string') {
     throw new TypeError('argument str must be a string');
   }
 
-  let obj = {}
+  let obj: Record<string, unknown> = {};
   let opt = options || {};
   let pairs = str.split(pairSplitRegExp);
   let dec = opt.decode || decode;
@@ -46,7 +46,7 @@ export function parse(str: string, options?: CookieParseOptions) {
       continue;
     }
 
-    let key = pair.substr(0, eq_idx).trim()
+    let key = pair.substr(0, eq_idx).trim();
     let val = pair.substr(++eq_idx, pair.length).trim();
 
     // quoted values
@@ -64,13 +64,13 @@ export function parse(str: string, options?: CookieParseOptions) {
 }
 
 /**
-* Serialize a cookie name-value pair into a `Set-Cookie` header string.
-*
-* @param name the name for the cookie
-* @param value value to set the cookie to
-* @param [options] object containing serialization options
-* @throws {TypeError} when `maxAge` options is invalid
-*/
+ * Serialize a cookie name-value pair into a `Set-Cookie` header string.
+ *
+ * @param name the name for the cookie
+ * @param value value to set the cookie to
+ * @param [options] object containing serialization options
+ * @throws {TypeError} when `maxAge` options is invalid
+ */
 export function serialize(name: string, value: string, options?: CookieSerializeOptions) {
   let opt = options || {};
   let enc = opt.encode || encode;
@@ -95,7 +95,7 @@ export function serialize(name: string, value: string, options?: CookieSerialize
     let maxAge = opt.maxAge - 0;
 
     if (isNaN(maxAge) || !isFinite(maxAge)) {
-      throw new TypeError('option maxAge is invalid')
+      throw new TypeError('option maxAge is invalid');
     }
 
     str += '; Max-Age=' + Math.floor(maxAge);
@@ -134,8 +134,7 @@ export function serialize(name: string, value: string, options?: CookieSerialize
   }
 
   if (opt.sameSite) {
-    let sameSite = typeof opt.sameSite === 'string'
-      ? opt.sameSite.toLowerCase() : opt.sameSite;
+    let sameSite = typeof opt.sameSite === 'string' ? opt.sameSite.toLowerCase() : opt.sameSite;
 
     switch (sameSite) {
       case true:
@@ -165,7 +164,7 @@ export function serialize(name: string, value: string, options?: CookieSerialize
  * @param {function} decode
  * @private
  */
-function tryDecode(str, decode) {
+function tryDecode(str: string, decode: typeof decodeURIComponent) {
   try {
     return decode(str);
   } catch (e) {
