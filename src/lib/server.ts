@@ -83,19 +83,49 @@ export const load = _loadFlash;
 
 type RedirectStatus = Parameters<typeof redir>[0];
 
+/**
+ * Create a `Redirect` object. If thrown during request handling, SvelteKit will return a redirect response.
+ * Make sure you're not catching the thrown redirect, which would prevent SvelteKit from handling it.
+ * @param {300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308} status The [HTTP status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#redirection_messages). Must be in the range 300-308.
+ * @param {string} location The location to redirect to.
+ */
 export function redirect(status: RedirectStatus, location: string | URL): ReturnType<typeof redir>;
 
+/**
+ * Create a `Redirect` object to the current URL, with HTTP status 303 and a flash message.
+ * If thrown during request handling, SvelteKit will return a redirect response.
+ * Make sure you're not catching the thrown redirect, which would prevent SvelteKit from handling it.
+ * @param {App.PageData['flash']} message The flash message.
+ * @param {RequestEvent} event The event for the load function or form action.
+ */
 export function redirect(
   message: App.PageData['flash'],
   event: RequestEvent
 ): ReturnType<typeof redir>;
 
+/**
+ * Create a `Redirect` object to a specific location, with HTTP status 303 and a flash message.
+ * If thrown during request handling, SvelteKit will return a redirect response.
+ * Make sure you're not catching the thrown redirect, which would prevent SvelteKit from handling it.
+ * @param {string | URL} location The redirect URL/location.
+ * @param {App.PageData['flash']} message The flash message.
+ * @param {RequestEvent} event The event for the load function or form action.
+ */
 export function redirect(
   location: string | URL,
   message: App.PageData['flash'],
   event: RequestEvent
 ): ReturnType<typeof redir>;
 
+/**
+ * Create a `Redirect` object to a location, with a HTTP status and a flash message.
+ * If thrown during request handling, SvelteKit will return a redirect response.
+ * Make sure you're not catching the thrown redirect, which would prevent SvelteKit from handling it.
+ * @param {300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308} status The [HTTP status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#redirection_messages). Must be in the range 300-308.
+ * @param {string | URL} location The redirect URL/location.
+ * @param {App.PageData['flash']} message The flash message.
+ * @param {RequestEvent} event The event for the load function or form action.
+ */
 export function redirect(
   status: RedirectStatus,
   location: string | URL,
@@ -161,6 +191,13 @@ function realRedirect(
   return redir(status, location.toString());
 }
 
+////////////////////////////////////////////////////////
+
+/**
+ * Set the flash message without redirecting, for example when validation fails in a form action.
+ * @param {App.PageData['flash']} message The flash message.
+ * @param {RequestEvent} event The event for the form action or load function.
+ */
 export function setFlash(message: App.PageData['flash'], event: RequestEvent | Cookies) {
   const cookies = 'cookies' in event ? event.cookies : event;
   cookies.set(cookieName, JSON.stringify(message), { httpOnly, path, maxAge });

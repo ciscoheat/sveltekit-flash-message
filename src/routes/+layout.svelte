@@ -2,16 +2,14 @@
   import './root.scss';
 
   import { page } from '$app/stores';
-  import { beforeNavigate } from '$app/navigation';
   import type { LayoutData } from './$types';
   import { getFlash } from '$lib/client';
   import toast, { Toaster } from 'svelte-french-toast';
   import { browser } from '$app/environment';
 
-  let flash = getFlash(page);
-
-  const timeoutMs = 75000;
-  let flashTimeout: ReturnType<typeof setTimeout>;
+  let flash = getFlash(page, {
+    clearAfterMs: 75000
+  });
 
   flash.subscribe(($flash) => {
     console.log('FLASH EVENT ' + (browser ? '[browser]' : '[SSR]') + ':', $flash?.[0].text);
@@ -24,20 +22,9 @@
     }
   });
 
-  $: if ($flash) {
-    clearTimeout(flashTimeout);
-    flashTimeout = setTimeout(() => ($flash = undefined), timeoutMs);
-  }
-
   function clear() {
     $flash = undefined;
   }
-
-  beforeNavigate((nav) => {
-    if ($flash && nav.from?.url.toString() != nav.to?.url.toString()) {
-      $flash = undefined;
-    }
-  });
 
   export let data: LayoutData;
 </script>

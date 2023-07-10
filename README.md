@@ -1,10 +1,10 @@
 # sveltekit-flash-message ⚡
 
-> sveltekit-flash-message 1.0 has just been released. See the end of this document for a simple migration guide.
+**sveltekit-flash-message 2.0 has just been released. See the end of this document for a simple migration guide.**
 
 This is a [Sveltekit](https://kit.svelte.dev/) library that passes temporary data to the next request, usually from [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful when you want a success or failure message displayed after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
 
-This is known as a "flash message", especially known from PHP apps, since it's easy to add this functionality with PHP's built-in session handling. With SvelteKit it's a bit harder, but this library was made to alleviate that, encouraging well-behaved web apps that [Redirects after Post](https://www.theserverside.com/news/1365146/Redirect-After-Post).
+Since it's a temporary message it's also known as a "flash message", especially known from PHP apps, since it's easy to add this functionality with PHP's built-in session handling. With SvelteKit it's a bit harder, but this library was made to alleviate that, encouraging well-behaved web apps that [Redirects after Post](https://www.theserverside.com/news/1365146/Redirect-After-Post).
 
 ## Installation
 
@@ -20,7 +20,7 @@ pnpm i -D sveltekit-flash-message
 
 ## 1. [Typescript only] Add the flash message to app.d.ts
 
-In `src/app.d.ts` you should add the type for the flash message to `App.PageData` as an optional property called `flash`. It can be as simple as a `string`, or something more advanced. It has to be serializable though, so only JSON-friendly data structures. Here's an example:
+In `src/app.d.ts`, add the type for the flash message to `App.PageData` as an optional property called `flash`. It can be as simple as a `string`, or something more advanced. It has to be serializable though, so only JSON-friendly data structures. Here's an example:
 
 **src/app.d.ts**
 
@@ -32,7 +32,7 @@ declare namespace App {
 }
 ```
 
-## 2. Add a load function to a top-level +page or +layout server route
+## 2. Wrap the load function of a top-level +layout or +page route
 
 If you're not using any [load functions](https://kit.svelte.dev/docs/load), this is a simple step. Create a `src/routes/+layout.server.ts` file (or `+page.server.ts`) with the following content:
 
@@ -42,14 +42,14 @@ If you're not using any [load functions](https://kit.svelte.dev/docs/load), this
 export { load } from 'sveltekit-flash-message/server';
 ```
 
-But most likely you have a top-level `load` function, in that case you can import `loadFlashMessage` and wrap your load function with it:
+But most likely you already have a top-level `load` function, in which case you can import `loadFlash` and wrap your load function with it:
 
 **src/routes/+layout.server.ts**
 
 ```typescript
-import { loadFlashMessage } from 'sveltekit-flash-message/server';
+import { loadFlash } from 'sveltekit-flash-message/server';
 
-export const load = loadFlashMessage(async (event) => {
+export const load = loadFlash(async (event) => {
   const data = { someOther: 'data' };
   return data;
 });
@@ -57,16 +57,16 @@ export const load = loadFlashMessage(async (event) => {
 
 ## 3. Display the flash message
 
-Import the client `initFlash` function to initialize and display the flash message, for example in your layout component. This will return a store that you can use to access the message:
+Import `getFlash` in a layout or page component to display the flash message. `getFlash` will return a store that you'll use to access the message:
 
 **src/routes/+layout.svelte**
 
 ```svelte
 <script lang="ts">
-  import { initFlash } from 'sveltekit-flash-message/client';
+  import { getFlash } from 'sveltekit-flash-message/client';
   import { page } from '$app/stores';
 
-  const flash = initFlash(page);
+  const flash = getFlash(page);
 </script>
 
 {#if $flash}
@@ -79,7 +79,7 @@ Import the client `initFlash` function to initialize and display the flash messa
 
 ### Server-side
 
-To send a flash message, import `redirect` from `sveltekit-flash-message/server` and throw it, as in [load](https://kit.svelte.dev/docs/load#redirects) and [form actions](https://kit.svelte.dev/docs/form-actions#anatomy-of-an-action-redirects).
+To send a flash message from the server, import `redirect` from `sveltekit-flash-message/server` and throw it, as in [load](https://kit.svelte.dev/docs/load#redirects) and [form actions](https://kit.svelte.dev/docs/form-actions#anatomy-of-an-action-redirects).
 
 ```typescript
 import { redirect } from 'sveltekit-flash-message/server'
@@ -112,21 +112,7 @@ throw redirect(
 )
 ```
 
-### Endpoint example
-
-**src/routes/todos/+server.ts**
-
-```typescript
-import type { RequestEvent } from '@sveltejs/kit';
-import { redirect } from 'sveltekit-flash-message/server';
-
-export const POST = async (event) => {
-  const message = { type: 'success', message: 'Endpoint POST successful!' } as const;
-  throw redirect(303, '/', message, event);
-};
-```
-
-### Form action example
+#### Form action example
 
 **src/routes/todos/+page.server.ts**
 
@@ -147,9 +133,23 @@ export const actions = {
 };
 ```
 
-### Setting without redirecting
+#### Endpoint example
 
-If you want to display a flash message without redirecting, as a general error message when validation fails for example, you can use the `setFlash` function:
+**src/routes/todos/+server.ts**
+
+```typescript
+import type { RequestEvent } from '@sveltejs/kit';
+import { redirect } from 'sveltekit-flash-message/server';
+
+export const POST = async (event) => {
+  const message = { type: 'success', message: 'Endpoint POST successful!' } as const;
+  throw redirect(303, '/', message, event);
+};
+```
+
+#### Setting without redirecting
+
+If you want to display a flash message without redirecting, as an error message when validation fails for example, you can use the `setFlash` function:
 
 ```typescript
 import { fail } from '@sveltejs/kit';
@@ -169,7 +169,7 @@ export const actions = {
 
 ### Client-side
 
-If you want to send a flash message in some other component on the client, use the `getFlash` function:
+If you want to update the flash message on the client, use `getFlash` in any component:
 
 **src/routes/some-route/+page.svelte**
 
@@ -180,15 +180,13 @@ If you want to send a flash message in some other component on the client, use t
 
   const flash = getFlash(page);
 
-  function change() {
+  function showMessage() {
     $flash = { type: 'success', message: 'Updated from other component!' };
   }
 </script>
 
-<button on:click={change}>Update message</button>
+<button on:click={showMessage}>Show flash message</button>
 ```
-
-Note that `initFlash` must have been called in a higher-level component before using `getFlash`.
 
 ## Client-side fetching and redirecting
 
@@ -196,7 +194,7 @@ When using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhanc
 
 ### use:enhance
 
-**If you're using v1.0, this is not required.** The flash message will update automatically when using `use:enhance`.
+**NOTE: This is not required in v1.0 and up.**
 
 ```svelte
 <script lang="ts">
@@ -216,7 +214,7 @@ When using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhanc
 
 ### Fetch
 
-Since nothing on the page will update if you're using `fetch`, you must call `updateFlash` afterwards, both on v0.x and v1.0:
+Since nothing on the page will update if you're using `fetch`, you must call `updateFlash` afterwards, **on all versions**:
 
 ```svelte
 <script lang="ts">
@@ -249,18 +247,18 @@ async function submitForm(e: Event) {
 }
 ```
 
-## Event-style messaging with toasts
+## Toast messages, event-style
 
 A common use case for flash messages is to show a toast notification, but a toast is more of an event than data that should be displayed on the page, as we've done previously. But you can use the `flash` store as an event handler by subscribing to it:
 
 **src/routes/+layout.svelte**
 
 ```typescript
-import { initFlash } from 'sveltekit-flash-message/client';
+import { getFlash } from 'sveltekit-flash-message/client';
 import { page } from '$app/stores';
 import toast, { Toaster } from 'svelte-french-toast';
 
-const flash = initFlash(page);
+const flash = getFlash(page);
 
 flash.subscribe(($flash) => {
   if (!$flash) return;
@@ -275,15 +273,31 @@ flash.subscribe(($flash) => {
 });
 ```
 
-## Multiple messages
+## Flash message options
 
-If you specify `App.PageData['flash']` as an array, the library will accomodate for that and will concatenate messages into the array instead of replacing them. But if you want to always clear the previous messages, set the `clearArray` option to `true`.
+The first time you call `getFlash` for a `page`, you can specify options:
 
 ```typescript
-const messages = initFlash(page, {
+const flash = getFlash(page, {
+  clearOnNavigate: true,
+  clearAfterMs: undefined,
   clearArray: true
 });
 ```
+
+### clearOnNavigate
+
+If `true`, the flash message will be removed when navigating to a different url.
+
+### clearAfterMs
+
+Can be set to a number of milliseconds before the flash message be automatically removed (set to `undefined`).
+
+### clearArray
+
+If you specify `App.PageData['flash']` as an array, the library will accomodate for that and will concatenate messages into the array instead of replacing them. But if you want to always clear the previous messages, set the `clearArray` option to `true`.
+
+Again, note that you can only set options the first time you call `getFlash` for a certain page/layout, usually in the top-level component. Subsequent calls to `getFlash` in components below cannot have any options. (See the first call to it as a kind of constructor.)
 
 ## Securing the flash message
 
@@ -291,49 +305,7 @@ Since the flash message is transferred in a cookie, it can be easily tampered wi
 
 ## Together with Superforms
 
-The sister library to sveltekit-flash-message is **Superforms**, the all-in-one solution for forms in SvelteKit. You can use them together with just a little bit of extra configuration, [found here](https://superforms.vercel.app/flash-messages) on the Superforms website.
-
-## Useful snippets
-
-### Removing the flash message when navigating
-
-This little snippet can be useful if you'd like to have the flash message removed when the user navigates to another route:
-
-**src/routes/+layout.svelte**
-
-```typescript
-import { initFlash } from 'sveltekit-flash-message/client';
-import { page } from '$app/stores';
-import { beforeNavigate } from '$app/navigation';
-
-const flash = initFlash(page);
-
-beforeNavigate((nav) => {
-  if ($flash && nav.from?.url.toString() != nav.to?.url.toString()) {
-    $flash = undefined;
-  }
-});
-```
-
-### Removing the flash message after a certain time
-
-**src/routes/+layout.svelte**
-
-```typescript
-import { initFlash } from 'sveltekit-flash-message/client';
-import { page } from '$app/stores';
-
-const flash = initFlash(page);
-const flashTimeoutMs = 5000;
-
-let flashTimeout: ReturnType<typeof setTimeout>;
-$: if ($flash) {
-  clearTimeout(flashTimeout);
-  flashTimeout = setTimeout(() => ($flash = undefined), flashTimeoutMs);
-}
-```
-
-If you use both of these, call `clearTimeout` in `beforeNavigate` too.
+The sister library to sveltekit-flash-message is [Superforms](https://superforms.rocks), the all-in-one solution for forms in SvelteKit. You can use them together without any extra work, but there are options for closer integration, [found here](https://superforms.rocks/flash-messages) on the Superforms website.
 
 ## Migration guide to 1.0
 
@@ -349,4 +321,17 @@ The only thing you need to do when upgrading to 1.0 is to remove all calls to `u
  >
 ```
 
-Enjoy the library, and please [open a github issue](https://github.com/ciscoheat/sveltekit-flash-message/issues) if you have suggestions or feedback in general!
+## Migration guide to 2.0
+
+1. Rename functions:
+
+- `initFlash` is deprecated, `getFlash` can now be used directly instead.
+- `loadFlashMessage` is deprecated and renamed to `loadFlash`.
+
+2. If you've added the `beforeNavigate` snippet that clears the flash message after navigation - it can now be removed since it's automatic (unless the `clearOnNavigate` option is set to `false`).
+
+3. If you're using the other snippet for clearing the message after a certain amount of time, you can remove it and use the `clearAfterMs` option instead.
+
+## Feedback and issues
+
+Please [open a github issue](https://github.com/ciscoheat/sveltekit-flash-message/issues) for suggestions, if you find a bug or have feedback in general!

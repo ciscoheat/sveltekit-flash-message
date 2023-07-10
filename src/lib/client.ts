@@ -7,6 +7,7 @@ import { afterNavigate } from '$app/navigation';
 export type FlashOptions = Partial<{
   clearArray: boolean;
   clearOnNavigate: boolean;
+  clearAfterMs: number;
 }>;
 
 type FlashContext = {
@@ -44,6 +45,9 @@ function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.
   flashStores.set(page, context);
   clearCookieAndUpdateIfNewData(context, get(page).data.flash);
 
+  /**
+   * Set to 'page' if the last call to updateFlash used a flash message.
+   */
   let lastUpdate: 'page' | null = null;
 
   const unsubscribeFromPage = page.subscribe(async ($page) => {
@@ -63,25 +67,39 @@ function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.
     }
   });
 
+  let unsubscribeClearFlash: () => void | undefined;
+  let flashTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
+
+  if (options.clearAfterMs && browser) {
+    unsubscribeClearFlash = store.subscribe(($flash) => {
+      if ($flash) {
+        if (flashTimeout) clearTimeout(flashTimeout);
+        flashTimeout = setTimeout(() => store.set(undefined), options?.clearAfterMs);
+      }
+    });
+  }
+
   onDestroy(() => {
+    if (unsubscribeClearFlash) {
+      if (flashTimeout) clearTimeout(flashTimeout);
+      unsubscribeClearFlash();
+    }
     unsubscribeFromPage();
     flashStores.delete(page);
   });
 
   afterNavigate(async (nav) => {
-    if (['form', 'goto'].includes(nav.type as string)) {
-      if (lastUpdate != 'page') {
-        updateFlash(page);
-      } else {
-        const context = flashStores.get(page);
+    //console.log('🚀 ~ file: client.ts:89 ~ afterNavigate ~ nav:', nav, lastUpdate);
+    if (
+      nav.type != 'enter' &&
+      options?.clearOnNavigate &&
+      nav.from?.url.toString() != nav.to?.url.toString()
+    ) {
+      store.set(undefined);
+    }
 
-        if (
-          context?.options.clearOnNavigate &&
-          nav.from?.url.toString() != nav.to?.url.toString()
-        ) {
-          context?.store.set(undefined);
-        }
-      }
+    if (lastUpdate != 'page' && ['form', 'goto'].includes(nav.type as string)) {
+      updateFlash(page);
     }
   });
 
@@ -100,17 +118,19 @@ export function getFlash(
 ): Writable<App.PageData['flash']> {
   const context = flashStores.get(page);
   if (!context) return _initFlash(page, options);
-  if (options)
+  if (options) {
     throw new Error(
-      'getFlash options can only be set during the first call to getFlash. Set the options at the highest level component that calls getFlash.'
+      'getFlash options can only be set during the first call to getFlash. ' +
+        'Set the options at the highest level component that calls getFlash.'
     );
+  }
   return context.store;
 }
 
 /**
- * Updates the flash message after a fetch request.
+ * Update the flash message manually, usually after a fetch request.
  * @param page Page store, imported from `$app/stores`.
- * @param {Promise<void>} update A callback which is executed *before* the message is set, to delay the message until navigation events are completed, for example when using `goto`.
+ * @param {Promise<void>} update A callback which is executed *before* the message is updated, to delay the message until navigation events are completed, for example when using `goto`.
  * @returns {Promise<boolean>} `true` if a flash message existed, `false` if not.
  */
 export async function updateFlash(page: Readable<Page>, update?: () => Promise<void>) {

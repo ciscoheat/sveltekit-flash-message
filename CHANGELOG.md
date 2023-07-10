@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0]
 
+### Added
+
+- Added `clearOnNavigate` and `clearAfterMs` options. `clearOnNavigate` is `true` as default, `clearAfterMs` can be used to clear the flash message after a certain time (ms).
+
 ### Changed
 
 - Removal of flash message when navigating is now automatic - no `afterNavigate` function needed anymore.
