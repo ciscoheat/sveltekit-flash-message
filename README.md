@@ -281,17 +281,17 @@ The first time you call `getFlash` for a `page`, you can specify options:
 const flash = getFlash(page, {
   clearOnNavigate: true,
   clearAfterMs: undefined,
-  clearArray: true
+  clearArray: false
 });
 ```
 
 ### clearOnNavigate
 
-If `true`, the flash message will be removed when navigating to a different url.
+If `true` (the default), the flash message will be removed when navigating to a different url.
 
 ### clearAfterMs
 
-Can be set to a number of milliseconds before the flash message be automatically removed (set to `undefined`).
+Can be set to a number of milliseconds before the flash message is automatically set to `undefined`.
 
 ### clearArray
 
