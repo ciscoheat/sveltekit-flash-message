@@ -4,11 +4,11 @@
   import { page } from '$app/stores';
   import { beforeNavigate } from '$app/navigation';
   import type { LayoutData } from './$types';
-  import { initFlash } from '$lib/client';
+  import { getFlash } from '$lib/client';
   import toast, { Toaster } from 'svelte-french-toast';
   import { browser } from '$app/environment';
 
-  let flash = initFlash(page);
+  let flash = getFlash(page);
 
   const timeoutMs = 75000;
   let flashTimeout: ReturnType<typeof setTimeout>;

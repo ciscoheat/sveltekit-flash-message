@@ -1,7 +1,7 @@
-import { loadFlashMessage } from '$lib/server.js';
+import { loadFlash } from '$lib/server.js';
 import { redirect } from '$lib/server.js';
 
-export const load = loadFlashMessage(async (event) => {
+export const load = loadFlash(async (event) => {
   if (event.url.searchParams.has('redirect')) {
     const message = [{ status: 'error', text: 'Redirect in layout' } as const];
     throw redirect(303, '/', message, event);

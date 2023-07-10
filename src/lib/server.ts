@@ -11,19 +11,28 @@ const maxAge = 120;
 
 /////////////////////////////////////////////////////////////////////
 
+/**
+ * @deprecated Renamed to loadFlash.
+ */
 export function loadFlashMessage<S extends ServerLoad, E extends ServerLoadEvent>(cb: S) {
+  return loadFlash<S, E>(cb);
+}
+
+/**
+ * Retrieves the flash message from the previous request.
+ * Use as a wrapper around a top-level load function, usually in a +layout.server.ts file.
+ */
+export function loadFlash<S extends ServerLoad, E extends ServerLoadEvent>(cb: S) {
   return async (event: E) => {
-    const flash = loadFlash(event).flash;
+    const flash = _loadFlash(event).flash;
     const loadFunction = await cb(event);
     return { flash, ...loadFunction } as ReturnType<S>;
   };
 }
 
-export function loadFlash<T extends ServerLoadEvent>(
+export function _loadFlash<T extends ServerLoadEvent>(
   event: T
 ): { flash: App.PageData['flash'] | undefined } {
-  //d('=== loadFlash: ' + event.route.id + ' ===');
-
   const header = event.request.headers.get('cookie') || '';
   if (!header.includes(cookieName + '=')) {
     //d('No flash cookie found.');
@@ -68,7 +77,7 @@ export function loadFlash<T extends ServerLoadEvent>(
   };
 }
 
-export const load = loadFlash;
+export const load = _loadFlash;
 
 /////////////////////////////////////////////////////////////////////
 
