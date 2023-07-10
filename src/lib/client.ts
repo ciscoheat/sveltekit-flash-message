@@ -120,7 +120,7 @@ export function getFlash(
   if (!context) return _initFlash(page, options);
   if (options) {
     throw new Error(
-      'getFlash options can only be set during the first call to getFlash. ' +
+      'getFlash options can only be set at the first call to getFlash. ' +
         'Set the options at the highest level component that calls getFlash.'
     );
   }
