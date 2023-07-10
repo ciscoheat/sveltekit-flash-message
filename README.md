@@ -1,6 +1,6 @@
 # sveltekit-flash-message ⚡
 
-**sveltekit-flash-message 2.0 has just been released. See the end of this document for a simple migration guide.**
+**Version 2.0 has just been released. See the end of this document for a simple migration guide.**
 
 This is a [Sveltekit](https://kit.svelte.dev/) library that passes temporary data to the next request, usually from [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful when you want a success or failure message displayed after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
 
