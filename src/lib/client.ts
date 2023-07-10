@@ -4,9 +4,14 @@ import { onDestroy, tick } from 'svelte';
 import { BROWSER as browser } from 'esm-env';
 import { afterNavigate } from '$app/navigation';
 
+export type FlashOptions = Partial<{
+  clearArray: boolean;
+  clearOnNavigate: boolean;
+}>;
+
 type FlashContext = {
   store: Writable<App.PageData['flash']>;
-  clearArray: boolean;
+  options: FlashOptions;
 };
 
 const flashStores = new WeakMap<Readable<Page>, FlashContext>();
@@ -16,31 +21,28 @@ const notInitialized =
 
 export function initFlash(
   page: Readable<Page>,
-  options: {
-    clearArray?: boolean;
-  } = {
-    clearArray: false
-  }
+  options?: FlashOptions
 ): Writable<App.PageData['flash']> {
   if (flashStores.has(page)) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return flashStores.get(page)!.store;
   }
 
-  if (!options.clearArray) options.clearArray = false;
-
-  const { clearArray } = options;
+  options = {
+    clearArray: false,
+    clearOnNavigate: true,
+    ...options
+  };
 
   const store = writable<App.PageData['flash']>();
-
-  const context = { store, clearArray };
+  const context = { store, options };
 
   flashStores.set(page, context);
-  updateStore(context, get(page).data.flash);
+  clearCookieAndUpdateIfNewData(context, get(page).data.flash);
 
   let lastUpdate: 'page' | null = null;
 
-  const pageSubscription = page.subscribe(async ($page) => {
+  const unsubscribeFromPage = page.subscribe(async ($page) => {
     //console.log('🚀 ~ page.subscribe: ', $page.data.flash?.[0].text, lastUpdate);
     if (!browser && $page.data.flash !== undefined) {
       updateFlash(page);
@@ -58,16 +60,23 @@ export function initFlash(
   });
 
   onDestroy(() => {
-    pageSubscription();
+    unsubscribeFromPage();
     flashStores.delete(page);
   });
 
   afterNavigate(async (nav) => {
-    //console.log('(🚀 ~ afterNavigate: ' + nav.type + ')', get(page).data.flash, lastUpdate);
     if (['form', 'goto'].includes(nav.type as string)) {
       if (lastUpdate != 'page') {
-        //if (await updateFlash(page)) console.log('::: afterNavigate update');
         updateFlash(page);
+      } else {
+        const context = flashStores.get(page);
+
+        if (
+          context?.options.clearOnNavigate &&
+          nav.from?.url.toString() != nav.to?.url.toString()
+        ) {
+          context?.store.set(undefined);
+        }
       }
     }
   });
@@ -81,6 +90,12 @@ export function getFlash(page: Readable<Page>): Writable<App.PageData['flash']> 
   return context.store;
 }
 
+/**
+ * Updates the flash message after a fetch request.
+ * @param page App page store
+ * @param {Promise<void>} update A callback that is executed before the message is set, to delay the message until navigation events are completed, for example.
+ * @returns {Promise<boolean>} true if a flash message existed, false if not.
+ */
 export async function updateFlash(page: Readable<Page>, update?: () => Promise<void>) {
   const store = flashStores.get(page);
   if (!store) throw new Error(notInitialized);
@@ -90,7 +105,7 @@ export async function updateFlash(page: Readable<Page>, update?: () => Promise<v
   await tick();
 
   const flashMessage = parseFlashCookie() as App.PageData['flash'] | undefined;
-  updateStore(store, flashMessage);
+  clearCookieAndUpdateIfNewData(store, flashMessage);
 
   return !!flashMessage;
 }
@@ -117,7 +132,6 @@ const varName = 'flash';
 
 function parseFlashCookie(cookieString?: string): unknown {
   if (!cookieString && browser) cookieString = document.cookie;
-
   if (!cookieString || !cookieString.includes(varName + '=')) return undefined;
 
   const cookies = parseCookieString(cookieString);
@@ -131,8 +145,13 @@ function parseFlashCookie(cookieString?: string): unknown {
   return undefined;
 }
 
-function updateStore(context: FlashContext, newData: App.PageData['flash'] | undefined) {
-  clearCookie();
+function clearCookieAndUpdateIfNewData(
+  context: FlashContext,
+  newData: App.PageData['flash'] | undefined
+) {
+  if (browser) {
+    document.cookie = varName + `=; Max-Age=0; Path=${path};`;
+  }
   if (newData === undefined) return;
 
   context.store.update((flash) => {
@@ -141,7 +160,7 @@ function updateStore(context: FlashContext, newData: App.PageData['flash'] | und
     // Need to do a per-element comparison here, since update will be called
     // when going to the same route, while keeping the old flash message,
     // making it display multiple times.
-    if (!context.clearArray && Array.isArray(newData)) {
+    if (!context.options.clearArray && Array.isArray(newData)) {
       if (Array.isArray(flash)) {
         if (
           flash.length > 0 &&
@@ -157,9 +176,4 @@ function updateStore(context: FlashContext, newData: App.PageData['flash'] | und
 
     return newData;
   });
-}
-
-function clearCookie() {
-  //console.log('Clearing flash cookie', browser);
-  if (browser) document.cookie = varName + `=; Max-Age=0; Path=${path};`;
 }
