@@ -93,8 +93,11 @@
     <button formaction="?/toast" id="action-post-toast">Post a toast</button>
   </form>
 
-  <h3>Github issues</h3>
-  <a href="/issue-11">#11 instant redirect</a>
+  <h3>Issues</h3>
+  <div>
+    <a href="/issue-11">#11 instant redirect</a>
+    <a href="/?redirect">Layout redirect</a>
+  </div>
 </article>
 
 <aside class="info">
