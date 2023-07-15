@@ -51,8 +51,8 @@ devDependencies:
     specifier: ^3.4.6
     version: 3.4.6(postcss@8.4.26)(sass@1.63.6)(svelte@4.0.5)
   svelte-french-toast:
-    specifier: 1.0.4-beta.0
-    version: 1.0.4-beta.0(svelte@4.0.5)
+    specifier: ^1.1.0
+    version: 1.1.0(svelte@4.0.5)
   svelte-preprocess:
     specifier: ^5.0.4
     version: 5.0.4(postcss@8.4.26)(sass@1.63.6)(svelte@4.0.5)(typescript@5.1.6)
@@ -1857,10 +1857,10 @@ packages:
       svelte: 4.0.5
     dev: true
 
-  /svelte-french-toast@1.0.4-beta.0(svelte@4.0.5):
-    resolution: {integrity: sha512-PkYNukEQAPZyV5ei+JzeYEsbaXFSbJS8/SDTdC8giYa5Atxp2SRepFnPDWx6mu7rV53g886FNLktPMLwRljkpw==}
+  /svelte-french-toast@1.1.0(svelte@4.0.5):
+    resolution: {integrity: sha512-OWlOJD0iqZpL4apMbtsbSZKYukBz9CuME2KoW/zzHfFWVImXVH5zAiCmUU4N0OSPo9fY34TZKIL/5+Sbt5KkPA==}
     peerDependencies:
-      svelte: ^3.57.0
+      svelte: ^3.57.0 || ^4.0.0
     dependencies:
       svelte: 4.0.5
       svelte-writable-derived: 3.1.0(svelte@4.0.5)

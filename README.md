@@ -299,13 +299,42 @@ If you specify `App.PageData['flash']` as an array, the library will accomodate 
 
 Again, note that you can only set options the first time you call `getFlash` for a certain page/layout, usually in the top-level component. Subsequent calls to `getFlash` in components below cannot have any options. (See the first call to it as a kind of constructor.)
 
+## Cookie options
+
+You can change the options for the cookie being sent, like this:
+
+```ts
+import { flashCookieOptions } from 'sveltekit-flash-message/server';
+
+flashCookieOptions.sameSite = 'lax';
+```
+
+All options can be found in the [cookie npm package](https://github.com/jshttp/cookie#options-1). Default options for the flash cookie are:
+
+```ts
+{
+  path: '/',
+  maxAge: 120,
+  sameSite: 'strict',
+  httpOnly: false // Setting this to true will probably break things client-side.
+}
+```
+
+The name of the cookie, `flash`, cannot be changed. ⚡
+
 ## Securing the flash message
 
 Since the flash message is transferred in a cookie, it can be easily tampered with, so don't trust its content. Treat it like you do with any user data - hanging from a ten-foot pole over a fiery pit. 🔥 So never use `{@html}` to display it, and if you need to persist it for some reason, make sure you validate it.
 
+## Note when setting cookies elsewhere
+
+If you're using `+hooks.server.ts/js`, or anywhere else you have access to `response`, calling `response.headers.set('set-cookie', ...)` will discard the flash message cookie. You must use `response.headers.append` instead.
+
 ## Together with Superforms
 
 The sister library to sveltekit-flash-message is [Superforms](https://superforms.rocks), the all-in-one solution for forms in SvelteKit. You can use them together without any extra work, but there are options for closer integration, [found here](https://superforms.rocks/flash-messages) on the Superforms website.
+
+# Migration guides
 
 ## Migration guide to 1.0
 

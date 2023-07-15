@@ -1,13 +1,18 @@
 import type { Cookies, RequestEvent, ServerLoad, ServerLoadEvent } from '@sveltejs/kit';
 import { redirect as redir } from '@sveltejs/kit';
-import { parse } from './cookie-es-main/index.js';
+import { parse, type CookieSerializeOptions } from './cookie-es-main/index.js';
 
 //const d = console.debug;
 
+// Cannot change.
 const cookieName = 'flash';
-const httpOnly = false;
-const path = '/';
-const maxAge = 120;
+
+export const flashCookieOptions: CookieSerializeOptions = {
+  path: '/',
+  maxAge: 120,
+  httpOnly: false,
+  sameSite: 'strict'
+};
 
 /////////////////////////////////////////////////////////////////////
 
@@ -60,7 +65,7 @@ export function _loadFlash<T extends ServerLoadEvent>(
       //d('Possible fetch request, keeping cookie for client.');
     } else {
       //d('Flash cookie found, clearing');
-      event.cookies.delete(cookieName, { path });
+      event.cookies.delete(cookieName, { path: flashCookieOptions.path });
     }
 
     try {
@@ -187,7 +192,7 @@ function realRedirect(
   if (!message) return redir(status, location.toString());
   if (!event) throw new Error('RequestEvent is required for redirecting with flash message');
 
-  event.cookies.set(cookieName, JSON.stringify(message), { httpOnly, path, maxAge });
+  event.cookies.set(cookieName, JSON.stringify(message), flashCookieOptions);
   return redir(status, location.toString());
 }
 
@@ -200,5 +205,5 @@ function realRedirect(
  */
 export function setFlash(message: App.PageData['flash'], event: RequestEvent | Cookies) {
   const cookies = 'cookies' in event ? event.cookies : event;
-  cookies.set(cookieName, JSON.stringify(message), { httpOnly, path, maxAge });
+  cookies.set(cookieName, JSON.stringify(message), flashCookieOptions);
 }
