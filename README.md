@@ -1,6 +1,6 @@
 # sveltekit-flash-message ⚡
 
-**Version 2.0 has just been released. See the end of this document for a simple migration guide.**
+**Version 2 has just been released. See the end of this document for a simple migration guide.**
 
 This is a [Sveltekit](https://kit.svelte.dev/) library that passes temporary data to the next request, usually from [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful when you want a success or failure message displayed after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
 
@@ -336,9 +336,9 @@ The sister library to sveltekit-flash-message is [Superforms](https://superforms
 
 # Migration guides
 
-## Migration guide to 1.0
+## From 0.x to 1.x
 
-The only thing you need to do when upgrading to 1.0 is to remove all calls to `updateFlash` in `use:enhance`.
+The only thing you need to do when upgrading to 1.x is to remove all calls to `updateFlash` in `use:enhance`.
 
 ```diff
  <form
@@ -350,16 +350,16 @@ The only thing you need to do when upgrading to 1.0 is to remove all calls to `u
  >
 ```
 
-## Migration guide to 2.0
+## From 1.x to 2.x
 
 1. Rename functions:
 
 - `initFlash` is deprecated, `getFlash` can now be used directly instead.
 - `loadFlashMessage` is deprecated and renamed to `loadFlash`.
 
-2. If you've added the `beforeNavigate` snippet that clears the flash message after navigation - it can now be removed since it's automatic (unless the `clearOnNavigate` option is set to `false`).
+2. If you've added the `beforeNavigate` snippet that clears the flash message after navigation - it can now be removed since it's automatic (though it can be prevented by setting the `clearOnNavigate` option to `false`).
 
-3. If you're using the other snippet for clearing the message after a certain amount of time, you can remove it and use the `clearAfterMs` option instead.
+3. If you're using the snippet for clearing the message after a certain amount of time, you can remove it and use the `clearAfterMs` option instead.
 
 ## Feedback and issues
 
