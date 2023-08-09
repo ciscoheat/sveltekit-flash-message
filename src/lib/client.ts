@@ -97,7 +97,7 @@ function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.
       store.set(undefined);
     }
 
-    if (lastUpdate != 'page' && ['form', 'goto'].includes(nav.type as string)) {
+    if (nav.type == 'goto' || (lastUpdate != 'page' && nav.type == 'form')) {
       updateFlash(page);
     }
   });
