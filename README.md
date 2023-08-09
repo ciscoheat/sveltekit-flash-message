@@ -326,13 +326,19 @@ The name of the cookie, `flash`, cannot be changed. ⚡
 
 Since the flash message is transferred in a cookie, it can be easily tampered with, so don't trust its content. Treat it like you do with any user data - hanging from a ten-foot pole over a fiery pit. 🔥 So never use `{@html}` to display it, and if you need to persist it for some reason, make sure you validate it.
 
-## Note when setting cookies elsewhere
-
-If you're using `+hooks.server.ts/js`, or anywhere else you have access to `response`, calling `response.headers.set('set-cookie', ...)` will discard the flash message cookie. You must use `response.headers.append` instead.
-
 ## Together with Superforms
 
 The sister library to sveltekit-flash-message is [Superforms](https://superforms.rocks), the all-in-one solution for forms in SvelteKit. You can use them together without any extra work, but there are options for closer integration, [found here](https://superforms.rocks/flash-messages) on the Superforms website.
+
+# Notes
+
+## When setting cookies in a response
+
+If you're using `+hooks.server.ts/js`, or anywhere you have access to `response`, calling `response.headers.set('set-cookie', ...)` will discard the flash message cookie. You must use `response.headers.append` instead.
+
+## Redirecting in the load function
+
+In SvelteKit, links are [preloaded on hover](https://kit.svelte.dev/docs/link-options#data-sveltekit-preload-data) for increased responsiveness of the app. This can have the side-effect of accidentally setting a flash cookie, if a flash message redirect is made in a load function, and the user hovers over a link leading to it, so it is preloaded. To prevent this, set the `data-sveltekit-preload-data="tap"` attribute on links where a redirect could happen in the load function.
 
 # Migration guides
 
