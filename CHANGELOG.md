@@ -11,11 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Compatibility with vitest `^0.34.1`.
 
+### Added
+
+- The client part of the library can now be imported directly from `sveltekit-flash-message`, instead of `sveltekit-flash-message/client`. (The latter also works, for compatibility.)
+
 ## [2.1.0] - 2023-07-16
 
 ### Added
 
-- Added `flashCookieOptions` object that can be exported from `sveltekit-flash-message/server` and used to set cookie options.
+- Added `flashCookieOptions` object that can be imported from `sveltekit-flash-message/server` and used to set cookie options.
 
 ### Security
 
