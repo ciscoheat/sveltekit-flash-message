@@ -89,11 +89,10 @@ function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.
   });
 
   afterNavigate(async (nav) => {
-    //console.log('🚀 ~ file: client.ts:89 ~ afterNavigate ~ nav:', nav, lastUpdate);
     if (
       nav.type != 'enter' &&
       options?.clearOnNavigate &&
-      nav.from?.url.toString() != nav.to?.url.toString()
+      nav.from?.url?.toString() != nav.to?.url?.toString()
     ) {
       store.set(undefined);
     }
