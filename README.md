@@ -63,7 +63,7 @@ Import `getFlash` in a layout or page component to display the flash message. `g
 
 ```svelte
 <script lang="ts">
-  import { getFlash } from 'sveltekit-flash-message/client';
+  import { getFlash } from 'sveltekit-flash-message';
   import { page } from '$app/stores';
 
   const flash = getFlash(page);
@@ -175,7 +175,7 @@ If you want to update the flash message on the client, use `getFlash` in any com
 
 ```svelte
 <script>
-  import { getFlash } from 'sveltekit-flash-message/client';
+  import { getFlash } from 'sveltekit-flash-message';
   import { page } from '$app/stores';
 
   const flash = getFlash(page);
@@ -198,7 +198,7 @@ When using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhanc
 
 ```svelte
 <script lang="ts">
-  import { updateFlash } from 'sveltekit-flash-message/client';
+  import { updateFlash } from 'sveltekit-flash-message';
   import { page } from '$app/stores';
 </script>
 
@@ -218,7 +218,7 @@ Since nothing on the page will update if you're using `fetch`, you must call `up
 
 ```svelte
 <script lang="ts">
-  import { updateFlash } from 'sveltekit-flash-message/client';
+  import { updateFlash } from 'sveltekit-flash-message';
   import { page } from '$app/stores';
 
   async function submitForm(e: Event) {
@@ -254,7 +254,7 @@ A common use case for flash messages is to show a toast notification, but a toas
 **src/routes/+layout.svelte**
 
 ```typescript
-import { getFlash } from 'sveltekit-flash-message/client';
+import { getFlash } from 'sveltekit-flash-message';
 import { page } from '$app/stores';
 import toast, { Toaster } from 'svelte-french-toast';
 
