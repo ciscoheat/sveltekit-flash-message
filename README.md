@@ -55,6 +55,14 @@ export const load = loadFlash(async (event) => {
 });
 ```
 
+If you're setting cookies in `hooks.server.ts`, be sure to use `append` method instead of `set` otherwise the flash cookie will be overwritten, for example:
+```typescript
+response.headers.append(
+    'set-cookie',
+    event.locals.pocketbase.authStore.exportToCookie(),
+);
+```
+
 ## 3. Display the flash message
 
 Import `getFlash` in a layout or page component to display the flash message. `getFlash` will return a store that you'll use to access the message:
