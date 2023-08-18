@@ -3,11 +3,13 @@ import type { Page } from '@sveltejs/kit';
 import { onDestroy, tick } from 'svelte';
 import { BROWSER as browser } from 'esm-env';
 import { afterNavigate } from '$app/navigation';
+import { serialize, type CookieSerializeOptions } from './cookie-es-main';
 
 export type FlashOptions = Partial<{
   clearArray: boolean;
   clearOnNavigate: boolean;
   clearAfterMs: number;
+  flashCookieOptions: CookieSerializeOptions;
 }>;
 
 type FlashContext = {
@@ -36,7 +38,14 @@ function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.
   options = {
     clearArray: false,
     clearOnNavigate: true,
-    ...options
+    ...options,
+    flashCookieOptions: {
+      path: '/',
+      maxAge: 120,
+      httpOnly: false,
+      sameSite: 'strict',
+      ...options?.flashCookieOptions
+    }
   };
 
   const store = writable<App.PageData['flash']>();
@@ -51,7 +60,6 @@ function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.
   let lastUpdate: 'page' | null = null;
 
   const unsubscribeFromPage = page.subscribe(async ($page) => {
-    //console.log('🚀 ~ page.subscribe: ', $page.data.flash?.[0].text, lastUpdate);
     if (!browser && $page.data.flash !== undefined) {
       updateFlash(page);
     } else if (browser) {
@@ -166,7 +174,6 @@ const parseCookieString = (str: string) => {
 
 /////////////////////////////////////////////////////////////////////
 
-const path = '/';
 const varName = 'flash';
 
 function parseFlashCookie(cookieString?: string): unknown {
@@ -189,13 +196,11 @@ function clearCookieAndUpdateIfNewData(
   newData: App.PageData['flash'] | undefined
 ) {
   if (browser) {
-    document.cookie = varName + `=; Max-Age=0; Path=${path};`;
+    document.cookie = serialize(varName, '', { ...context.options.flashCookieOptions, maxAge: 0 });
   }
   if (newData === undefined) return;
 
   context.store.update((flash) => {
-    //console.log("🚀 ~ file: client.ts:120 ~ updateStore ~ newData:", newData)
-
     // Need to do a per-element comparison here, since update will be called
     // when going to the same route, while keeping the old flash message,
     // making it display multiple times.

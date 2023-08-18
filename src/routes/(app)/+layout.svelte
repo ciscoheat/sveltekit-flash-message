@@ -8,7 +8,10 @@
   import { browser } from '$app/environment';
 
   let flash = getFlash(page, {
-    clearAfterMs: 75000
+    clearAfterMs: 75000,
+    flashCookieOptions: {
+      sameSite: 'lax'
+    }
   });
 
   flash.subscribe(($flash) => {

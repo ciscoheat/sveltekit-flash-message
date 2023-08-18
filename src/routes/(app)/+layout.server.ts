@@ -1,5 +1,7 @@
-import { loadFlash } from '$lib/server.js';
+import { flashCookieOptions, loadFlash } from '$lib/server.js';
 import { redirect } from '$lib/server.js';
+
+flashCookieOptions.sameSite = 'lax';
 
 export const load = loadFlash(async (event) => {
   if (event.url.searchParams.has('redirect')) {

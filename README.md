@@ -281,7 +281,8 @@ The first time you call `getFlash` for a `page`, you can specify options:
 const flash = getFlash(page, {
   clearOnNavigate: true,
   clearAfterMs: undefined,
-  clearArray: false
+  clearArray: false,
+  flashCookieOptions: CookieSerializeOptions
 });
 ```
 
@@ -299,14 +300,30 @@ If you specify `App.PageData['flash']` as an array, the library will accomodate 
 
 Again, note that you can only set options the first time you call `getFlash` for a certain page/layout, usually in the top-level component. Subsequent calls to `getFlash` in components below cannot have any options. (See the first call to it as a kind of constructor.)
 
+### flashCookieOptions
+
+See right below.
+
 ## Cookie options
 
-You can change the options for the cookie being sent, like this:
+You can change the options for the cookie being sent, like this on the server:
 
 ```ts
-import { flashCookieOptions } from 'sveltekit-flash-message/server';
+import { loadFlash, flashCookieOptions } from 'sveltekit-flash-message/server';
 
 flashCookieOptions.sameSite = 'lax';
+
+export const load = loadFlash(async (event) => {
+  // ...load function...
+});
+```
+
+And correspondingly, on the client:
+
+```ts
+const flash = getFlash(page, {
+  flashCookieOptions: { sameSite: 'lax' }
+});
 ```
 
 All options can be found in the [cookie npm package](https://github.com/jshttp/cookie#options-1). Default options for the flash cookie are:
@@ -316,11 +333,11 @@ All options can be found in the [cookie npm package](https://github.com/jshttp/c
   path: '/',
   maxAge: 120,
   sameSite: 'strict',
-  httpOnly: false // Setting this to true will probably break things client-side.
+  httpOnly: false // Setting this to true will most likely break things client-side.
 }
 ```
 
-The name of the cookie, `flash`, cannot be changed. ⚡
+The name of the cookie, `flash`, cannot be changed currently, let me know if that's inconvenient. ⚡
 
 ## Securing the flash message
 
