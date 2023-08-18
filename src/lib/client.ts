@@ -189,7 +189,7 @@ function clearCookieAndUpdateIfNewData(
   newData: App.PageData['flash'] | undefined
 ) {
   if (browser) {
-    document.cookie = varName + `=; Max-Age=0; Path=${path};`;
+    document.cookie = varName + `=; Max-Age=0; Path=${path}; SameSite=Strict;`;
   }
   if (newData === undefined) return;
 
