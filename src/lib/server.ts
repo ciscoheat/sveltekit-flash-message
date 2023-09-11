@@ -1,6 +1,6 @@
 import type { Cookies, RequestEvent, ServerLoad, ServerLoadEvent } from '@sveltejs/kit';
 import { redirect as redir } from '@sveltejs/kit';
-import { parse, type CookieSerializeOptions } from './cookie-es-main/index.js';
+import type { CookieSerializeOptions } from './cookie-es-main/index.js';
 
 //const d = console.debug;
 
@@ -38,14 +38,11 @@ export function loadFlash<S extends ServerLoad, E extends ServerLoadEvent>(cb: S
 export function _loadFlash<T extends ServerLoadEvent>(
   event: T
 ): { flash: App.PageData['flash'] | undefined } {
-  const header = event.request.headers.get('cookie') || '';
-  if (!header.includes(cookieName + '=')) {
+  const dataString = event.cookies.get(cookieName);
+  if (!dataString) {
     //d('No flash cookie found.');
     return { [cookieName]: undefined };
   }
-
-  const cookies = parse(header) as Record<string, string>;
-  const dataString = cookies[cookieName];
 
   let data = undefined;
 
