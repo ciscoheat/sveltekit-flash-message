@@ -1,8 +1,6 @@
 # sveltekit-flash-message ⚡
 
-**Version 2 has just been released. See the end of this document for a simple migration guide.**
-
-This is a [Sveltekit](https://kit.svelte.dev/) library that passes temporary data to the next request, usually from [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful when you want a success or failure message displayed after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
+This is a [Sveltekit](https://kit.svelte.dev/) library that passes temporary data to the next request, usually from [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful for displaying a success or failure message after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
 
 Since it's a temporary message it's also known as a "flash message", especially known from PHP apps, since it's easy to add this functionality with PHP's built-in session handling. With SvelteKit it's a bit harder, but this library was made to alleviate that, encouraging well-behaved web apps that [Redirects after Post](https://www.theserverside.com/news/1365146/Redirect-After-Post).
 
@@ -16,9 +14,9 @@ npm i -D sveltekit-flash-message
 pnpm i -D sveltekit-flash-message
 ```
 
-## Configuration
+## How to use
 
-## 1. [Typescript only] Add the flash message to app.d.ts
+### 1. Add the flash message to app.d.ts (Typescript only)
 
 In `src/app.d.ts`, add the type for the flash message to `App.PageData` as an optional property called `flash`. It can be as simple as a `string`, or something more advanced. It has to be serializable though, so only JSON-friendly data structures. Here's an example:
 
@@ -32,9 +30,9 @@ declare namespace App {
 }
 ```
 
-## 2. Wrap the load function of a top-level +layout or +page route
+### 2. Wrap the load function of a top-level +layout or +page route
 
-If you're not using any [load functions](https://kit.svelte.dev/docs/load), this is a simple step. Create a `src/routes/+layout.server.ts` file (or `+page.server.ts`) with the following content:
+If you're not using any [load functions](https://kit.svelte.dev/docs/load), this is a simple step. Create a `src/routes/+layout.server.ts` file with the following content:
 
 **src/routes/+layout.server.ts**
 
@@ -55,7 +53,7 @@ export const load = loadFlash(async (event) => {
 });
 ```
 
-## 3. Display the flash message
+### 3. Display the flash message
 
 Import `getFlash` in a layout or page component to display the flash message. `getFlash` will return a store that you'll use to access the message:
 
@@ -190,31 +188,7 @@ If you want to update the flash message on the client, use `getFlash` in any com
 
 ## Client-side fetching and redirecting
 
-When using [enhance](https://kit.svelte.dev/docs/form-actions#progressive-enhancement-use-enhance) or [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis), in certain cases you must use `updateFlash` afterwards:
-
-### use:enhance
-
-**NOTE: This is not required in v1.0 and up.**
-
-```svelte
-<script lang="ts">
-  import { updateFlash } from 'sveltekit-flash-message';
-  import { page } from '$app/stores';
-</script>
-
-<form
-  method="POST"
-  use:enhance={() =>
-    ({ update }) =>
-      updateFlash(page, update)}
->
-  <button>Submit with enhanced form</button>
-</form>
-```
-
-### Fetch
-
-Since nothing on the page will update if you're using `fetch`, you must call `updateFlash` afterwards, **on all versions**:
+In most cases the flash message will update automatically on redirect or navigation, with one exception: When using [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis), you must call `updateFlash` afterwards:
 
 ```svelte
 <script lang="ts">
