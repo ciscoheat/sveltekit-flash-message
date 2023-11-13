@@ -60,7 +60,7 @@
     <p>{data.test}</p>
     <p>
       Sed porttitor lectus nibh. Nulla quis lorem ut libero malesuada feugiat. Curabitur non nulla
-      sit amet nisl tempus convallis quis ac lectus.
+      sit amet nisl tempus convallis quis ac lectus. <a href="/">Back to start</a>
     </p>
     <p>
       Curabitur aliquet quam id dui posuere blandit. Cras ultricies ligula sed magna dictum porta.

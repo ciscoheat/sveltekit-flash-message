@@ -12,3 +12,5 @@
 <div>
   <slot />
 </div>
+
+<br /><a href="/">Back to start</a>

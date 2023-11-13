@@ -5,6 +5,12 @@ Headlines: Added, Changed, Deprecated, Removed, Fixed, Security
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.2] - 2023-11-13
+
+### Fixed
+
+- Options couldn't be set in different top-level layouts.
+
 ## [2.2.1] - 2023-09-11
 
 ### Fixed

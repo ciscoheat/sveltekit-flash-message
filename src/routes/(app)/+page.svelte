@@ -48,6 +48,7 @@
   <p>
     <a href="/">Link to here</a> <a href="/posted">Link to posted</a>
     <a href="/?reset">Reset counter</a> <a href="/multi-init">Error init options</a>
+    <a href="/timeout">Timeout</a>
     egestas non nisi. Vivamus suscipit tortor eget felis porttitor volutpat. Vestibulum ac diam sit amet
     quam vehicula elementum sed sit amet dui.
   </p>

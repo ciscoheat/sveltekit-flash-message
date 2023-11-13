@@ -275,7 +275,7 @@ flash.subscribe(($flash) => {
 
 ## Flash message options
 
-The first time you call `getFlash` for a `page`, you can specify options:
+In a top-level component, most likely a `+layout.svelte` file, when you call `getFlash` for a `page`, you can specify options. **Note** that options can only be set the first time you call `getFlash` for a certain page/layout, usually in the top-level component. Subsequent calls to `getFlash` in components below cannot have any options. (See the first call to it as a kind of constructor.)
 
 ```typescript
 const flash = getFlash(page, {
@@ -298,13 +298,7 @@ Can be set to a number of milliseconds before the flash message is automatically
 
 If you specify `App.PageData['flash']` as an array, the library will accomodate for that and will concatenate messages into the array instead of replacing them. But if you want to always clear the previous messages, set the `clearArray` option to `true`.
 
-Again, note that you can only set options the first time you call `getFlash` for a certain page/layout, usually in the top-level component. Subsequent calls to `getFlash` in components below cannot have any options. (See the first call to it as a kind of constructor.)
-
 ### flashCookieOptions
-
-See right below.
-
-## Cookie options
 
 You can change the options for the cookie being sent, like this on the server:
 

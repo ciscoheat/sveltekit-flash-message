@@ -19,6 +19,16 @@ type FlashContext = {
 
 const flashStores = new WeakMap<Readable<Page>, FlashContext>();
 
+const defaultOptions = {
+  clearOnNavigate: true,
+  flashCookieOptions: {
+    path: '/',
+    maxAge: 120,
+    httpOnly: false,
+    sameSite: 'strict' as const
+  }
+};
+
 /**
  * @deprecated Use getFlash instead.
  */
@@ -30,26 +40,48 @@ export function initFlash(
 }
 
 function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.PageData['flash']> {
-  if (flashStores.has(page)) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return flashStores.get(page)!.store;
+  const flashStore = flashStores.get(page);
+
+  if (flashStore && !options) {
+    /*
+    console.log(
+      {
+        hasStore: true,
+        route: get(page).route.id,
+        customOptions: flashStore.options !== defaultOptions
+      },
+      flashStore.options
+    );
+    */
+    return flashStore.store;
+  } else if (flashStore && options && flashStore.options !== options) {
+    throw new Error('getFlash options can only be set once, at a top-level component.');
   }
 
-  options = {
-    clearArray: false,
-    clearOnNavigate: true,
-    ...options,
-    flashCookieOptions: {
-      path: '/',
-      maxAge: 120,
-      httpOnly: false,
-      sameSite: 'strict',
-      ...options?.flashCookieOptions
-    }
-  };
+  const currentOptions: FlashOptions = options
+    ? {
+        ...defaultOptions,
+        ...options,
+        flashCookieOptions: {
+          ...defaultOptions.flashCookieOptions,
+          ...options?.flashCookieOptions
+        }
+      }
+    : defaultOptions;
 
   const store = writable<App.PageData['flash']>();
-  const context = { store, options };
+  const context = { store, options: currentOptions };
+
+  /*
+  console.log(
+    {
+      hasStore: false,
+      route: get(page).route.id,
+      customOptions: context.options !== defaultOptions
+    },
+    context.options
+  );
+  */
 
   flashStores.set(page, context);
   clearCookieAndUpdateIfNewData(context, get(page).data.flash);
@@ -78,11 +110,11 @@ function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.
   let unsubscribeClearFlash: () => void | undefined;
   let flashTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 
-  if (options.clearAfterMs && browser) {
+  if (currentOptions.clearAfterMs && browser) {
     unsubscribeClearFlash = store.subscribe(($flash) => {
       if ($flash) {
         if (flashTimeout) clearTimeout(flashTimeout);
-        flashTimeout = setTimeout(() => store.set(undefined), options?.clearAfterMs);
+        flashTimeout = setTimeout(() => store.set(undefined), currentOptions.clearAfterMs);
       }
     });
   }
@@ -99,7 +131,7 @@ function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.
   afterNavigate(async (nav) => {
     if (
       nav.type != 'enter' &&
-      options?.clearOnNavigate &&
+      currentOptions.clearOnNavigate &&
       nav.from?.url?.toString() != nav.to?.url?.toString()
     ) {
       store.set(undefined);
@@ -123,15 +155,7 @@ export function getFlash(
   page: Readable<Page>,
   options?: FlashOptions
 ): Writable<App.PageData['flash']> {
-  const context = flashStores.get(page);
-  if (!context) return _initFlash(page, options);
-  if (options) {
-    throw new Error(
-      'getFlash options can only be set at the first call to getFlash. ' +
-        'Set the options at the highest level component that calls getFlash.'
-    );
-  }
-  return context.store;
+  return _initFlash(page, options);
 }
 
 /**
