@@ -7,7 +7,7 @@ import type { CookieSerializeOptions } from './cookie-es-main/index.js';
 // Cannot change.
 const cookieName = 'flash';
 
-export const flashCookieOptions: CookieSerializeOptions = {
+export const flashCookieOptions: CookieSerializeOptions & { path: string } = {
   path: '/',
   maxAge: 120,
   httpOnly: false,
