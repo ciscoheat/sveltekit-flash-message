@@ -77,7 +77,9 @@ Import `getFlash` in a layout or page component to display the flash message. `g
 
 ### Server-side
 
-To send a flash message from the server, import `redirect` from `sveltekit-flash-message/server` and throw it, as in [load](https://kit.svelte.dev/docs/load#redirects) and [form actions](https://kit.svelte.dev/docs/form-actions#anatomy-of-an-action-redirects).
+To send a flash message from the server, import `redirect` from `sveltekit-flash-message/server` and use it in [load functions](https://kit.svelte.dev/docs/load#redirects) and [form actions](https://kit.svelte.dev/docs/form-actions#anatomy-of-an-action-redirects).
+
+**Note:** With SvelteKit 2, you don't need to [throw the redirect anymore](https://kit.svelte.dev/docs/migrating-to-sveltekit-2#redirect-and-error-are-no-longer-thrown-by-you), just call `redirect`.
 
 ```typescript
 import { redirect } from 'sveltekit-flash-message/server'
@@ -249,7 +251,7 @@ flash.subscribe(($flash) => {
 
 ## Flash message options
 
-In a top-level component, most likely a `+layout.svelte` file, when you call `getFlash` for a `page`, you can specify options. **Note** that options can only be set the first time you call `getFlash` for a certain page/layout, usually in the top-level component. Subsequent calls to `getFlash` in components below cannot have any options. (See the first call to it as a kind of constructor.)
+In a top-level component, most likely a `+layout.svelte` file, you can specify options for `getFlash`. **Note** that options can only be set the first time you call `getFlash` for a certain page/layout, usually in the top-level component. Subsequent calls to `getFlash` in components below cannot have any options. (See the first call to it as a kind of constructor.)
 
 ```typescript
 const flash = getFlash(page, {

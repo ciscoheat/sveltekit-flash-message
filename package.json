@@ -28,9 +28,10 @@
     "format": "prettier --plugin-search-dir . --write ."
   },
   "devDependencies": {
-    "@sveltejs/adapter-auto": "^2.1.1",
-    "@sveltejs/kit": "^1.30.3",
+    "@sveltejs/adapter-auto": "^3.0.0",
+    "@sveltejs/kit": "^2.0.0",
     "@sveltejs/package": "^2.2.3",
+    "@sveltejs/vite-plugin-svelte": "^3.0.1",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "eslint": "^8.55.0",
@@ -47,7 +48,7 @@
     "svelte-preprocess": "^5.1.2",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
-    "vite": "^4.5.1"
+    "vite": "^5.0.9"
   },
   "peerDependencies": {
     "@sveltejs/kit": "1.x || 2.x",
