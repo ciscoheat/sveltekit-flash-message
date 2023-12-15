@@ -7,7 +7,7 @@ import type { CookieSerializeOptions } from './cookie-es-main/index.js';
 // Cannot change.
 const cookieName = 'flash';
 
-export const flashCookieOptions: CookieSerializeOptions & { path: string } = {
+export const flashCookieOptions: CookieSerializeOptions = {
   path: '/',
   maxAge: 120,
   httpOnly: false,
@@ -62,7 +62,7 @@ export function _loadFlash<T extends ServerLoadEvent>(
       //d('Possible fetch request, keeping cookie for client.');
     } else {
       //d('Flash cookie found, clearing');
-      event.cookies.delete(cookieName, { path: flashCookieOptions.path });
+      event.cookies.delete(cookieName, { path: flashCookieOptions.path ?? '/' });
     }
 
     try {
@@ -98,11 +98,11 @@ export function redirect(status: RedirectStatus, location: string | URL): Return
  * If thrown during request handling, SvelteKit will return a redirect response.
  * Make sure you're not catching the thrown redirect, which would prevent SvelteKit from handling it.
  * @param {App.PageData['flash']} message The flash message.
- * @param {RequestEvent} event The event for the load function or form action.
+ * @param {RequestEvent | Cookies} event The event for the load function or form action.
  */
 export function redirect(
   message: App.PageData['flash'],
-  event: RequestEvent
+  event: RequestEvent | Cookies
 ): ReturnType<typeof redir>;
 
 /**
@@ -111,12 +111,12 @@ export function redirect(
  * Make sure you're not catching the thrown redirect, which would prevent SvelteKit from handling it.
  * @param {string | URL} location The redirect URL/location.
  * @param {App.PageData['flash']} message The flash message.
- * @param {RequestEvent} event The event for the load function or form action.
+ * @param {RequestEvent | Cookies} event The event for the load function or form action.
  */
 export function redirect(
   location: string | URL,
   message: App.PageData['flash'],
-  event: RequestEvent
+  event: RequestEvent | Cookies
 ): ReturnType<typeof redir>;
 
 /**
@@ -126,20 +126,20 @@ export function redirect(
  * @param {300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308} status The [HTTP status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#redirection_messages). Must be in the range 300-308.
  * @param {string | URL} location The redirect URL/location.
  * @param {App.PageData['flash']} message The flash message.
- * @param {RequestEvent} event The event for the load function or form action.
+ * @param {RequestEvent | Cookies} event The event for the load function or form action.
  */
 export function redirect(
   status: RedirectStatus,
   location: string | URL,
   message: App.PageData['flash'],
-  event: RequestEvent
+  event: RequestEvent | Cookies
 ): ReturnType<typeof redir>;
 
 export function redirect(
   status: unknown,
   location: unknown,
   message?: unknown,
-  event?: RequestEvent
+  event?: RequestEvent | Cookies
 ): ReturnType<typeof redir> {
   switch (arguments.length) {
     case 2:
@@ -184,12 +184,17 @@ function realRedirect(
   status: RedirectStatus,
   location: string | URL,
   message?: App.PageData['flash'],
-  event?: RequestEvent
+  event?: RequestEvent | Cookies
 ) {
   if (!message) return redir(status, location.toString());
   if (!event) throw new Error('RequestEvent is required for redirecting with flash message');
 
-  event.cookies.set(cookieName, JSON.stringify(message), flashCookieOptions);
+  const cookies = 'cookies' in event ? event.cookies : event;
+
+  cookies.set(cookieName, JSON.stringify(message), {
+    ...flashCookieOptions,
+    path: flashCookieOptions.path ?? '/'
+  });
   return redir(status, location.toString());
 }
 
@@ -202,5 +207,8 @@ function realRedirect(
  */
 export function setFlash(message: App.PageData['flash'], event: RequestEvent | Cookies) {
   const cookies = 'cookies' in event ? event.cookies : event;
-  cookies.set(cookieName, JSON.stringify(message), flashCookieOptions);
+  cookies.set(cookieName, JSON.stringify(message), {
+    ...flashCookieOptions,
+    path: flashCookieOptions.path ?? '/'
+  });
 }

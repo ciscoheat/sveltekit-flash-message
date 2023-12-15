@@ -88,20 +88,20 @@ throw redirect(
   status: number,
   location: string,
   message: App.PageData['flash'],
-  event: RequestEvent
+  event: RequestEvent | Cookies
 )
 
 // Makes a 303 redirect
 throw redirect(
   location: string,
   message: App.PageData['flash'],
-  event: RequestEvent
+  event: RequestEvent | Cookies
 )
 
 // Makes a 303 redirect to the current URL
 throw redirect(
   message: App.PageData['flash'],
-  event: RequestEvent
+  event: RequestEvent | Cookies
 )
 
 // For compatibility, the sveltekit signature can also be used,
@@ -120,15 +120,15 @@ throw redirect(
 import { redirect } from 'sveltekit-flash-message/server';
 
 export const actions = {
-  default: async (event) => {
-    const form = await event.request.formData();
+  default: async ({ request, locals, cookies }) => {
+    const form = await request.formData();
 
-    await api('POST', `/todos/${event.locals.userid}`, {
+    await api('POST', `/todos/${locals.userid}`, {
       text: form.get('text')
     });
 
     const message = { type: 'success', message: "That's the entrepreneur spirit!" } as const;
-    throw redirect(message, event);
+    throw redirect(message, cookies);
   }
 };
 ```
@@ -141,9 +141,9 @@ export const actions = {
 import type { RequestEvent } from '@sveltejs/kit';
 import { redirect } from 'sveltekit-flash-message/server';
 
-export const POST = async (event) => {
+export const POST = async ({ cookies }) => {
   const message = { type: 'success', message: 'Endpoint POST successful!' } as const;
-  throw redirect(303, '/', message, event);
+  throw redirect(303, '/', message, cookies);
 };
 ```
 

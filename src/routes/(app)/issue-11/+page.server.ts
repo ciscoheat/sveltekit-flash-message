@@ -7,7 +7,8 @@ export const load = async (event) => {
     text: 'Redirecting back to start.'
   } as const;
   console.log('🚀 ~ /issue-11 ~ message:', message);
-  throw redirect(303, '/', [message], event);
+  // SvelteKit 2 check (no throw)
+  redirect(303, '/', [message], event);
 };
 
 /*

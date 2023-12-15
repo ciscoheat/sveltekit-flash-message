@@ -23,7 +23,7 @@ export const actions = {
     );
   },
 
-  enhanced: async (event) => {
+  enhanced: async ({ cookies }) => {
     throw redirect(
       '/posted',
       [
@@ -32,7 +32,7 @@ export const actions = {
           text: '+page.server.ts POST to /posted ' + count.next()
         }
       ],
-      event
+      cookies
     );
   },
 
@@ -45,7 +45,7 @@ export const actions = {
   },
 
   async toast(event) {
-    throw redirect(
+    redirect(
       [
         {
           status: 'ok',
