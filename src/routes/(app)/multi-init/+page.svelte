@@ -5,7 +5,7 @@
   let error = '';
 
   try {
-    getFlash(page, { clearOnNavigate: true });
+    getFlash(page, { clearOnNavigate: false });
   } catch (e) {
     error = String(e);
   }

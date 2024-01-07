@@ -15,6 +15,7 @@ export type FlashOptions = Partial<{
 type FlashContext = {
   store: Writable<App.PageData['flash']>;
   options: FlashOptions;
+  optionHash: string;
 };
 
 const flashStores = new WeakMap<Readable<Page>, FlashContext>();
@@ -41,22 +42,7 @@ export function initFlash(
 
 function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.PageData['flash']> {
   const flashStore = flashStores.get(page);
-
-  if (flashStore && !options) {
-    /*
-    console.log(
-      {
-        hasStore: true,
-        route: get(page).route.id,
-        customOptions: flashStore.options !== defaultOptions
-      },
-      flashStore.options
-    );
-    */
-    return flashStore.store;
-  } else if (flashStore && options && flashStore.options !== options) {
-    throw new Error('getFlash options can only be set once, at a top-level component.');
-  }
+  if (flashStore && !options) return flashStore.store;
 
   const currentOptions: FlashOptions = options
     ? {
@@ -69,19 +55,12 @@ function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.
       }
     : defaultOptions;
 
-  const store = writable<App.PageData['flash']>();
-  const context = { store, options: currentOptions };
+  if (flashStore && options && serializeOptions(currentOptions) !== flashStore.optionHash) {
+    throw new Error('getFlash options can only be set once, at a top-level component.');
+  }
 
-  /*
-  console.log(
-    {
-      hasStore: false,
-      route: get(page).route.id,
-      customOptions: context.options !== defaultOptions
-    },
-    context.options
-  );
-  */
+  const store = writable<App.PageData['flash']>();
+  const context = { store, options: currentOptions, optionHash: serializeOptions(currentOptions) };
 
   flashStores.set(page, context);
   clearCookieAndUpdateIfNewData(context, get(page).data.flash);
@@ -143,6 +122,10 @@ function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.
   });
 
   return store;
+}
+
+function serializeOptions(opts: FlashOptions) {
+  return JSON.stringify(opts);
 }
 
 /**
