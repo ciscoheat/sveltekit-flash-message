@@ -3,7 +3,10 @@ import type { Page } from '@sveltejs/kit';
 import { onDestroy, tick } from 'svelte';
 import { BROWSER as browser } from 'esm-env';
 import { afterNavigate } from '$app/navigation';
-import { serialize, type CookieSerializeOptions } from './cookie-es-main';
+import { serialize, type CookieSerializeOptions } from './cookie-es-main/index.js';
+import { navigating } from '$app/stores';
+
+const d = console.log;
 
 export type FlashOptions = Partial<{
   clearArray: boolean;
@@ -59,31 +62,37 @@ function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.
     throw new Error('getFlash options can only be set once, at a top-level component.');
   }
 
+  d('=== initFlash ===');
+
   const store = writable<App.PageData['flash']>();
   const context = { store, options: currentOptions, optionHash: serializeOptions(currentOptions) };
 
   flashStores.set(page, context);
-  clearCookieAndUpdateIfNewData(context, get(page).data.flash);
 
-  /**
-   * Set to 'page' if the last call to updateFlash used a flash message.
-   */
-  let lastUpdate: 'page' | null = null;
+  //let nagivated = false;
+
+  updateFromCookie(context, get(page).data.flash);
+
+  const unsubscribeNavigating = navigating.subscribe((nav) => {
+    d('Navigating:', nav?.from?.route.id, nav?.to?.route.id);
+
+    if (!nav) {
+      //clearCookieAndUpdateIfNewData(context, get(page).data.flash);
+      //updateFlash(page);
+    } else if (nav && currentOptions.clearOnNavigate && nav.from?.route.id != nav.to?.route.id) {
+      store.set(undefined);
+    }
+  });
 
   const unsubscribeFromPage = page.subscribe(async ($page) => {
-    if (!browser && $page.data.flash !== undefined) {
-      updateFlash(page);
-    } else if (browser) {
+    d('Page update, flash:', $page.data.flash?.[0]);
+    updateFlash(page);
+    /*
+    if (browser) {
       // Wait for eventual navigation event
-      await tick();
-      setTimeout(async () => {
-        if (await updateFlash(page)) {
-          lastUpdate = 'page';
-        } else {
-          lastUpdate = null;
-        }
-      });
+      setTimeout(() => updateFlash(page));
     }
+    */
   });
 
   let unsubscribeClearFlash: () => void | undefined;
@@ -103,23 +112,28 @@ function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.
       if (flashTimeout) clearTimeout(flashTimeout);
       unsubscribeClearFlash();
     }
+    //unsubscribeCheckNav();
     unsubscribeFromPage();
+    unsubscribeNavigating();
     flashStores.delete(page);
   });
 
+  /*
   afterNavigate(async (nav) => {
+    const current = get(store);
+
     if (
       nav.type != 'enter' &&
       currentOptions.clearOnNavigate &&
       nav.from?.url?.toString() != nav.to?.url?.toString()
     ) {
-      store.set(undefined);
+      console.log('afterNavigate tried to clear flash message')      
+      //store.set(undefined);
     }
 
-    if (nav.type == 'goto' || (lastUpdate != 'page' && nav.type == 'form')) {
-      updateFlash(page);
-    }
+    if (nav.type == 'goto') updateFlash(page);
   });
+  */
 
   return store;
 }
@@ -156,10 +170,11 @@ export async function updateFlash(page: Readable<Page>, update?: () => Promise<v
 
   // Update before setting the new message, so navigation events can pass through first.
   if (update) await update();
-  await tick();
+  if (browser) await tick();
 
   const flashMessage = parseFlashCookie() as App.PageData['flash'] | undefined;
-  clearCookieAndUpdateIfNewData(store, flashMessage);
+  d('🚀 ~ updateFlash ~ flashMessage:', flashMessage);
+  updateFromCookie(store, flashMessage);
 
   return !!flashMessage;
 }
@@ -198,10 +213,7 @@ function parseFlashCookie(cookieString?: string): unknown {
   return undefined;
 }
 
-function clearCookieAndUpdateIfNewData(
-  context: FlashContext,
-  newData: App.PageData['flash'] | undefined
-) {
+function updateFromCookie(context: FlashContext, newData: App.PageData['flash'] | undefined) {
   if (browser) {
     document.cookie = serialize(varName, '', { ...context.options.flashCookieOptions, maxAge: 0 });
   }

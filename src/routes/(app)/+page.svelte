@@ -98,6 +98,7 @@
   <div>
     <a href="/issue-11">#11 instant redirect</a>
     <a href="/?redirect">Layout redirect</a>
+    <a href="/sk2">SvelteKit 2 remove after navigation</a>
   </div>
 </article>
 

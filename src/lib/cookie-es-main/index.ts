@@ -1,5 +1,5 @@
-import type { CookieParseOptions, CookieSerializeOptions } from './types';
-export type { CookieParseOptions, CookieSerializeOptions } from './types';
+import type { CookieParseOptions, CookieSerializeOptions } from './types.js';
+export type { CookieParseOptions, CookieSerializeOptions } from './types.js';
 
 /**
  * Module letiables.
