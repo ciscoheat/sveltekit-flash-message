@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- SvelteKit 2 redirect issue fixed.
 - Options for `getFlash` affects routes below.
 
 ### Added
