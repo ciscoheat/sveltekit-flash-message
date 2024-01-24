@@ -2,7 +2,7 @@ import type { Cookies, RequestEvent, ServerLoad, ServerLoadEvent } from '@svelte
 import { redirect as redir } from '@sveltejs/kit';
 import type { CookieSerializeOptions } from './cookie-es-main/index.js';
 
-const d = console.debug;
+//const d = console.debug;
 
 // Cannot change.
 const cookieName = 'flash';
@@ -40,7 +40,7 @@ export function _loadFlash<T extends ServerLoadEvent>(
 ): { flash: App.PageData['flash'] | undefined } {
   const dataString = event.cookies.get(cookieName);
   if (!dataString) {
-    d('No flash cookie found.');
+    //d('No flash cookie found.');
     return { [cookieName]: undefined };
   }
 
@@ -59,9 +59,9 @@ export function _loadFlash<T extends ServerLoadEvent>(
       accept == '*/*' ||
       accept?.includes('application/json')
     ) {
-      d('Possible fetch request, keeping cookie for client.');
+      //d('Possible fetch request, keeping cookie for client.');
     } else {
-      d('Flash cookie found, clearing');
+      //d('Flash cookie found, clearing');
       event.cookies.delete(cookieName, { path: flashCookieOptions.path ?? '/' });
     }
 

@@ -18,7 +18,10 @@ function getRouter(page: Readable<Page>, initialData?: FlashMessageType, routeId
     routers.set(page, router);
   } else if (routeId && initialData !== undefined) {
     const flashMessage = router.getFlashMessage(routeId);
-    flashMessage.message.set(initialData, { concatenateArray: !flashMessage.options.clearArray });
+    flashMessage.message.set(
+      initialData ?? parseFlashCookie(flashMessage.options.flashCookieOptions),
+      { concatenateArray: !flashMessage.options.clearArray }
+    );
   }
   return router;
 }
@@ -39,12 +42,13 @@ function _initFlash(page: Readable<Page>, options?: Partial<FlashOptions>): Flas
   }
 
   const _page = get(page);
+  const initialData = _page.data.flash;
 
   ///// Roles //////////////////////////////////////////////////////////////////
 
   //#region Router /////
 
-  const Router = getRouter(page, _page.data.flash, _page.route.id);
+  const Router = getRouter(page, initialData, _page.route.id);
 
   function Router_getFlashMessage() {
     const route = Router.routes.get(Page_route());
@@ -82,21 +86,19 @@ function _initFlash(page: Readable<Page>, options?: Partial<FlashOptions>): Flas
     if (!browser) return;
 
     Page.store.subscribe(() => {
-      const cookieData = parseFlashCookie();
+      const cookieData = parseFlashCookie(flash.options.flashCookieOptions);
 
       if (cookieData !== undefined) {
         flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
-        clearFlashCookie(flash.options.flashCookieOptions);
       }
     });
 
     Page.navigating.subscribe((nav) => {
       if (!nav) {
-        const cookieData = parseFlashCookie();
+        const cookieData = parseFlashCookie(flash.options.flashCookieOptions);
 
         if (cookieData !== undefined) {
           flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
-          clearFlashCookie(flash.options.flashCookieOptions);
         }
       } else if (nav && flash.options.clearOnNavigate && nav.from?.route.id != nav.to?.route.id) {
         flash.message.set(undefined);
@@ -135,31 +137,23 @@ export async function updateFlash(page: Readable<Page>, update?: () => Promise<v
   if (update) await update();
   if (browser) await tick();
 
-  const cookieData = parseFlashCookie() as App.PageData['flash'] | undefined;
+  const cookieData = parseFlashCookie(flashMessage.options.flashCookieOptions) as
+    | App.PageData['flash']
+    | undefined;
 
   if (cookieData !== undefined) {
     flashMessage.message.set(cookieData, { concatenateArray: !flashMessage.options.clearArray });
   }
-
-  clearFlashCookie(flashMessage.options.flashCookieOptions);
 
   return !!cookieData;
 }
 
 ///////////////////////////////////////////////////////////
 
-function clearFlashCookie(options: CookieSerializeOptions) {
-  // Clear parsed cookie
-  if (browser) {
-    document.cookie = serialize(cookieName, '', {
-      ...options,
-      maxAge: 0
-    });
-  }
-}
-
-function parseFlashCookie(cookieString?: string): App.PageData['flash'] | undefined {
-  if (!cookieString && browser) cookieString = document.cookie;
+function parseFlashCookie(
+  clearOptions?: CookieSerializeOptions
+): App.PageData['flash'] | undefined {
+  const cookieString = document.cookie;
   if (!cookieString || !cookieString.includes(cookieName + '=')) return undefined;
 
   function parseCookieString(str: string) {
@@ -175,7 +169,19 @@ function parseFlashCookie(cookieString?: string): App.PageData['flash'] | undefi
       }, output);
   }
 
+  function clearFlashCookie(options: CookieSerializeOptions) {
+    // Clear parsed cookie
+    if (browser) {
+      document.cookie = serialize(cookieName, '', {
+        ...options,
+        maxAge: 0
+      });
+    }
+  }
+
   const cookies = parseCookieString(cookieString);
+  if (clearOptions) clearFlashCookie(clearOptions);
+
   if (cookies[cookieName]) {
     try {
       return JSON.parse(cookies[cookieName]);
