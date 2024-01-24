@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { FlashMessage, type FlashMessageType, type FlashOptions } from './flashMessage.js';
 
-export class Router {
+export class FlashRouter {
   public readonly routes = new Map<string, FlashMessage>();
 
   constructor(initialData: FlashMessageType) {

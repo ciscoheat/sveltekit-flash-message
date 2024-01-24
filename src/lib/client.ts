@@ -5,17 +5,20 @@ import { BROWSER as browser } from 'esm-env';
 import { serialize, type CookieSerializeOptions } from './cookie-es-main/index.js';
 import { navigating } from '$app/stores';
 import { FlashMessage, type FlashMessageType, type FlashOptions } from './flashMessage.js';
-import { Router } from './router.js';
+import { FlashRouter } from './router.js';
 
 const cookieName = 'flash';
 
-const routers = new WeakMap<Readable<Page>, Router>();
+const routers = new WeakMap<Readable<Page>, FlashRouter>();
 
-function getRouter(page: Readable<Page>, initialData?: FlashMessageType) {
+function getRouter(page: Readable<Page>, initialData?: FlashMessageType, routeId?: string | null) {
   let router = routers.get(page);
   if (!router) {
-    router = new Router(initialData);
+    router = new FlashRouter(initialData);
     routers.set(page, router);
+  } else if (routeId && initialData !== undefined) {
+    const flashMessage = router.getFlashMessage(routeId);
+    flashMessage.message.set(initialData, { concatenateArray: !flashMessage.options.clearArray });
   }
   return router;
 }
@@ -41,7 +44,7 @@ function _initFlash(page: Readable<Page>, options?: Partial<FlashOptions>): Flas
 
   //#region Router /////
 
-  const Router = getRouter(page, _page.data.flash);
+  const Router = getRouter(page, _page.data.flash, _page.route.id);
 
   function Router_getFlashMessage() {
     const route = Router.routes.get(Page_route());
