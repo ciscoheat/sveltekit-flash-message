@@ -1,145 +1,115 @@
-import { type Writable, type Readable, writable, get } from 'svelte/store';
+import { type Writable, type Readable, get } from 'svelte/store';
 import type { Page } from '@sveltejs/kit';
-import { onDestroy, tick } from 'svelte';
+import { tick } from 'svelte';
 import { BROWSER as browser } from 'esm-env';
-import { afterNavigate } from '$app/navigation';
 import { serialize, type CookieSerializeOptions } from './cookie-es-main/index.js';
 import { navigating } from '$app/stores';
+import { FlashMessage, type FlashMessageType, type FlashOptions } from './flashMessage.js';
+import { Router } from './router.js';
 
 const d = console.log;
+const cookieName = 'flash';
 
-export type FlashOptions = Partial<{
-  clearArray: boolean;
-  clearOnNavigate: boolean;
-  clearAfterMs: number;
-  flashCookieOptions: CookieSerializeOptions;
-}>;
+const routers = new WeakMap<Readable<Page>, Router>();
 
-type FlashContext = {
-  store: Writable<App.PageData['flash']>;
-  options: FlashOptions;
-  optionHash: string;
-};
-
-const flashStores = new WeakMap<Readable<Page>, FlashContext>();
-
-const defaultOptions = {
-  clearOnNavigate: true,
-  flashCookieOptions: {
-    path: '/',
-    maxAge: 120,
-    httpOnly: false,
-    sameSite: 'strict' as const
+function getRouter(page: Readable<Page>, initialData?: FlashMessageType) {
+  let router = routers.get(page);
+  if (!router) {
+    router = new Router(initialData);
+    routers.set(page, router);
   }
-};
-
-/**
- * @deprecated Use getFlash instead.
- */
-export function initFlash(
-  page: Readable<Page>,
-  options?: FlashOptions
-): Writable<App.PageData['flash']> {
-  return _initFlash(page, options);
+  return router;
 }
 
-function _initFlash(page: Readable<Page>, options?: FlashOptions): Writable<App.PageData['flash']> {
-  const flashStore = flashStores.get(page);
-  if (flashStore && !options) return flashStore.store;
+export function initFlash(
+  page: Readable<Page>,
+  options?: Partial<FlashOptions>
+): Writable<App.PageData['flash']> {
+  return _initFlash(page, options).message;
+}
 
-  const currentOptions: FlashOptions = options
-    ? {
-        ...defaultOptions,
-        ...options,
-        flashCookieOptions: {
-          ...defaultOptions.flashCookieOptions,
-          ...options?.flashCookieOptions
-        }
-      }
-    : defaultOptions;
-
-  if (flashStore && options && serializeOptions(currentOptions) !== flashStore.optionHash) {
-    throw new Error('getFlash options can only be set once, at a top-level component.');
+// @DCI-context
+function _initFlash(page: Readable<Page>, options?: Partial<FlashOptions>): FlashMessage {
+  if (!browser) {
+    // The SSR version uses a simple store with no options,
+    // since they are used only on the client.
+    return new FlashMessage(get(page).data.flash);
   }
 
-  d('=== initFlash ===');
+  const _page = get(page);
 
-  const store = writable<App.PageData['flash']>();
-  const context = { store, options: currentOptions, optionHash: serializeOptions(currentOptions) };
+  ///// Roles //////////////////////////////////////////////////////////////////
 
-  flashStores.set(page, context);
+  //#region Router /////
 
-  //let nagivated = false;
+  const Router = getRouter(page, _page.data.flash);
 
-  updateFromCookie(context, get(page).data.flash);
+  function Router_getFlashMessage() {
+    const route = Router.routes.get(Page_route());
+    if (route) return route;
 
-  const unsubscribeNavigating = navigating.subscribe((nav) => {
-    d('Navigating:', nav?.from?.route.id, nav?.to?.route.id);
+    return options ? Router_createRoute() : Router.getClosestRoute(Page_route());
+  }
 
-    if (!nav) {
-      //clearCookieAndUpdateIfNewData(context, get(page).data.flash);
-      //updateFlash(page);
-    } else if (nav && currentOptions.clearOnNavigate && nav.from?.route.id != nav.to?.route.id) {
-      store.set(undefined);
-    }
-  });
+  function Router_createRoute() {
+    const flashMessage = Router.createRoute(Page_route(), Page_initialData(), options);
+    Page_subscribeToNavigation(flashMessage);
+    return flashMessage;
+  }
 
-  const unsubscribeFromPage = page.subscribe(async ($page) => {
-    d('Page update, flash:', $page.data.flash?.[0]);
-    updateFlash(page);
-    /*
-    if (browser) {
-      // Wait for eventual navigation event
-      setTimeout(() => updateFlash(page));
-    }
-    */
-  });
+  //#endregion
 
-  let unsubscribeClearFlash: () => void | undefined;
-  let flashTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
+  //#region Page
 
-  if (currentOptions.clearAfterMs && browser) {
-    unsubscribeClearFlash = store.subscribe(($flash) => {
-      if ($flash) {
-        if (flashTimeout) clearTimeout(flashTimeout);
-        flashTimeout = setTimeout(() => store.set(undefined), currentOptions.clearAfterMs);
+  const Page = {
+    store: page,
+    route: _page.route.id,
+    initialdata: _page.data.flash,
+    navigating
+  };
+
+  function Page_initialData() {
+    return Page.initialdata;
+  }
+
+  function Page_route() {
+    return Page.route ?? '';
+  }
+
+  function Page_subscribeToNavigation(flash: FlashMessage) {
+    if (!browser) return;
+
+    Page.store.subscribe(() => {
+      const cookieData = parseFlashCookie();
+      d('Page update, cookie: ', cookieData);
+
+      if (cookieData !== undefined) {
+        flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
+        clearFlashCookie(flash.options.flashCookieOptions);
+      }
+    });
+
+    Page.navigating.subscribe((nav) => {
+      d('Navigating:', nav?.from?.route.id, nav?.to?.route.id);
+
+      if (!nav) {
+        const cookieData = parseFlashCookie();
+        console.log('Nav ends, cookie:', cookieData);
+
+        if (cookieData !== undefined) {
+          flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
+          clearFlashCookie(flash.options.flashCookieOptions);
+        }
+      } else if (nav && flash.options.clearOnNavigate && nav.from?.route.id != nav.to?.route.id) {
+        console.log('Nav starts, clearing message');
+        flash.message.set(undefined);
       }
     });
   }
 
-  onDestroy(() => {
-    if (unsubscribeClearFlash) {
-      if (flashTimeout) clearTimeout(flashTimeout);
-      unsubscribeClearFlash();
-    }
-    //unsubscribeCheckNav();
-    unsubscribeFromPage();
-    unsubscribeNavigating();
-    flashStores.delete(page);
-  });
+  //#endregion
 
-  /*
-  afterNavigate(async (nav) => {
-    const current = get(store);
-
-    if (
-      nav.type != 'enter' &&
-      currentOptions.clearOnNavigate &&
-      nav.from?.url?.toString() != nav.to?.url?.toString()
-    ) {
-      console.log('afterNavigate tried to clear flash message')      
-      //store.set(undefined);
-    }
-
-    if (nav.type == 'goto') updateFlash(page);
-  });
-  */
-
-  return store;
-}
-
-function serializeOptions(opts: FlashOptions) {
-  return JSON.stringify(opts);
+  return Router_getFlashMessage();
 }
 
 /**
@@ -150,9 +120,9 @@ function serializeOptions(opts: FlashOptions) {
  */
 export function getFlash(
   page: Readable<Page>,
-  options?: FlashOptions
+  options?: Partial<FlashOptions>
 ): Writable<App.PageData['flash']> {
-  return _initFlash(page, options);
+  return _initFlash(page, options).message;
 }
 
 /**
@@ -162,81 +132,60 @@ export function getFlash(
  * @returns {Promise<boolean>} `true` if a flash message existed, `false` if not.
  */
 export async function updateFlash(page: Readable<Page>, update?: () => Promise<void>) {
-  const store = flashStores.get(page);
-  if (!store)
-    throw new Error(
-      'Flash store must be initialized with getFlash(page) before calling updateFlash.'
-    );
+  const flashMessage = getRouter(page).getFlashMessage(get(page).route.id);
 
   // Update before setting the new message, so navigation events can pass through first.
   if (update) await update();
   if (browser) await tick();
 
-  const flashMessage = parseFlashCookie() as App.PageData['flash'] | undefined;
-  d('🚀 ~ updateFlash ~ flashMessage:', flashMessage);
-  updateFromCookie(store, flashMessage);
+  const cookieData = parseFlashCookie() as App.PageData['flash'] | undefined;
 
-  return !!flashMessage;
+  if (cookieData !== undefined) {
+    console.log('updateFlash parsed cookie', cookieData, '(deleting on client)');
+    flashMessage.message.set(cookieData, { concatenateArray: !flashMessage.options.clearArray });
+  }
+
+  clearFlashCookie(flashMessage.options.flashCookieOptions);
+
+  return !!cookieData;
 }
 
 ///////////////////////////////////////////////////////////
 
-const parseCookieString = (str: string) => {
-  const output = {} as Record<string, string>;
-  if (!str) return output;
+function clearFlashCookie(options: CookieSerializeOptions) {
+  // Clear parsed cookie
+  if (browser) {
+    document.cookie = serialize(cookieName, '', {
+      ...options,
+      maxAge: 0
+    });
+  }
+}
 
-  return str
-    .split(';')
-    .map((v) => v.split('='))
-    .reduce((acc, v) => {
-      acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
-      return acc;
-    }, output);
-};
-
-/////////////////////////////////////////////////////////////////////
-
-const varName = 'flash';
-
-function parseFlashCookie(cookieString?: string): unknown {
+function parseFlashCookie(cookieString?: string): App.PageData['flash'] | undefined {
   if (!cookieString && browser) cookieString = document.cookie;
-  if (!cookieString || !cookieString.includes(varName + '=')) return undefined;
+  if (!cookieString || !cookieString.includes(cookieName + '=')) return undefined;
+
+  function parseCookieString(str: string) {
+    const output = {} as Record<string, string>;
+    if (!str) return output;
+
+    return str
+      .split(';')
+      .map((v) => v.split('='))
+      .reduce((acc, v) => {
+        acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+        return acc;
+      }, output);
+  }
 
   const cookies = parseCookieString(cookieString);
-  if (cookies[varName]) {
+  if (cookies[cookieName]) {
     try {
-      return JSON.parse(cookies[varName]);
+      return JSON.parse(cookies[cookieName]);
     } catch (e) {
       // Ignore value if parsing failed
     }
   }
   return undefined;
-}
-
-function updateFromCookie(context: FlashContext, newData: App.PageData['flash'] | undefined) {
-  if (browser) {
-    document.cookie = serialize(varName, '', { ...context.options.flashCookieOptions, maxAge: 0 });
-  }
-  if (newData === undefined) return;
-
-  context.store.update((flash) => {
-    // Need to do a per-element comparison here, since update will be called
-    // when going to the same route, while keeping the old flash message,
-    // making it display multiple times.
-    if (!context.options.clearArray && Array.isArray(newData)) {
-      if (Array.isArray(flash)) {
-        if (
-          flash.length > 0 &&
-          newData.length > 0 &&
-          flash[flash.length - 1] === newData[newData.length - 1]
-        ) {
-          return flash;
-        } else {
-          return flash.concat(newData) as unknown as App.PageData['flash'];
-        }
-      }
-    }
-
-    return newData;
-  });
 }

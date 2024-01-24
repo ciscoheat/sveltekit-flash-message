@@ -1,8 +1,8 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { getFlash } from '$lib/client';
+  import { initFlash } from '$lib/client';
 
-  getFlash(page, {
+  initFlash(page, {
     clearAfterMs: 4000
   });
 </script>

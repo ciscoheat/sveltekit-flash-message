@@ -70,8 +70,6 @@ export function _loadFlash<T extends ServerLoadEvent>(
     } catch (e) {
       // Ignore data if parsing error
     }
-
-    d('Setting flash message: ', data);
   }
 
   return {

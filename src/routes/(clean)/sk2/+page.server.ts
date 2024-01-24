@@ -1,5 +1,7 @@
-import type { Actions, PageServerLoad } from './$types';
+import type { Actions } from './$types';
 import { redirect } from '$lib/server';
+
+export { load } from '$lib/server';
 
 export const actions: Actions = {
   default: async (event) => {

@@ -1,11 +1,10 @@
 <script lang="ts">
-  import type { PageData } from './$types';
   import { getFlash } from '$lib/client';
   import { page } from '$app/stores';
 
   const flash = getFlash(page);
   flash.subscribe(($flash) => {
-    //console.log($flash);
+    console.log($flash);
   });
 </script>
 
