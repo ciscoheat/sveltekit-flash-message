@@ -14,16 +14,16 @@
     }
   });
 
-  flash.subscribe(($flash) => {
+  $: if ($flash) {
     console.log('FLASH EVENT ' + (browser ? '[browser]' : '[SSR]') + ':', $flash?.[0].text);
     // Toast event handling
-    if ($flash && $flash.length && $flash[$flash.length - 1].text.toLowerCase().includes('toast')) {
+    if ($flash.length && $flash[$flash.length - 1].text.toLowerCase().includes('toast')) {
       toast($flash[$flash.length - 1].text, {
         icon: '✅'
       });
-      flash.set(undefined);
+      $flash = undefined;
     }
-  });
+  }
 
   function clear() {
     $flash = undefined;

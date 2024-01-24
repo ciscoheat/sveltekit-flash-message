@@ -7,7 +7,6 @@ import { navigating } from '$app/stores';
 import { FlashMessage, type FlashMessageType, type FlashOptions } from './flashMessage.js';
 import { Router } from './router.js';
 
-const d = console.log;
 const cookieName = 'flash';
 
 const routers = new WeakMap<Readable<Page>, Router>();
@@ -81,7 +80,6 @@ function _initFlash(page: Readable<Page>, options?: Partial<FlashOptions>): Flas
 
     Page.store.subscribe(() => {
       const cookieData = parseFlashCookie();
-      d('Page update, cookie: ', cookieData);
 
       if (cookieData !== undefined) {
         flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
@@ -90,18 +88,14 @@ function _initFlash(page: Readable<Page>, options?: Partial<FlashOptions>): Flas
     });
 
     Page.navigating.subscribe((nav) => {
-      d('Navigating:', nav?.from?.route.id, nav?.to?.route.id);
-
       if (!nav) {
         const cookieData = parseFlashCookie();
-        console.log('Nav ends, cookie:', cookieData);
 
         if (cookieData !== undefined) {
           flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
           clearFlashCookie(flash.options.flashCookieOptions);
         }
       } else if (nav && flash.options.clearOnNavigate && nav.from?.route.id != nav.to?.route.id) {
-        console.log('Nav starts, clearing message');
         flash.message.set(undefined);
       }
     });
@@ -141,7 +135,6 @@ export async function updateFlash(page: Readable<Page>, update?: () => Promise<v
   const cookieData = parseFlashCookie() as App.PageData['flash'] | undefined;
 
   if (cookieData !== undefined) {
-    console.log('updateFlash parsed cookie', cookieData, '(deleting on client)');
     flashMessage.message.set(cookieData, { concatenateArray: !flashMessage.options.clearArray });
   }
 

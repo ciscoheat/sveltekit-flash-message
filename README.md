@@ -18,7 +18,7 @@ pnpm i -D sveltekit-flash-message
 
 ### 1. Add the flash message to app.d.ts (Typescript only)
 
-In `src/app.d.ts`, add the type for the flash message to `App.PageData` as an optional property called `flash`. It can be as simple as a `string`, or something more advanced. It has to be serializable though, so only JSON-friendly data structures. Here's an example:
+In `src/app.d.ts`, add the type for the flash message to `App.PageData` as an optional property called `flash`. It can be as simple as a `string`, or something more advanced. It has to be serializable though, so only JSON-friendly data structures. For example:
 
 **src/app.d.ts**
 
@@ -143,7 +143,7 @@ import { redirect } from 'sveltekit-flash-message/server';
 
 export const POST = async ({ cookies }) => {
   const message = { type: 'success', message: 'Endpoint POST successful!' } as const;
-  throw redirect(303, '/', message, cookies);
+  throw redirect('/', message, cookies);
 };
 ```
 
@@ -156,11 +156,11 @@ import { fail } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 
 export const actions = {
-  default: async (event) => {
-    const form = await event.request.formData();
+  default: async ({ request, cookies }) => {
+    const form = await request.formData();
 
     if (!form.get('text')) {
-      setFlash({ type: 'error', message: 'Please enter text.' }, event);
+      setFlash({ type: 'error', message: 'Please enter text.' }, cookies);
       return fail(400);
     }
   }
@@ -190,7 +190,7 @@ If you want to update the flash message on the client, use `getFlash` in any com
 
 ## Client-side fetching and redirecting
 
-In most cases the flash message will update automatically on redirect or navigation, with one exception: When using [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis), you must call `updateFlash` afterwards:
+The flash message will update automatically on redirect or navigation, but when using [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis), you must call `updateFlash` afterwards:
 
 ```svelte
 <script lang="ts">
@@ -225,7 +225,7 @@ async function submitForm(e: Event) {
 
 ## Toast messages, event-style
 
-A common use case for flash messages is to show a toast notification, but a toast is more of an event than data that should be displayed on the page, as we've done previously. But you can use the `flash` store as an event handler by subscribing to it:
+A common use case for flash messages is to show a toast notification, but a toast is more of an event than data that should be displayed on the page, as we've done previously. But you can use the `flash` store as an event handler with a reactive statement:
 
 **src/routes/+layout.svelte**
 
@@ -236,22 +236,19 @@ import toast, { Toaster } from 'svelte-french-toast';
 
 const flash = getFlash(page);
 
-flash.subscribe(($flash) => {
-  if (!$flash) return;
-
+$: if ($flash) {
   toast($flash.message, {
     icon: $flash.type == 'success' ? '✅' : '❌'
   });
 
-  // Clearing the flash message could sometimes
-  // be required here to avoid double-toasting.
-  flash.set(undefined);
-});
+  // Clear the flash message to avoid double-toasting.
+  $flash = undefined;
+}
 ```
 
 ## Flash message options
 
-In a top-level component, most likely a `+layout.svelte` file, you can specify options for `getFlash`. **Note** that options can only be set the first time you call `getFlash` for a certain page/layout, usually in the top-level component. Subsequent calls to `getFlash` in components below cannot have any options. (See the first call to it as a kind of constructor.)
+When calling `getFlash`, you can specify options, which will be set for the current route and the ones below.
 
 ```typescript
 const flash = getFlash(page, {
@@ -272,7 +269,7 @@ Can be set to a number of milliseconds before the flash message is automatically
 
 ### clearArray
 
-If you specify `App.PageData['flash']` as an array, the library will accomodate for that and will concatenate messages into the array instead of replacing them. But if you want to always clear the previous messages, set the `clearArray` option to `true`.
+If you specify `App.PageData['flash']` as an array, the library will concatenate messages into the array instead of replacing them. But if you always want to clear the previous messages for arrays, set the `clearArray` option to `true`.
 
 ### flashCookieOptions
 
