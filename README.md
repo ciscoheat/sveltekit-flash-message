@@ -22,7 +22,7 @@ In `src/app.d.ts`, add the type for the flash message to `App.PageData` as an op
 
 **src/app.d.ts**
 
-```typescript
+```ts
 declare namespace App {
   interface PageData {
     flash?: { type: 'success' | 'error'; message: string };
@@ -36,7 +36,7 @@ If you're not using any [load functions](https://kit.svelte.dev/docs/load), this
 
 **src/routes/+layout.server.ts**
 
-```typescript
+```ts
 export { load } from 'sveltekit-flash-message/server';
 ```
 
@@ -44,7 +44,7 @@ But most likely you already have a top-level `load` function, in which case you 
 
 **src/routes/+layout.server.ts**
 
-```typescript
+```ts
 import { loadFlash } from 'sveltekit-flash-message/server';
 
 export const load = loadFlash(async (event) => {
@@ -81,7 +81,7 @@ To send a flash message from the server, import `redirect` from `sveltekit-flash
 
 **Note:** With SvelteKit 2, you don't need to [throw the redirect anymore](https://kit.svelte.dev/docs/migrating-to-sveltekit-2#redirect-and-error-are-no-longer-thrown-by-you), just call `redirect`.
 
-```typescript
+```ts
 import { redirect } from 'sveltekit-flash-message/server'
 
 throw redirect(
@@ -116,7 +116,7 @@ throw redirect(
 
 **src/routes/todos/+page.server.ts**
 
-```typescript
+```ts
 import { redirect } from 'sveltekit-flash-message/server';
 
 export const actions = {
@@ -137,7 +137,7 @@ export const actions = {
 
 **src/routes/todos/+server.ts**
 
-```typescript
+```ts
 import type { RequestEvent } from '@sveltejs/kit';
 import { redirect } from 'sveltekit-flash-message/server';
 
@@ -151,7 +151,7 @@ export const POST = async ({ cookies }) => {
 
 If you want to display a flash message without redirecting, as an error message when validation fails for example, you can use the `setFlash` function:
 
-```typescript
+```ts
 import { fail } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 
@@ -229,7 +229,7 @@ A common use case for flash messages is to show a toast notification, but a toas
 
 **src/routes/+layout.svelte**
 
-```typescript
+```ts
 import { getFlash } from 'sveltekit-flash-message';
 import { page } from '$app/stores';
 import toast, { Toaster } from 'svelte-french-toast';
@@ -250,12 +250,23 @@ $: if ($flash) {
 
 When calling `getFlash`, you can specify options, which will be set for the current route and the ones below.
 
-```typescript
+```ts
 const flash = getFlash(page, {
   clearOnNavigate: true,
   clearAfterMs: undefined,
   clearArray: false,
   flashCookieOptions: CookieSerializeOptions
+});
+```
+
+You can also use `initFlash`, if you don't display a flash message in a certain layout but still want to set options for the routes below:
+
+```ts
+import { initFlash } from 'sveltekit-flash-message';
+import { page } from '$app/stores';
+
+initFlash(page, {
+  clearAfterMs: 10000
 });
 ```
 
