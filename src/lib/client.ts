@@ -32,7 +32,7 @@ function subscribeToNavigation(page: Readable<Page>) {
     const cookieData = parseFlashCookie();
 
     if (cookieData !== undefined) {
-      console.log('🚀 ~ page.subscribe:', cookieData, $page.route.id);
+      //console.log('🚀 ~ page.subscribe:', cookieData, $page.route.id);
       const flash = getRouter(page).getFlashMessage($page.route.id);
       flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
       clearFlashCookie(flash.options.flashCookieOptions);
@@ -44,7 +44,7 @@ function subscribeToNavigation(page: Readable<Page>) {
     if (navTo) {
       const flash = getRouter(page).getFlashMessage(navTo);
       if (flash.options.clearOnNavigate && nav.from?.route.id != navTo) {
-        console.log('🚀 ~ beforeNavigate ~ clear message on nav to:', navTo);
+        //console.log('🚀 ~ beforeNavigate ~ clear message on nav to:', navTo);
         flash.message.set(undefined);
       }
     }
@@ -54,7 +54,7 @@ function subscribeToNavigation(page: Readable<Page>) {
     const cookieData = parseFlashCookie();
 
     if (cookieData !== undefined) {
-      console.log('🚀 ~ afterNavigate:', cookieData, get(page).route.id);
+      //console.log('🚀 ~ afterNavigate:', cookieData, get(page).route.id);
       const flash = getRouter(page).getFlashMessage(get(page).route.id);
       flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
       clearFlashCookie(flash.options.flashCookieOptions);

@@ -49,7 +49,6 @@ export class FlashRouter {
   }
 
   createRoute(routeId: string, data: FlashMessageType, options?: Partial<FlashOptions>) {
-    console.log('createRoute', routeId, options);
     const closest = this.getClosestRoute(routeId);
     const newRoute = new FlashMessage(this.messageStore, mergeOptions(closest.options, options));
 
