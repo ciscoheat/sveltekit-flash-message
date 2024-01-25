@@ -248,7 +248,7 @@ $: if ($flash) {
 
 ## Flash message options
 
-When calling `getFlash`, you can specify options, which will be set for the current route and the ones below.
+When calling `getFlash`, you can specify options, which will be inherited for the current route and the ones below.
 
 ```ts
 const flash = getFlash(page, {
@@ -272,7 +272,7 @@ initFlash(page, {
 
 ### clearOnNavigate
 
-If `true` (the default), the flash message will be removed when navigating to a different url.
+If `true` (the default), the flash message will be removed when navigating to a different route.
 
 ### clearAfterMs
 
@@ -280,7 +280,7 @@ Can be set to a number of milliseconds before the flash message is automatically
 
 ### clearArray
 
-If you specify `App.PageData['flash']` as an array, the library will concatenate messages into the array instead of replacing them. But if you always want to clear the previous messages for arrays, set the `clearArray` option to `true`.
+If you specify `App.PageData['flash']` as an array, the library will concatenate messages into the array instead of replacing them. But if you always want to clear the previous messages for arrays, set the `clearArray` option to `true`. If your flash message isn't an array, this option will have no effect.
 
 ### flashCookieOptions
 
@@ -296,10 +296,12 @@ export const load = loadFlash(async (event) => {
 });
 ```
 
-And correspondingly, on the client:
+And correspondingly, on the client (in a top-level component):
 
 ```ts
-const flash = getFlash(page, {
+import { initFlash } from 'sveltekit-flash-message';
+
+initFlash(page, {
   flashCookieOptions: { sameSite: 'lax' }
 });
 ```
