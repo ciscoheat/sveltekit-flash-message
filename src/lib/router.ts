@@ -1,11 +1,23 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { FlashMessage, type FlashMessageType, type FlashOptions } from './flashMessage.js';
+import { writable, type Writable } from 'svelte/store';
+import { FlashMessage, type FlashMessageType } from './flashMessage.js';
+import { mergeOptions, type FlashOptions } from './options.js';
+import { onDestroy } from 'svelte';
 
 export class FlashRouter {
   public readonly routes = new Map<string, FlashMessage>();
+  private messageStore: Writable<FlashMessageType>;
 
-  constructor(initialData: FlashMessageType) {
-    this.routes.set('', new FlashMessage(initialData));
+  constructor() {
+    this.messageStore = writable<FlashMessageType>();
+    this.createRoute('', undefined);
+
+    onDestroy(() => {
+      console.log('onDestroy, clear timeouts');
+      for (const route of this.routes.values()) {
+        clearTimeout(route.flashTimeout);
+      }
+    });
   }
 
   get defaultRoute() {
@@ -16,7 +28,7 @@ export class FlashRouter {
     return this.routes.has(routeId);
   }
 
-  getFlashMessage(routeId: string | null) {
+  getFlashMessage(routeId: string | null | undefined) {
     if (!routeId) return this.defaultRoute;
 
     if (this.routes.has(routeId)) return this.routes.get(routeId)!;
@@ -38,7 +50,10 @@ export class FlashRouter {
   }
 
   createRoute(routeId: string, data: FlashMessageType, options?: Partial<FlashOptions>) {
-    const newRoute = new FlashMessage(data, options);
+    console.log('createRoute', routeId, options);
+    const newRoute = new FlashMessage(this.messageStore, mergeOptions(options));
+    newRoute.message.set(data);
+
     this.routes.set(routeId, newRoute);
     return newRoute;
   }

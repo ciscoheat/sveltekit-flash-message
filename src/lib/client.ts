@@ -1,29 +1,79 @@
-import { type Writable, type Readable, get } from 'svelte/store';
+import { type Writable, type Readable, get, writable } from 'svelte/store';
 import type { Page } from '@sveltejs/kit';
 import { tick } from 'svelte';
 import { BROWSER as browser } from 'esm-env';
 import { serialize, type CookieSerializeOptions } from './cookie-es-main/index.js';
 import { navigating } from '$app/stores';
-import { FlashMessage, type FlashMessageType, type FlashOptions } from './flashMessage.js';
+import { FlashMessage, type FlashMessageType } from './flashMessage.js';
 import { FlashRouter } from './router.js';
+import type { FlashOptions } from './options.js';
 
 const cookieName = 'flash';
 
 const routers = new WeakMap<Readable<Page>, FlashRouter>();
 
-function getRouter(page: Readable<Page>, initialData?: FlashMessageType, routeId?: string | null) {
+function getRouter(page: Readable<Page>, initialData?: FlashMessageType) {
   let router = routers.get(page);
   if (!router) {
-    router = new FlashRouter(initialData);
+    router = new FlashRouter();
     routers.set(page, router);
-  } else if (routeId && initialData !== undefined) {
+    subscribeToNavigation(page);
+    router.getFlashMessage(get(page).route.id).message.set(initialData);
+  }
+
+  /*
+  else if (routeId && initialData !== undefined) {
     const flashMessage = router.getFlashMessage(routeId);
     flashMessage.message.set(
       initialData ?? parseFlashCookie(flashMessage.options.flashCookieOptions),
       { concatenateArray: !flashMessage.options.clearArray }
     );
   }
+  */
+
+  /*
+  Array.from(router.routes.entries())
+    .map(([route, flash]) => {
+      return { route, message: get(flash.message) };
+    })
+    .forEach((m) => console.log(m));
+  */
+
   return router;
+}
+
+function subscribeToNavigation(page: Readable<Page>) {
+  if (!browser) return;
+
+  page.subscribe(($page) => {
+    const flash = getRouter(page).getFlashMessage($page.route.id);
+    const cookieData = parseFlashCookie(flash.options.flashCookieOptions);
+
+    if (cookieData !== undefined) {
+      flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
+    }
+  });
+
+  navigating.subscribe((nav) => {
+    if (!nav) {
+      const flash = getRouter(page).getFlashMessage(get(page).route.id);
+      const cookieData = parseFlashCookie(flash.options.flashCookieOptions);
+
+      if (cookieData !== undefined) {
+        flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
+      }
+      return;
+    } else {
+      const navTo = nav?.to?.route.id;
+      if (navTo) {
+        const flash = getRouter(page).getFlashMessage(navTo);
+
+        if (flash.options.clearOnNavigate && nav.from?.route.id != navTo) {
+          flash.message.set(undefined);
+        }
+      }
+    }
+  });
 }
 
 export function initFlash(
@@ -38,17 +88,16 @@ function _initFlash(page: Readable<Page>, options?: Partial<FlashOptions>): Flas
   if (!browser) {
     // The SSR version uses a simple store with no options,
     // since they are used only on the client.
-    return new FlashMessage(get(page).data.flash);
+    return new FlashMessage(writable(get(page).data.flash));
   }
 
   const _page = get(page);
-  const initialData = _page.data.flash;
 
   ///// Roles //////////////////////////////////////////////////////////////////
 
   //#region Router /////
 
-  const Router = getRouter(page, initialData, _page.route.id);
+  const Router = getRouter(page, _page.data.flash);
 
   function Router_getFlashMessage() {
     const route = Router.routes.get(Page_route());
@@ -58,9 +107,7 @@ function _initFlash(page: Readable<Page>, options?: Partial<FlashOptions>): Flas
   }
 
   function Router_createRoute() {
-    const flashMessage = Router.createRoute(Page_route(), Page_initialData(), options);
-    Page_subscribeToNavigation(flashMessage);
-    return flashMessage;
+    return Router.createRoute(Page_route(), Page_initialData(), options);
   }
 
   //#endregion
@@ -80,30 +127,6 @@ function _initFlash(page: Readable<Page>, options?: Partial<FlashOptions>): Flas
 
   function Page_route() {
     return Page.route ?? '';
-  }
-
-  function Page_subscribeToNavigation(flash: FlashMessage) {
-    if (!browser) return;
-
-    Page.store.subscribe(() => {
-      const cookieData = parseFlashCookie(flash.options.flashCookieOptions);
-
-      if (cookieData !== undefined) {
-        flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
-      }
-    });
-
-    Page.navigating.subscribe((nav) => {
-      if (!nav) {
-        const cookieData = parseFlashCookie(flash.options.flashCookieOptions);
-
-        if (cookieData !== undefined) {
-          flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
-        }
-      } else if (nav && flash.options.clearOnNavigate && nav.from?.route.id != nav.to?.route.id) {
-        flash.message.set(undefined);
-      }
-    });
   }
 
   //#endregion

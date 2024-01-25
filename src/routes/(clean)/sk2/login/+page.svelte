@@ -3,6 +3,7 @@
   import { page } from '$app/stores';
 
   const flash = getFlash(page);
+  console.log('🚀 ~ flash:', $flash);
 </script>
 
 <div>{$flash?.[0].status} {$flash?.[0].text}</div>

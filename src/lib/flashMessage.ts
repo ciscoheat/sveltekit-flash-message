@@ -1,41 +1,10 @@
-import { writable, type Updater, type Writable } from 'svelte/store';
-import type { CookieSerializeOptions } from './cookie-es-main/index.js';
-import { onDestroy } from 'svelte';
+import type { Updater, Writable } from 'svelte/store';
 import { browser } from '$app/environment';
+import { defaultOptions, type FlashOptions } from './options.js';
 
 export type FlashMessageType =
   | (App.PageData['flash'] extends never ? any : App.PageData['flash'])
   | undefined;
-
-export type FlashOptions = {
-  clearArray: boolean;
-  clearOnNavigate: boolean;
-  clearAfterMs: number;
-  flashCookieOptions: CookieSerializeOptions;
-};
-
-const defaultOptions = {
-  clearArray: false,
-  clearOnNavigate: true,
-  clearAfterMs: 0,
-  flashCookieOptions: {
-    path: '/',
-    maxAge: 120,
-    httpOnly: false,
-    sameSite: 'strict' as const
-  }
-} satisfies FlashOptions;
-
-function mergeOptions(options: Partial<FlashOptions> | undefined): FlashOptions {
-  return {
-    ...defaultOptions,
-    ...options,
-    flashCookieOptions: {
-      ...defaultOptions.flashCookieOptions,
-      ...options?.flashCookieOptions
-    }
-  };
-}
 
 interface FlashMessageStore extends Writable<FlashMessageType> {
   set(this: void, value: FlashMessageType, options?: { concatenateArray: boolean }): void;
@@ -47,9 +16,8 @@ interface FlashMessageStore extends Writable<FlashMessageType> {
 }
 
 export class FlashMessage {
-  public readonly options: Readonly<FlashOptions>;
+  public options: Readonly<FlashOptions>;
 
-  // Move update method to store
   private _message: FlashMessageStore;
   public get message() {
     return this._message;
@@ -60,35 +28,25 @@ export class FlashMessage {
     return this._flashTimeout;
   }
 
-  constructor(initialData: FlashMessageType, options?: Partial<FlashOptions>) {
-    const messageStore = writable<FlashMessageType | undefined>(initialData);
-
-    this.options = options ? mergeOptions(options) : defaultOptions;
+  constructor(message: Writable<FlashMessageType>, options?: FlashOptions) {
+    this.options = options ?? defaultOptions;
 
     this._message = {
-      subscribe: messageStore.subscribe,
+      subscribe: message.subscribe,
       set: (value, options?: { concatenateArray: boolean }) =>
-        messageStore.update(($message) => this.update($message, value, options?.concatenateArray)),
+        message.update(($message) =>
+          this.update($message, value, options?.concatenateArray ?? false)
+        ),
       update: (updater, options?: { concatenateArray: boolean }) =>
-        messageStore.update(($message) =>
-          this.update($message, updater($message), options?.concatenateArray)
+        message.update(($message) =>
+          this.update($message, updater($message), options?.concatenateArray ?? false)
         )
     };
-
-    onDestroy(() => clearTimeout(this._flashTimeout));
-    this.autoClearMessage(initialData);
-  }
-
-  private autoClearMessage(newData: FlashMessageType) {
-    if (!browser) return;
-    if (this._flashTimeout) clearTimeout(this.flashTimeout);
-
-    if (newData !== undefined && this.options.clearAfterMs) {
-      this._flashTimeout = setTimeout(() => this.message.set(undefined), this.options.clearAfterMs);
-    }
   }
 
   private update(current: FlashMessageType, newData: FlashMessageType, concatenateArray = false) {
+    if (this._flashTimeout) clearTimeout(this.flashTimeout);
+
     // Need to do a per-element comparison here, since update will be called
     // when going to the same route, while keeping the old flash message,
     // making it display multiple times.
@@ -101,12 +59,17 @@ export class FlashMessage {
         ) {
           return current;
         } else {
-          return current.concat(newData) as unknown as App.PageData['flash'];
+          return current.concat(newData);
         }
       }
     }
 
-    this.autoClearMessage(newData);
+    if (browser && newData !== undefined && this.options.clearAfterMs) {
+      this._flashTimeout = setTimeout(() => {
+        this.message.set(undefined);
+      }, this.options.clearAfterMs);
+    }
+
     return newData;
   }
 }
