@@ -7,6 +7,7 @@ import { navigating } from '$app/stores';
 import { FlashMessage, type FlashMessageType } from './flashMessage.js';
 import { FlashRouter } from './router.js';
 import type { FlashOptions } from './options.js';
+import { afterNavigate, beforeNavigate } from '$app/navigation';
 
 const cookieName = 'flash';
 
@@ -17,27 +18,9 @@ function getRouter(page: Readable<Page>, initialData?: FlashMessageType) {
   if (!router) {
     router = new FlashRouter();
     routers.set(page, router);
-    subscribeToNavigation(page);
     router.getFlashMessage(get(page).route.id).message.set(initialData);
+    subscribeToNavigation(page);
   }
-
-  /*
-  else if (routeId && initialData !== undefined) {
-    const flashMessage = router.getFlashMessage(routeId);
-    flashMessage.message.set(
-      initialData ?? parseFlashCookie(flashMessage.options.flashCookieOptions),
-      { concatenateArray: !flashMessage.options.clearArray }
-    );
-  }
-  */
-
-  /*
-  Array.from(router.routes.entries())
-    .map(([route, flash]) => {
-      return { route, message: get(flash.message) };
-    })
-    .forEach((m) => console.log(m));
-  */
 
   return router;
 }
@@ -46,32 +29,35 @@ function subscribeToNavigation(page: Readable<Page>) {
   if (!browser) return;
 
   page.subscribe(($page) => {
-    const flash = getRouter(page).getFlashMessage($page.route.id);
-    const cookieData = parseFlashCookie(flash.options.flashCookieOptions);
+    const cookieData = parseFlashCookie();
 
     if (cookieData !== undefined) {
+      console.log('🚀 ~ page.subscribe:', cookieData, $page.route.id);
+      const flash = getRouter(page).getFlashMessage($page.route.id);
       flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
+      clearFlashCookie(flash.options.flashCookieOptions);
     }
   });
 
-  navigating.subscribe((nav) => {
-    if (!nav) {
+  beforeNavigate((nav) => {
+    const navTo = nav?.to?.route.id;
+    if (navTo) {
+      const flash = getRouter(page).getFlashMessage(navTo);
+      if (flash.options.clearOnNavigate && nav.from?.route.id != navTo) {
+        console.log('🚀 ~ beforeNavigate ~ clear message on nav to:', navTo);
+        flash.message.set(undefined);
+      }
+    }
+  });
+
+  afterNavigate(() => {
+    const cookieData = parseFlashCookie();
+
+    if (cookieData !== undefined) {
+      console.log('🚀 ~ afterNavigate:', cookieData, get(page).route.id);
       const flash = getRouter(page).getFlashMessage(get(page).route.id);
-      const cookieData = parseFlashCookie(flash.options.flashCookieOptions);
-
-      if (cookieData !== undefined) {
-        flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
-      }
-      return;
-    } else {
-      const navTo = nav?.to?.route.id;
-      if (navTo) {
-        const flash = getRouter(page).getFlashMessage(navTo);
-
-        if (flash.options.clearOnNavigate && nav.from?.route.id != navTo) {
-          flash.message.set(undefined);
-        }
-      }
+      flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
+      clearFlashCookie(flash.options.flashCookieOptions);
     }
   });
 }
@@ -154,18 +140,16 @@ export function getFlash(
  * @returns {Promise<boolean>} `true` if a flash message existed, `false` if not.
  */
 export async function updateFlash(page: Readable<Page>, update?: () => Promise<void>) {
-  const flashMessage = getRouter(page).getFlashMessage(get(page).route.id);
-
   // Update before setting the new message, so navigation events can pass through first.
   if (update) await update();
-  if (browser) await tick();
 
-  const cookieData = parseFlashCookie(flashMessage.options.flashCookieOptions) as
-    | App.PageData['flash']
-    | undefined;
+  const cookieData = parseFlashCookie() as App.PageData['flash'] | undefined;
 
   if (cookieData !== undefined) {
-    flashMessage.message.set(cookieData, { concatenateArray: !flashMessage.options.clearArray });
+    if (browser) await tick();
+    const flash = getRouter(page).getFlashMessage(get(page).route.id);
+    flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
+    clearFlashCookie(flash.options.flashCookieOptions);
   }
 
   return !!cookieData;
@@ -173,9 +157,17 @@ export async function updateFlash(page: Readable<Page>, update?: () => Promise<v
 
 ///////////////////////////////////////////////////////////
 
-function parseFlashCookie(
-  clearOptions?: CookieSerializeOptions
-): App.PageData['flash'] | undefined {
+function clearFlashCookie(options: CookieSerializeOptions) {
+  // Clear parsed cookie
+  if (browser) {
+    document.cookie = serialize(cookieName, '', {
+      ...options,
+      maxAge: 0
+    });
+  }
+}
+
+function parseFlashCookie(): App.PageData['flash'] | undefined {
   const cookieString = document.cookie;
   if (!cookieString || !cookieString.includes(cookieName + '=')) return undefined;
 
@@ -192,18 +184,7 @@ function parseFlashCookie(
       }, output);
   }
 
-  function clearFlashCookie(options: CookieSerializeOptions) {
-    // Clear parsed cookie
-    if (browser) {
-      document.cookie = serialize(cookieName, '', {
-        ...options,
-        maxAge: 0
-      });
-    }
-  }
-
   const cookies = parseCookieString(cookieString);
-  if (clearOptions) clearFlashCookie(clearOptions);
 
   if (cookies[cookieName]) {
     try {

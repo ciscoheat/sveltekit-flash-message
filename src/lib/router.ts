@@ -10,10 +10,9 @@ export class FlashRouter {
 
   constructor() {
     this.messageStore = writable<FlashMessageType>();
-    this.createRoute('', undefined);
+    this.routes.set('', new FlashMessage(this.messageStore));
 
     onDestroy(() => {
-      console.log('onDestroy, clear timeouts');
       for (const route of this.routes.values()) {
         clearTimeout(route.flashTimeout);
       }
@@ -51,7 +50,10 @@ export class FlashRouter {
 
   createRoute(routeId: string, data: FlashMessageType, options?: Partial<FlashOptions>) {
     console.log('createRoute', routeId, options);
-    const newRoute = new FlashMessage(this.messageStore, mergeOptions(options));
+    const closest = this.getClosestRoute(routeId);
+    const newRoute = new FlashMessage(this.messageStore, mergeOptions(closest.options, options));
+
+    // Update flash data
     newRoute.message.set(data);
 
     this.routes.set(routeId, newRoute);

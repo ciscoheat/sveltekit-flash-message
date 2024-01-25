@@ -19,12 +19,15 @@ export const defaultOptions = {
   }
 } satisfies FlashOptions;
 
-export function mergeOptions(options: Partial<FlashOptions> | undefined): FlashOptions {
+export function mergeOptions(
+  parentOptions: FlashOptions,
+  options: Partial<FlashOptions> | undefined
+): FlashOptions {
   return {
-    ...defaultOptions,
+    ...parentOptions,
     ...options,
     flashCookieOptions: {
-      ...defaultOptions.flashCookieOptions,
+      ...parentOptions.flashCookieOptions,
       ...options?.flashCookieOptions
     }
   };
