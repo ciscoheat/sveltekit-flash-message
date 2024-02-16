@@ -113,7 +113,7 @@
     <h3>Events</h3>
     <div class="events">
       {#each $events as message}
-        <div>{message}</div>
+        <div>{String(message)}</div>
       {/each}
     </div>
   </section>
