@@ -102,7 +102,7 @@ redirect(
 // Makes a 303 redirect to the current location.
 redirect(
   message: App.PageData['flash'],
-  event: RequestEvent | Cookies
+  event: RequestEvent
 )
 
 // For compatibility, the sveltekit signature can also be used, which will send no flash message.
