@@ -83,6 +83,7 @@ function _initFlash(page: Readable<Page>, options?: Partial<FlashOptions>): Flas
 
   //#region Router /////
 
+  // eslint-disable-next-line dci-lint/literal-role-contracts
   const Router = getRouter(page, _page.data.flash);
 
   function Router_getFlashMessage() {

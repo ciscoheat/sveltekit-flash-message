@@ -1,7 +1,8 @@
 //import type { Actions } from '@sveltejs/kit';
 import { redirect } from '$lib/server';
+import type { PageServerLoad } from './$types';
 
-export const load = async (event) => {
+export const load: PageServerLoad = async (event) => {
   const message = {
     status: 'ok',
     text: 'Redirecting back to start.'
@@ -10,9 +11,3 @@ export const load = async (event) => {
   // SvelteKit 2 check (no throw)
   redirect(303, '/', [message], event);
 };
-
-/*
-export const actions: Actions = {
-  default: async (event) => {}
-};
-*/

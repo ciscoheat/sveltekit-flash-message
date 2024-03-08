@@ -1,17 +1,17 @@
 # sveltekit-flash-message ⚡
 
-This is a [Sveltekit](https://kit.svelte.dev/) library that passes temporary data to the next request, usually from [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful for displaying a success or failure message after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
+This [Sveltekit](https://kit.svelte.dev/) library passes temporary data to the next request, usually in [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful for displaying a success or failure message after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
 
 Since it's a temporary message it's also known as a "flash message", especially known from PHP apps, since it's easy to add this functionality with PHP's built-in session handling. With SvelteKit it's a bit harder, but this library was made to alleviate that, encouraging well-behaved web apps that [Redirects after Post](https://www.theserverside.com/news/1365146/Redirect-After-Post).
 
 ## Installation
 
 ```
-npm i -D sveltekit-flash-message
+pnpm i -D sveltekit-flash-message
 ```
 
 ```
-pnpm i -D sveltekit-flash-message
+npm i -D sveltekit-flash-message
 ```
 
 ## How to use
@@ -79,34 +79,34 @@ Import `getFlash` in a layout or page component to display the flash message. `g
 
 To send a flash message from the server, import `redirect` from `sveltekit-flash-message/server` and use it in [load functions](https://kit.svelte.dev/docs/load#redirects) and [form actions](https://kit.svelte.dev/docs/form-actions#anatomy-of-an-action-redirects).
 
-**Note:** With SvelteKit 2, you don't need to [throw the redirect anymore](https://kit.svelte.dev/docs/migrating-to-sveltekit-2#redirect-and-error-are-no-longer-thrown-by-you), just call `redirect`.
+**Note:** With SvelteKit 2, you don't need to [throw the redirect](https://kit.svelte.dev/docs/migrating-to-sveltekit-2#redirect-and-error-are-no-longer-thrown-by-you), just call `redirect`. If you're still on SvelteKit 1, `throw` the function call.
 
 ```ts
 import { redirect } from 'sveltekit-flash-message/server'
 
-throw redirect(
+// The most specific: Redirect with a specific HTTP status to a specific location.
+redirect(
   status: number,
   location: string,
   message: App.PageData['flash'],
   event: RequestEvent | Cookies
 )
 
-// Makes a 303 redirect
-throw redirect(
+// Makes a 303 redirect to a specific location.
+redirect(
   location: string,
   message: App.PageData['flash'],
   event: RequestEvent | Cookies
 )
 
-// Makes a 303 redirect to the current URL
-throw redirect(
+// Makes a 303 redirect to the current location.
+redirect(
   message: App.PageData['flash'],
   event: RequestEvent | Cookies
 )
 
-// For compatibility, the sveltekit signature can also be used,
-// which will send no flash message.
-throw redirect(
+// For compatibility, the sveltekit signature can also be used, which will send no flash message.
+redirect(
   status: number,
   location: string,
 )
@@ -127,8 +127,7 @@ export const actions = {
       text: form.get('text')
     });
 
-    const message = { type: 'success', message: "That's the entrepreneur spirit!" } as const;
-    throw redirect(message, cookies);
+    redirect('/', { type: 'success', message: "That's the entrepreneur spirit!" }, cookies);
   }
 };
 ```
@@ -142,8 +141,7 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { redirect } from 'sveltekit-flash-message/server';
 
 export const POST = async ({ cookies }) => {
-  const message = { type: 'success', message: 'Endpoint POST successful!' } as const;
-  throw redirect('/', message, cookies);
+  redirect('/', { type: 'success', message: 'Endpoint POST successful!' }, cookies);
 };
 ```
 
@@ -188,6 +186,8 @@ If you want to update the flash message on the client, use `getFlash` in any com
 <button on:click={showMessage}>Show flash message</button>
 ```
 
+This will of course not set a cookie for the next request, it'll only update the flash message on the client.
+
 ## Client-side fetching and redirecting
 
 The flash message will update automatically on redirect or navigation, but when using [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis), you must call `updateFlash` afterwards:
@@ -225,7 +225,7 @@ async function submitForm(e: Event) {
 
 ## Toast messages, event-style
 
-A common use case for flash messages is to show a toast notification, but a toast is more of an event than data that should be displayed on the page, as we've done previously. But you can use the `flash` store as an event handler with a reactive statement:
+A common use case for flash messages is to show a toast notification, but a toast is more like an event than data that should be displayed on the page, as we've done previously. But you can use the `flash` store as an event handler with a reactive statement:
 
 **src/routes/+layout.svelte**
 

@@ -5,6 +5,12 @@ Headlines: Added, Changed, Deprecated, Removed, Fixed, Security
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.3] - 2024-03-108
+
+### Fixed
+
+- `redirect` with two parameters accepted a `Cookies` object, which wouldn't work as the redirect url couldn't be detected.
+
 ## [2.4.2] - 2024-02-16
 
 ### Added
