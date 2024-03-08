@@ -23,11 +23,21 @@ In `src/app.d.ts`, add the type for the flash message to `App.PageData` as an op
 **src/app.d.ts**
 
 ```ts
-declare namespace App {
-  interface PageData {
-    flash?: { type: 'success' | 'error'; message: string };
+// See https://kit.svelte.dev/docs/types#app
+// for information about these interfaces
+declare global {
+  namespace App {
+    // interface Error {}
+    // interface Locals {}
+    interface PageData {
+      flash?: { type: 'success' | 'error'; message: string };
+    }
+    // interface PageState {}
+    // interface Platform {}
   }
 }
+
+export {};
 ```
 
 ### 2. Wrap the load function of a top-level +layout or +page route
