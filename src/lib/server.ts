@@ -99,7 +99,10 @@ export function redirect(status: RedirectStatus, location: string | URL): Return
  * When called during request handling, SvelteKit will return a redirect response.
  * Make sure you're not catching the thrown redirect, which would prevent SvelteKit from handling it.
  * @param {App.PageData['flash']} message The flash message.
- * @param {RequestEvent | Cookies} event The event for the load function or form action.
+ * @param {RequestEvent} event The event for the load function or form action.
+ * @throws {Redirect} This error instructs SvelteKit to redirect to the specified location.
+ * @throws {Error} If the provided status is invalid.
+ * @return {never}
  */
 export function redirect(
   message: App.PageData['flash'],
@@ -112,7 +115,10 @@ export function redirect(
  * Make sure you're not catching the thrown redirect, which would prevent SvelteKit from handling it.
  * @param {string | URL} location The redirect URL/location.
  * @param {App.PageData['flash']} message The flash message.
- * @param {RequestEvent | Cookies} event The event for the load function or form action.
+ * @param {RequestEvent | Cookies} event The event for the load function or form action, or the cookies object from the RequestEvent.
+ * @throws {Redirect} This error instructs SvelteKit to redirect to the specified location.
+ * @throws {Error} If the provided status is invalid.
+ * @return {never}
  */
 export function redirect(
   location: string | URL,
@@ -127,7 +133,10 @@ export function redirect(
  * @param {300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308} status The [HTTP status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#redirection_messages). Must be in the range 300-308.
  * @param {string | URL} location The redirect URL/location.
  * @param {App.PageData['flash']} message The flash message.
- * @param {RequestEvent | Cookies} event The event for the load function or form action.
+ * @param {RequestEvent | Cookies} event The event for the load function or form action, or the cookies object from the RequestEvent.
+ * @throws {Redirect} This error instructs SvelteKit to redirect to the specified location.
+ * @throws {Error} If the provided status is invalid.
+ * @return {never}
  */
 export function redirect(
   status: RedirectStatus,
