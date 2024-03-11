@@ -63,6 +63,8 @@ export const load = loadFlash(async (event) => {
 });
 ```
 
+**Note:** There cannot be any additional `loadFlash` calls in routes below, as the flash cookie is deleted when it is found the first time.
+
 ### 3. Display the flash message
 
 Import `getFlash` in a layout or page component to display the flash message. `getFlash` will return a store that you'll use to access the message:
