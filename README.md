@@ -369,10 +369,10 @@ The only thing you need to do when upgrading to 1.x is to remove all calls to `u
 
 1. Rename functions:
 
-- `initFlash` is deprecated, `getFlash` can now be used directly instead.
 - `loadFlashMessage` is deprecated and renamed to `loadFlash`.
+- `initFlash` is only needed for configuration, `getFlash` can be used directly in most cases.
 
-2. If you've added the `beforeNavigate` snippet that clears the flash message after navigation - it can now be removed since it's automatic (though it can be prevented by setting the `clearOnNavigate` option to `false`).
+2. If you've added the `beforeNavigate` snippet that clears the flash message after navigation, it's now automatic and can be removed. (It can be prevented by setting the `clearOnNavigate` option to `false`.)
 
 3. If you're using the snippet for clearing the message after a certain amount of time, you can remove it and use the `clearAfterMs` option instead.
 
