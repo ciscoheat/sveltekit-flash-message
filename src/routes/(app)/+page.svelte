@@ -37,9 +37,9 @@
 </script>
 
 <aside class="interactions">
-  <i class="fa-regular fa-heart fa-2x" />
-  <i class="fa-regular fa-lightbulb fa-2x" />
-  <i class="fa-regular fa-thumbs-up fa-2x" />
+  <i class="fa-regular fa-heart fa-2x"></i>
+  <i class="fa-regular fa-lightbulb fa-2x"></i>
+  <i class="fa-regular fa-thumbs-up fa-2x"></i>
 </aside>
 
 <article>

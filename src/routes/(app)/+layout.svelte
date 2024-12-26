@@ -1,6 +1,5 @@
 <script lang="ts">
   import './root.scss';
-
   import { page } from '$app/stores';
   import type { LayoutData } from './$types';
   import { getFlash } from '$lib/client';
@@ -116,13 +115,12 @@
     @include stack-horizontal;
     grid-template-columns: 1fr 14fr 5fr;
 
+    background-color: rgb(245, 245, 245);
+    align-items: start;
+
     @media (max-width: $mobile) {
       @include stack-vertical;
     }
-
-    align-items: start;
-
-    background-color: rgb(245, 245, 245);
   }
 
   footer {
