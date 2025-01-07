@@ -1,6 +1,6 @@
 # sveltekit-flash-message ⚡
 
-This [Sveltekit](https://kit.svelte.dev/) library passes temporary data to the next request, usually in [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful for displaying a success or failure message after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
+This [Sveltekit](https://svelte.dev/docs/kit/) library passes temporary data to the next request, usually in [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful for displaying a success or failure message after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
 
 Since it's a temporary message it's also known as a "flash message", especially known from PHP apps, since it's easy to add this functionality with PHP's built-in session handling. With SvelteKit it's a bit harder, but this library was made to alleviate that, encouraging well-behaved web apps that [Redirects after Post](https://www.theserverside.com/news/1365146/Redirect-After-Post).
 
@@ -23,7 +23,7 @@ In `src/app.d.ts`, add the type for the flash message to `App.PageData` as an op
 **src/app.d.ts**
 
 ```ts
-// See https://kit.svelte.dev/docs/types#app
+// See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 declare global {
   namespace App {
@@ -74,7 +74,7 @@ Import `getFlash` in a layout or page component to display the flash message. `g
 ```svelte
 <script lang="ts">
   import { getFlash } from 'sveltekit-flash-message';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
 
   const flash = getFlash(page);
 </script>
@@ -186,7 +186,7 @@ If you want to update the flash message on the client, use `getFlash` in any com
 ```svelte
 <script>
   import { getFlash } from 'sveltekit-flash-message';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
 
   const flash = getFlash(page);
 
@@ -207,7 +207,7 @@ The flash message will update automatically on redirect or navigation, but when 
 ```svelte
 <script lang="ts">
   import { updateFlash } from 'sveltekit-flash-message';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
 
   async function submitForm(e: Event) {
     const form = e.target as HTMLFormElement;
@@ -243,7 +243,7 @@ A common use case for flash messages is to show a toast notification, but a toas
 
 ```ts
 import { getFlash } from 'sveltekit-flash-message';
-import { page } from '$app/stores';
+import { page } from '$app/state';
 import toast, { Toaster } from 'svelte-french-toast';
 
 const flash = getFlash(page);
@@ -275,7 +275,7 @@ You can also use `initFlash`, if you don't display a flash message in a certain 
 
 ```ts
 import { initFlash } from 'sveltekit-flash-message';
-import { page } from '$app/stores';
+import { page } from '$app/state';
 
 initFlash(page, {
   clearAfterMs: 10000

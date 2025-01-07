@@ -1,6 +1,6 @@
 <script lang="ts">
   import './root.scss';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import type { LayoutData } from './$types';
   import { getFlash } from '$lib/client';
   import toast, { Toaster } from 'svelte-french-toast';

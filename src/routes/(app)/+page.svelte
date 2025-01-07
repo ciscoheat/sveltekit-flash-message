@@ -2,7 +2,7 @@
   import { enhance } from '$app/forms';
   import type { PageData } from './$types';
   import { getFlash, updateFlash } from '$lib/client';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import { writable } from 'svelte/store';
 
   const flash = getFlash(page);
