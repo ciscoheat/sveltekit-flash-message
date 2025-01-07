@@ -33,28 +33,35 @@ function subscribeToNavigation(page: Readable<Page> | Page) {
   if (!browser) return;
 
   try {
+    if ('subscribe' in page) throw '$app/stores used';
+
     // Svelte 5
     $effect(() => {
-      const p = page as Page;
       // Track the whole object, like page.subscribe in Svelte 4
-      p.data;
-      p.error;
-      p.form;
-      p.params;
-      p.route;
-      p.state;
-      p.status;
-      p.url;
+      page.data;
+      page.error;
+      page.form;
+      page.params;
+      page.route;
+      page.state;
+      page.status;
+      page.url;
       const cookieData = parseFlashCookie();
 
       if (cookieData !== undefined) {
         //console.log('🚀 ~ page.subscribe:', cookieData, $page.route.id);
-        const flash = getRouter(p).getFlashMessage(p.route.id);
+        const flash = getRouter(page).getFlashMessage(page.route.id);
         flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
         clearFlashCookie(flash.options.flashCookieOptions);
       }
     });
   } catch (e) {
+    if (!('subscribe' in page)) {
+      throw new Error(
+        'sveltekit-flash-message cannot use Page from $app/state in Svelte 4. Use $app/stores instead.'
+      );
+    }
+
     // Svelte 4
     const p = page as Readable<Page>;
     p.subscribe(($page) => {
