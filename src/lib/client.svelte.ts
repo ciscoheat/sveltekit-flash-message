@@ -76,7 +76,7 @@ function subscribeToNavigation(page: Readable<Page> | Page) {
   }
 
   navigating.subscribe((nav) => {
-    console.log('Navigating:', nav);
+    //console.log('Navigating:', nav);
     if (nav === null) {
       const cookieData = parseFlashCookie();
 
