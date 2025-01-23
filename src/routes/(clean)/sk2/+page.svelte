@@ -2,7 +2,6 @@
   import { enhance } from '$app/forms';
 </script>
 
-<h1>Welcome to SvelteKit</h1>
 <p>Click submit, a flash message should appear on the next page.</p>
 <p><a href="/">Back</a></p>
 

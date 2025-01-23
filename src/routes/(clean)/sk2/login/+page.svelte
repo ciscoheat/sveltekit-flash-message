@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getFlash } from '$lib/client';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
 
   const flash = getFlash(page);
   console.log('🚀 ~ flash:', $flash);
