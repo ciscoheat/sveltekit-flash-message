@@ -63,7 +63,7 @@ export const load = loadFlash(async (event) => {
 });
 ```
 
-**Note:** There cannot be any additional `loadFlash` calls in routes below, as the flash cookie is deleted when it is found the first time.
+**Note:** There cannot be any additional `load/loadFlash` calls in routes below, as the flash cookie is deleted when it is found the first time.
 
 ### 3. Display the flash message
 
