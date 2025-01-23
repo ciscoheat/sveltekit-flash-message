@@ -237,7 +237,7 @@ async function submitForm(e: Event) {
 
 ## Toast messages, event-style
 
-A common use case for flash messages is to show a toast notification, but a toast is more like an event than data that should be displayed on the page, as we've done previously. But you can use the `flash` store as an event handler with a reactive statement:
+A common use case for flash messages is to show a toast notification, but a toast is more of an event than data that should be displayed on the page, as we've done previously. But you can use the `flash` store in an [$effect](https://svelte.dev/docs/svelte/$effect) to handle this:
 
 **src/routes/+layout.svelte**
 
@@ -248,14 +248,16 @@ import toast, { Toaster } from 'svelte-french-toast';
 
 const flash = getFlash(page);
 
-$: if ($flash) {
+$effect(() => {
+  if (!$flash) return;
+
   toast($flash.message, {
     icon: $flash.type == 'success' ? '✅' : '❌'
   });
 
   // Clear the flash message to avoid double-toasting.
   $flash = undefined;
-}
+});
 ```
 
 ## Flash message options
