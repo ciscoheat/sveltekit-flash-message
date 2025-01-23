@@ -1,6 +1,6 @@
 # sveltekit-flash-message ⚡
 
-This [Sveltekit](https://svelte.dev/docs/kit/) library passes temporary data to the next request, usually in [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful for displaying a success or failure message after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
+This [SvelteKit](https://svelte.dev/docs/kit/) library passes temporary data to the next request, usually in [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful for displaying a success or failure message after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
 
 Since it's a temporary message it's also known as a "flash message", especially known from PHP apps, since it's easy to add this functionality with PHP's built-in session handling. With SvelteKit it's a bit harder, but this library was made to alleviate that, encouraging well-behaved web apps that [Redirects after Post](https://www.theserverside.com/news/1365146/Redirect-After-Post).
 
