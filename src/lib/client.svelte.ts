@@ -31,6 +31,29 @@ function getRouter(page: Readable<Page> | Page, initialData?: FlashMessageType) 
 function subscribeToNavigation(page: Readable<Page> | Page) {
   if (!browser) return;
 
+  navigating.subscribe((nav) => {
+    //console.log('Navigating:', nav);
+    if (nav === null) {
+      const cookieData = parseFlashCookie();
+
+      if (cookieData !== undefined) {
+        //console.log('🚀 ~ afterNavigate:', cookieData, get(page).route.id);
+        const flash = getRouter(page).getFlashMessage(get(page).route.id);
+        flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
+        clearFlashCookie(flash.options.flashCookieOptions);
+      }
+    } else {
+      const navTo = nav?.to?.route.id;
+      if (navTo) {
+        const flash = getRouter(page).getFlashMessage(navTo);
+        if (flash.options.clearOnNavigate && nav.from?.route.id != navTo) {
+          //console.log('🚀 ~ beforeNavigate ~ clear message on nav to:', navTo);
+          flash.message.set(undefined);
+        }
+      }
+    }
+  });
+
   try {
     if ('subscribe' in page) throw '$app/stores used';
 
@@ -74,29 +97,6 @@ function subscribeToNavigation(page: Readable<Page> | Page) {
       }
     });
   }
-
-  navigating.subscribe((nav) => {
-    //console.log('Navigating:', nav);
-    if (nav === null) {
-      const cookieData = parseFlashCookie();
-
-      if (cookieData !== undefined) {
-        //console.log('🚀 ~ afterNavigate:', cookieData, get(page).route.id);
-        const flash = getRouter(page).getFlashMessage(get(page).route.id);
-        flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
-        clearFlashCookie(flash.options.flashCookieOptions);
-      }
-    } else {
-      const navTo = nav?.to?.route.id;
-      if (navTo) {
-        const flash = getRouter(page).getFlashMessage(navTo);
-        if (flash.options.clearOnNavigate && nav.from?.route.id != navTo) {
-          //console.log('🚀 ~ beforeNavigate ~ clear message on nav to:', navTo);
-          flash.message.set(undefined);
-        }
-      }
-    }
-  });
 }
 
 export function initFlash(
