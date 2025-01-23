@@ -160,7 +160,7 @@ function _initFlash(page: Readable<Page> | Page, options?: Partial<FlashOptions>
 
 /**
  * Retrieves the flash message store for display or modification.
- * @param page Page store, imported from `$app/stores`.
+ * @param page Page store, imported from `$app/state`.
  * @param {FlashOptions} options for the flash message. Can only be set once, usually at the highest level component where getFlash is called for the first time.
  * @returns The flash message store.
  */
@@ -173,7 +173,7 @@ export function getFlash(
 
 /**
  * Update the flash message manually, usually after a fetch request.
- * @param page Page store, imported from `$app/stores`.
+ * @param page Page store, imported from `$app/state`.
  * @param {Promise<void>} update A callback which is executed *before* the message is updated, to delay the message until navigation events are completed, for example when using `goto`.
  * @returns {Promise<boolean>} `true` if a flash message existed, `false` if not.
  */
