@@ -59,7 +59,8 @@
   "exports": {
     ".": {
       "types": "./dist/client.d.ts",
-      "svelte": "./dist/client.js"
+      "svelte": "./dist/client.js",
+      "default": "./dist/client.js"
     },
     "./package.json": "./package.json",
     "./client": {
