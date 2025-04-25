@@ -19,19 +19,19 @@ export const flashCookieOptions: CookieSerializeOptions = {
 /**
  * @deprecated Renamed to loadFlash.
  */
-export function loadFlashMessage<S extends ServerLoad, E extends ServerLoadEvent>(cb: S) {
-  return loadFlash<S, E>(cb);
+export function loadFlashMessage<E extends ServerLoadEvent, R>(load: (event: E) => R) {
+  return loadFlash(load);
 }
 
 /**
  * Retrieves the flash message from the previous request.
  * Use as a wrapper around a top-level load function, usually in a +layout.server.ts file.
  */
-export function loadFlash<S extends ServerLoad, E extends ServerLoadEvent>(cb: S) {
+export function loadFlash<E extends ServerLoadEvent, R>(load: (event: E) => R) {
   return async (event: E) => {
     const flash = _loadFlash(event).flash;
-    const loadFunction = await cb(event);
-    return { flash, ...loadFunction } as ReturnType<S>;
+    const loadReturn = await load(event);
+    return { flash, ...loadReturn } as typeof loadReturn;
   };
 }
 
