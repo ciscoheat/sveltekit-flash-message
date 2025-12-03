@@ -193,6 +193,22 @@ export async function updateFlash(page: Readable<Page> | Page, update?: () => Pr
   return !!cookieData;
 }
 
+/**
+ * Take the flash message, preventing the flash message store from being updated with the message. Useful with progressively enhanced forms for applying custom handling to the flash message.
+ * @param page Page store, imported from `$app/stores`.
+ * @returns {Promise<App.PageData['flash']>} The flash message if it existed, `undefined` if not.
+ */
+export async function takeFlash(page: Readable<Page> | Page) {
+  const cookieData = parseFlashCookie() as App.PageData['flash'] | undefined;
+
+  if (cookieData !== undefined) {
+    if (browser) await tick();
+    const flash = getRouter(page).getFlashMessage(get(page).route.id);
+    clearFlashCookie(flash.options.flashCookieOptions);
+    return flash;
+  }
+}
+
 ///////////////////////////////////////////////////////////
 
 function clearFlashCookie(options: CookieSerializeOptions) {

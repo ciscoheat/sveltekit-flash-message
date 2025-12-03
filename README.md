@@ -260,6 +260,47 @@ $effect(() => {
 });
 ```
 
+`takeFlash` can be used to prevent the flash message store from being updated with the flash message. This can be useful for applying custom handling to the flash message in progressively enhanced forms:
+
+```svelte
+<script lang="ts">
+  import { toast } from "svelte-sonner";
+  import { takeFlash } from 'sveltekit-flash-message';
+  import { superForm } from "sveltekit-superforms";
+
+  let toastId: string | number | null = null;
+  const { form, enhance } = superForm(
+    { test: "" },
+    {
+      onSubmit: () => {
+        toastId = toast.loading("Pending...");
+      },
+      onResult: async ({ result }) => {
+        if (toastId !== null) {
+          // Prevent the flash message store in `src/routes/+layout.svelte` from being updated.
+          // Instead, we manually take the flash message here and update the already pending toast.
+          const flash = await takeFlash();
+          if (!flash) return;
+          if (result.type === "error" || result.type === "failure") {
+            toast.error(flash.message, {
+              id: toastId,
+              action: { label: "Retry", onClick: () => { /* Retry logic here */ }, },
+            });
+          } else {
+            toast.success(flash.message, { id: toastId });
+          }
+        }
+      },
+    },
+  );
+</script>
+
+<form method="POST" action="/test" use:enhance>
+  <input type="text" name="test" bind:value={$form.test} />
+  <button>Submit</button>
+</form>
+```
+
 ## Flash message options
 
 When calling `getFlash`, you can specify options, which will be inherited for the current route and the ones below.
