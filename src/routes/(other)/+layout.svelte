@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { initFlash } from '$lib/client';
+  import { page } from '$app/state';
+  import { initFlash } from '#lib/client.js';
 
   initFlash(page, {
     clearAfterMs: 4000

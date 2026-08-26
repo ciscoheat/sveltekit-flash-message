@@ -1,8 +1,16 @@
+import adapter from '@sveltejs/adapter-auto';
 import { sveltekit } from '@sveltejs/kit/vite';
-import type { UserConfig } from 'vite';
+import { sveltePreprocess } from 'svelte-preprocess';
+import { defineConfig } from 'vite';
 
-const config: UserConfig = {
-  plugins: [sveltekit()]
-};
-
-export default config;
+export default defineConfig({
+  plugins: [
+    sveltekit({
+      adapter: adapter(),
+      preprocess: sveltePreprocess(),
+      csrf: {
+        trustedOrigins: ['*']
+      }
+    })
+  ]
+});

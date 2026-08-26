@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
-import { setFlash } from '$lib/server';
-import { loadFlash } from '$lib/server';
+import { setFlash } from '#lib/server.js';
+import { loadFlash } from '#lib/server.js';
 
 export const load = loadFlash(async (event) => {
   console.log('loadFlash called on: ', event.url.pathname);

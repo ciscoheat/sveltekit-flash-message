@@ -1,1 +1,1 @@
-export { load } from '$lib/server';
+export { load } from '#lib/server.js';

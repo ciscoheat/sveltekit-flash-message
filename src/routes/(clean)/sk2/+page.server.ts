@@ -1,5 +1,5 @@
 import type { Actions } from './$types';
-import { redirect } from '$lib/server';
+import { redirect } from '#lib/server.js';
 
 export const actions: Actions = {
   default: async (event) => {

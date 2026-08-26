@@ -2,9 +2,9 @@
   import './root.scss';
   import { page } from '$app/state';
   import type { LayoutData } from './$types';
-  import { getFlash } from '$lib/client';
+  import { getFlash } from '#lib/client.js';
   import toast, { Toaster } from 'svelte-french-toast';
-  import { browser } from '$app/environment';
+  import { browser } from '$app/env';
 
   let flash = getFlash(page, {
     clearAfterMs: 75000,

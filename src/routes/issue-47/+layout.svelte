@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { getFlash } from '$lib/client';
+  import { getFlash } from '#lib/client.js';
   import type { LayoutData } from './$types';
 
   interface Props {

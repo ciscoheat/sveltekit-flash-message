@@ -1,4 +1,4 @@
-import { redirect } from '$lib/server';
+import { redirect } from '#lib/server.js';
 
 export const actions = {
   default: ({ cookies }) => {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getFlash } from '$lib/client';
+  import { getFlash } from '#lib/client.js';
   import { page } from '$app/state';
 
   const flash = getFlash(page);

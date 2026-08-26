@@ -1,4 +1,4 @@
-import { redirect } from '$lib/server';
+import { redirect } from '#lib/server.js';
 import type { PageServerLoad } from './$types';
 
 export const load = (async (event) => {

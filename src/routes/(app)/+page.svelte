@@ -1,7 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import type { PageData } from './$types';
-  import { getFlash, updateFlash } from '$lib/client';
+  import { getFlash, updateFlash } from '#lib/client.js';
   import { page } from '$app/state';
   import { writable } from 'svelte/store';
 
