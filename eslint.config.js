@@ -44,6 +44,11 @@ export default [
     }
   },
   {
+    rules: {
+      'svelte/no-navigation-without-resolve': 'off'
+    }
+  },
+  {
     files: ['**/*.svelte'],
     languageOptions: {
       parser: svelteParser,
