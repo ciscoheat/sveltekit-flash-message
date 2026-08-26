@@ -1,10 +1,10 @@
-import type { CookieSerializeOptions } from './cookie-es-main/types.js';
+import type { SerializeOptions } from 'cookie';
 
 export type FlashOptions = {
   clearArray: boolean;
   clearOnNavigate: boolean;
   clearAfterMs: number;
-  flashCookieOptions: CookieSerializeOptions;
+  flashCookieOptions: SerializeOptions;
 };
 
 export const defaultOptions = {
