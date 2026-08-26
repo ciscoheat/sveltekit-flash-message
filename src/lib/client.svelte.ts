@@ -22,7 +22,6 @@ function getRouter(page: Readable<Page> | Page, initialData?: FlashMessageType) 
     router = new FlashRouter();
     routers.set(page, router);
     router.getFlashMessage(get(page).route.id).message.set(initialData);
-    subscribeToNavigation(page);
   }
 
   return router;
@@ -33,10 +32,13 @@ function subscribeToNavigation(page: Readable<Page> | Page) {
 
   beforeNavigate(({ to, from }) => {
     const navTo = to?.route.id;
-    if (navTo) {
-      const flash = getRouter(page).getFlashMessage(navTo);
-      if (flash.options.clearOnNavigate && from?.route.id != navTo) {
-        flash.message.set(undefined);
+    if (navTo && parseFlashCookie() === undefined) {
+      if (from?.route.id != navTo) {
+        for (const flash of getRouter(page).routes.values()) {
+          if (flash.options.clearOnNavigate) {
+            flash.message.set(undefined);
+          }
+        }
       }
     }
   });
@@ -112,6 +114,7 @@ function _initFlash(page: Readable<Page> | Page, options?: Partial<FlashOptions>
   }
 
   const _page = get(page);
+  subscribeToNavigation(page);
 
   ///// Roles //////////////////////////////////////////////////////////////////
 
@@ -119,6 +122,14 @@ function _initFlash(page: Readable<Page> | Page, options?: Partial<FlashOptions>
 
   // eslint-disable-next-line dci-lint/literal-role-contracts
   const Router = getRouter(page, _page.data.flash);
+  const cookieData = parseFlashCookie();
+  if (cookieData !== undefined) {
+    const flash = Router.getFlashMessage(_page.route.id);
+    flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
+    clearFlashCookie(flash.options.flashCookieOptions);
+  } else if (_page.data.flash === undefined) {
+    Router.getFlashMessage(_page.route.id).message.set(undefined);
+  }
 
   function Router_getFlashMessage() {
     const route = Router.routes.get(Page_route());
