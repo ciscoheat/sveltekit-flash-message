@@ -76,7 +76,7 @@ function subscribeToNavigation(page: Readable<Page> | Page) {
         clearFlashCookie(flash.options.flashCookieOptions);
       }
     });
-  } catch (e) {
+  } catch {
     if (!('subscribe' in page)) {
       throw new Error(
         'sveltekit-flash-message cannot use Page from $app/state in Svelte 4. Use $app/stores instead.'
@@ -236,7 +236,7 @@ function parseFlashCookie(): App.PageData['flash'] | undefined {
   if (cookies[cookieName]) {
     try {
       return JSON.parse(cookies[cookieName]);
-    } catch (e) {
+    } catch {
       // Ignore value if parsing failed
     }
   }

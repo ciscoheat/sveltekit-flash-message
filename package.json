@@ -39,12 +39,14 @@
     "eslint-plugin-dci-lint": "^0.9.1",
     "eslint-plugin-svelte": "^3.23.0",
     "esm-env": "^1.2.2",
+    "globals": "^17.11.0",
     "prettier": "^3.9.6",
     "prettier-plugin-svelte": "^4.1.1",
     "publint": "^0.3.24",
     "sass": "^1.103.1",
     "svelte": "^5.56.10",
     "svelte-check": "^4.7.6",
+    "svelte-eslint-parser": "^1.8.1",
     "svelte-french-toast": "^1.2.0",
     "svelte-preprocess": "^6.0.5",
     "tslib": "^2.8.1",
@@ -53,8 +55,8 @@
   },
   "peerDependencies": {
     "@sveltejs/kit": "^2.12.0 || ^3.0.0-next.25",
-    "svelte": ">=5.0.0-next.51 <6.0.0",
-    "cookie": "^2.0.0"
+    "cookie": "^2.0.0",
+    "svelte": ">=5.0.0-next.51 <6.0.0"
   },
   "type": "module",
   "imports": {

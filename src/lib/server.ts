@@ -71,7 +71,7 @@ export function _loadFlash<T extends ServerLoadEvent>(
 
     try {
       data = JSON.parse(dataString);
-    } catch (e) {
+    } catch {
       // Ignore data if parsing error
     }
   }

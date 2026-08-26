@@ -20,7 +20,7 @@
     const form = e.target as HTMLFormElement;
     const body = new FormData(e.target as HTMLFormElement);
 
-    const response = await fetch(form.action, {
+    await fetch(form.action, {
       method: 'POST',
       body
     });
@@ -112,7 +112,7 @@
   <section>
     <h3>Events</h3>
     <div class="events">
-      {#each $events as message}
+      {#each $events as message (message)}
         <div>{String(message)}</div>
       {/each}
     </div>

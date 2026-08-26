@@ -44,7 +44,7 @@
   </header>
   <div id="messages">
     {#if $flash}
-      {#each $flash as msg}
+      {#each $flash as msg (msg.text)}
         {@const bg = msg.status == 'ok' ? '#3D9970' : '#FF4136'}
         <div data-status={msg.status} style:background-color={bg} class="flash">{msg.text}</div>
       {/each}

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { writable, type Writable } from 'svelte/store';
 import { FlashMessage, type FlashMessageType } from './flashMessage.js';
 import { mergeOptions, type FlashOptions } from './options.js';
