@@ -1,4 +1,4 @@
-import type { Cookies, RequestEvent, ServerLoad, ServerLoadEvent } from '@sveltejs/kit';
+import type { Cookies, RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
 import { redirect as redir } from '@sveltejs/kit';
 import type { SerializeOptions } from 'cookie';
 
@@ -7,7 +7,7 @@ import type { SerializeOptions } from 'cookie';
 // Cannot change.
 const cookieName = 'flash';
 
-export const flashCookieOptions = {
+export const flashCookieOptions: SerializeOptions = {
   path: '/',
   maxAge: 120,
   httpOnly: false,
@@ -19,19 +19,23 @@ export const flashCookieOptions = {
 /**
  * @deprecated Renamed to loadFlash.
  */
-export function loadFlashMessage<S extends ServerLoad, E extends ServerLoadEvent>(cb: S) {
-  return loadFlash<S, E>(cb);
+export function loadFlashMessage<E extends ServerLoadEvent, R extends Record<string, any>>(
+  load: (event: E) => R | Promise<R>
+) {
+  return loadFlash(load);
 }
 
 /**
  * Retrieves the flash message from the previous request.
  * Use as a wrapper around a top-level load function, usually in a +layout.server.ts file.
  */
-export function loadFlash<S extends ServerLoad, E extends ServerLoadEvent>(cb: S) {
+export function loadFlash<E extends ServerLoadEvent, R extends Record<string, any>>(
+  load: (event: E) => R | Promise<R>
+) {
   return async (event: E) => {
     const flash = _loadFlash(event).flash;
-    const loadFunction = await cb(event);
-    return { flash, ...loadFunction } as ReturnType<S>;
+    const loadReturn = await load(event);
+    return { flash, ...loadReturn } as R & { flash: App.PageData['flash'] | undefined };
   };
 }
 

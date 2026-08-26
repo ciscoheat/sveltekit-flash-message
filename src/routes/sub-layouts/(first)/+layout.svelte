@@ -11,7 +11,7 @@
 
   {#if $flash}
     <div style="border: 1px solid black;">
-      {$flash.message}
+      {$flash[0]?.text}
     </div>
   {/if}
 
