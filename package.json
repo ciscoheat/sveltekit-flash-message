@@ -52,7 +52,7 @@
     "vite": "^8.2.2"
   },
   "peerDependencies": {
-    "@sveltejs/kit": "^2.12.0 || ^3.0.0-next.23",
+    "@sveltejs/kit": ">=3.0.0-next.25 <4.0.0",
     "svelte": ">=5.0.0-next.51 <6.0.0"
   },
   "type": "module",
