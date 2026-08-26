@@ -11,7 +11,7 @@
   }
 </script>
 
-<aside class="interactions" />
+<aside class="interactions"></aside>
 
 <article>
   <p>{error}</p>

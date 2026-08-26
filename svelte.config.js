@@ -11,7 +11,7 @@ const config = {
 		adapter: adapter(),
 		csrf: {
 			// For ngrok to work
-			checkOrigin: false
+			trustedOrigins: ['*']
 		}
 	}
 };

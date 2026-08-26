@@ -1,7 +1,7 @@
 <script lang="ts">
 </script>
 
-<aside class="interactions" />
+	<aside class="interactions"></aside>
 
 <article>
 	<h1>After POST page</h1>
@@ -14,7 +14,7 @@
 </article>
 
 <style lang="scss">
-	@import '../mixins.scss';
+	@use '../mixins.scss' as *;
 
 	article {
 		@include stack-vertical;

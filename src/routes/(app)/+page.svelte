@@ -120,7 +120,7 @@
 </aside>
 
 <style lang="scss">
-  @import './mixins.scss';
+  @use './mixins.scss' as *;
 
   .events {
     display: flex;
