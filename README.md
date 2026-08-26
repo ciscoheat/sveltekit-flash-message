@@ -1,6 +1,6 @@
 # sveltekit-flash-message ⚡
 
-This [Sveltekit](https://svelte.dev/docs/kit/) library passes temporary data to the next request, usually in [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful for displaying a success or failure message after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
+This [SvelteKit](https://svelte.dev/docs/kit/) library passes temporary data to the next request, usually in [form actions](https://kit.svelte.dev/docs/form-actions) and [endpoints](https://kit.svelte.dev/docs/routing#server). It's useful for displaying a success or failure message after a POST, which should not always be displayed at the form, rather as a message on the page that the request was redirected to.
 
 Since it's a temporary message it's also known as a "flash message", especially known from PHP apps, since it's easy to add this functionality with PHP's built-in session handling. With SvelteKit it's a bit harder, but this library was made to alleviate that, encouraging well-behaved web apps that [Redirects after Post](https://www.theserverside.com/news/1365146/Redirect-After-Post).
 
@@ -63,7 +63,7 @@ export const load = loadFlash(async (event) => {
 });
 ```
 
-**Note:** There cannot be any additional `loadFlash` calls in routes below, as the flash cookie is deleted when it is found the first time.
+**Note:** There cannot be any additional `load/loadFlash` calls in routes below, as the flash cookie is deleted when it is found the first time.
 
 ### 3. Display the flash message
 
@@ -237,7 +237,7 @@ async function submitForm(e: Event) {
 
 ## Toast messages, event-style
 
-A common use case for flash messages is to show a toast notification, but a toast is more like an event than data that should be displayed on the page, as we've done previously. But you can use the `flash` store as an event handler with a reactive statement:
+A common use case for flash messages is to show a toast notification, but a toast is more of an event than data that should be displayed on the page, as we've done previously. But you can use the `flash` store in an [$effect](https://svelte.dev/docs/svelte/$effect) to handle this:
 
 **src/routes/+layout.svelte**
 
@@ -248,14 +248,16 @@ import toast, { Toaster } from 'svelte-french-toast';
 
 const flash = getFlash(page);
 
-$: if ($flash) {
+$effect(() => {
+  if (!$flash) return;
+
   toast($flash.message, {
     icon: $flash.type == 'success' ? '✅' : '❌'
   });
 
   // Clear the flash message to avoid double-toasting.
   $flash = undefined;
-}
+});
 ```
 
 ## Flash message options
