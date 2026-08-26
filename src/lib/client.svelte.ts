@@ -2,7 +2,7 @@ import { type Writable, type Readable, get as svelteGet, writable } from 'svelte
 import type { Page } from '$app/state';
 import { tick } from 'svelte';
 import { BROWSER as browser } from 'esm-env';
-import { serialize, type CookieSerializeOptions } from './cookie-es-main/index.js';
+import { stringifySetCookie, type SerializeOptions } from 'cookie';
 import { afterNavigate, beforeNavigate } from '$app/navigation';
 import { FlashMessage, type FlashMessageType } from './flashMessage.js';
 import { FlashRouter } from './router.js';
@@ -202,11 +202,13 @@ export async function updateFlash(page: Readable<Page> | Page, update?: () => Pr
 
 ///////////////////////////////////////////////////////////
 
-function clearFlashCookie(options: CookieSerializeOptions) {
+function clearFlashCookie(options: SerializeOptions) {
   // Clear parsed cookie
   if (browser) {
-    document.cookie = serialize(cookieName, '', {
+    document.cookie = stringifySetCookie({
       ...options,
+      name: cookieName,
+      value: '',
       maxAge: 0
     });
   }
