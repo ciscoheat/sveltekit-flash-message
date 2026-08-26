@@ -112,7 +112,7 @@
   <section>
     <h3>Events</h3>
     <div class="events">
-      {#each $events as message (message)}
+      {#each $events as message, index (index)}
         <div>{String(message)}</div>
       {/each}
     </div>

@@ -3,7 +3,6 @@
   import { page } from '$app/state';
   import type { LayoutData } from './$types';
   import { getFlash } from '#lib/client.js';
-  import toast, { Toaster } from 'svelte-french-toast';
   import { browser } from '$app/env';
 
   let flash = getFlash(page, {
@@ -12,14 +11,23 @@
       sameSite: 'lax'
     }
   });
+  let toastMessage: string | undefined;
+  let toastTimeout: ReturnType<typeof setTimeout>;
 
+  function showToast(message: string) {
+    toastMessage = message;
+    if (browser) {
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toastMessage = undefined;
+      }, 4000);
+    }
+  }
   $: if ($flash) {
     console.log('FLASH EVENT ' + (browser ? '[browser]' : '[SSR]') + ':', $flash?.[0].text);
     // Toast event handling
     if ($flash.length && $flash[$flash.length - 1].text.toLowerCase().includes('toast')) {
-      toast($flash[$flash.length - 1].text, {
-        icon: '✅'
-      });
+      showToast($flash[$flash.length - 1].text);
       $flash = undefined;
     }
   }
@@ -50,7 +58,9 @@
       {/each}
     {/if}
   </div>
-  <Toaster />
+  {#if toastMessage}
+    <div class="toast" role="status" aria-live="polite">{toastMessage}</div>
+  {/if}
   <main>
     <slot />
   </main>
@@ -84,6 +94,20 @@
       text-align: center;
       color: $white;
       font-weight: bold;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 10;
+      right: 1rem;
+      bottom: 1rem;
+      max-width: min(24rem, calc(100vw - 2rem));
+      padding: 0.8rem 1rem;
+      color: $white;
+      background-color: #1da489;
+      border: 1px solid #24564c;
+      border-radius: 6px;
+      box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 20%);
     }
   }
 
