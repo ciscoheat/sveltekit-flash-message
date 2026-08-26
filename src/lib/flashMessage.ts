@@ -1,5 +1,5 @@
 import type { Updater, Writable } from 'svelte/store';
-import { browser } from '$app/env';
+import { BROWSER as browser } from 'esm-env';
 import { defaultOptions, type FlashOptions } from './options.js';
 
 export type FlashMessageType =
