@@ -31,7 +31,7 @@ export function loadFlash<S extends ServerLoad, E extends ServerLoadEvent>(cb: S
   return async (event: E) => {
     const flash = _loadFlash(event).flash;
     const loadFunction = await cb(event);
-    return { flash, ...loadFunction } as ReturnType<S>;
+    return { flash, ...loadFunction } as Awaited<ReturnType<S>>;
   };
 }
 
