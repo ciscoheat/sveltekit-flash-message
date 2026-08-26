@@ -1,18 +1,18 @@
 import type { Cookies, RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
 import { redirect as redir } from '@sveltejs/kit';
-import type { SerializeOptions } from 'cookie';
+import type { CookieSerializeOptions } from './cookie.js';
 
 //const d = console.debug;
 
 // Cannot change.
 const cookieName = 'flash';
 
-export const flashCookieOptions: SerializeOptions = {
+export const flashCookieOptions: CookieSerializeOptions = {
   path: '/',
   maxAge: 120,
   httpOnly: false,
   sameSite: 'strict'
-} satisfies SerializeOptions;
+} satisfies CookieSerializeOptions;
 
 /////////////////////////////////////////////////////////////////////
 
