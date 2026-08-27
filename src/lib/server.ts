@@ -200,7 +200,8 @@ function realRedirect(
   message?: App.PageData['flash'],
   event?: RequestEvent | Cookies
 ) {
-  if (!message) return redir(status, location.toString());
+  const redirectLocation = redirectLocationForKit(location, event);
+  if (!message) return redir(status, redirectLocation);
   if (!event) throw new Error('RequestEvent is required for redirecting with flash message');
 
   const cookies = 'cookies' in event ? event.cookies : event;
@@ -209,7 +210,22 @@ function realRedirect(
     ...flashCookieOptions,
     path: flashCookieOptions.path ?? '/'
   });
-  return redir(status, location.toString());
+  return redir(status, redirectLocation);
+}
+
+function redirectLocationForKit(location: string | URL, event?: RequestEvent | Cookies) {
+  const locationString = location.toString();
+
+  try {
+    const target = new URL(locationString);
+    if (event && 'url' in event && target.origin === event.url.origin) {
+      return target.pathname + target.search + target.hash;
+    }
+  } catch {
+    return locationString;
+  }
+
+  return locationString;
 }
 
 ////////////////////////////////////////////////////////
