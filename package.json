@@ -38,23 +38,23 @@
     "svelte": "^5.40.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.60.0",
-    "@sveltejs/adapter-auto": "^8.0.0-next.3",
-    "@sveltejs/kit": "^3.0.0-next.0",
+    "@playwright/test": "^1.63.0",
+    "@sveltejs/adapter-auto": "^8.0.0-next.4",
+    "@sveltejs/kit": "^3.0.0-next.27",
     "@sveltejs/package": "^2.5.8",
-    "@sveltejs/vite-plugin-svelte": "^7.2.0",
-    "@tailwindcss/vite": "^4.3.0",
-    "@vitest/browser-playwright": "^4.1.8",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitest/browser-playwright": "^4.1.11",
     "arktype": "^2.2.3",
-    "playwright": "^1.60.0",
-    "publint": "^0.3.21",
-    "svelte": "^5.56.7",
-    "svelte-check": "^4.6.0",
-    "tailwindcss": "^4.3.0",
+    "playwright": "^1.63.0",
+    "publint": "^0.3.24",
+    "svelte": "^5.57.1",
+    "svelte-check": "^4.7.6",
+    "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "vite": "^8.1.5",
-    "vitest": "^4.1.8",
-    "vitest-browser-svelte": "^2.1.1"
+    "vite": "^8.3.0",
+    "vitest": "^4.1.11",
+    "vitest-browser-svelte": "^2.2.1"
   },
   "keywords": [
     "svelte"
