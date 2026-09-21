@@ -1,91 +1,66 @@
 {
   "name": "sveltekit-flash-message",
-  "version": "2.4.6",
-  "author": "Andreas Söderlund <ciscoheat@gmail.com> (https://blog.encodeart.dev)",
-  "description": "Send temporary data to the next request after redirect. Works with both SSR and client.",
-  "keywords": [
-    "sveltekit",
-    "svelte",
-    "session",
-    "flash message",
-    "redirect",
-    "post"
-  ],
-  "license": "MIT",
-  "bugs": "https://github.com/ciscoheat/sveltekit-flash-message/issues",
-  "repository": {
-    "url": "https://github.com/ciscoheat/sveltekit-flash-message"
-  },
+  "version": "4.0.0-runes.0",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build && npm run package",
-    "package": "svelte-kit sync && svelte-package && publint",
-    "prepublishOnly": "npm run build",
+    "build": "vite build && pnpm run prepack",
     "preview": "vite preview",
+    "prepare": "svelte-kit sync || echo ''",
+    "prepack": "svelte-kit sync && svelte-package && publint",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "lint": "prettier --plugin-search-dir . --check . && eslint .",
-    "format": "prettier --plugin-search-dir . --write ."
+    "test:unit": "vitest",
+    "test": "npm run test:unit -- --run && npm run test:e2e",
+    "test:e2e": "playwright install && playwright test"
   },
-  "devDependencies": {
-    "@sveltejs/adapter-auto": "^3.3.1",
-    "@sveltejs/kit": "^2.15.1",
-    "@sveltejs/package": "^2.3.7",
-    "@sveltejs/vite-plugin-svelte": "^4.0.4",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
-    "@typescript-eslint/parser": "^5.62.0",
-    "eslint": "^8.57.1",
-    "eslint-config-prettier": "^8.10.0",
-    "eslint-plugin-dci-lint": "^0.3.2",
-    "eslint-plugin-svelte": "^2.46.1",
-    "esm-env": "^1.2.1",
-    "prettier": "^3.4.2",
-    "prettier-plugin-svelte": "^3.3.2",
-    "publint": "^0.1.16",
-    "sass": "^1.83.1",
-    "svelte": "^5.16.2",
-    "svelte-check": "^3.8.6",
-    "svelte-french-toast": "^1.2.0",
-    "svelte-preprocess": "^5.1.4",
-    "tslib": "^2.8.1",
-    "typescript": "^5.7.2",
-    "vite": "^5.4.11"
-  },
-  "peerDependencies": {
-    "@sveltejs/kit": "1.x || 2.x",
-    "svelte": "3.x || 4.x || >=5.0.0-next.51"
-  },
+  "files": [
+    "dist",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "svelte": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/client.d.ts",
-      "svelte": "./dist/client.js",
-      "default": "./dist/client.js"
-    },
-    "./package.json": "./package.json",
-    "./client": {
-      "types": "./dist/client.d.ts",
-      "default": "./dist/client.js"
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js"
     },
     "./server": {
-      "types": "./dist/server.d.ts",
-      "default": "./dist/server.js"
+      "types": "./dist/server/index.d.ts",
+      "svelte": "./dist/server/index.js"
     }
   },
-  "types": "./dist/client.d.ts",
-  "svelte": "./dist/client.js",
-  "files": [
-    "dist"
+  "peerDependencies": {
+    "svelte": "^5.40.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@sveltejs/adapter-auto": "^8.0.0-next.3",
+    "@sveltejs/kit": "^3.0.0-next.0",
+    "@sveltejs/package": "^2.5.8",
+    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@tailwindcss/vite": "^4.3.0",
+    "@vitest/browser-playwright": "^4.1.8",
+    "arktype": "^2.2.3",
+    "playwright": "^1.60.0",
+    "publint": "^0.3.21",
+    "svelte": "^5.56.7",
+    "svelte-check": "^4.6.0",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.8",
+    "vitest-browser-svelte": "^2.1.1"
+  },
+  "keywords": [
+    "svelte"
   ],
-  "typesVersions": {
-    ">4.0": {
-      "client": [
-        "./dist/client.d.ts"
-      ],
-      "server": [
-        "./dist/server.d.ts"
-      ]
-    }
-  },
-  "packageManager": "npm@11.21.0"
+  "imports": {
+    "#lib": "./src/lib/index.js",
+    "#lib/*": "./src/lib/*"
+  }
 }

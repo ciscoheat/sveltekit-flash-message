@@ -1,0 +1,47 @@
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md px-base py-2xs font-heading text-sm font-semibold no-underline transition-colors;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    border: 1px solid transparent;
+    inline-size: fit-content;
+    max-inline-size: 100%;
+
+    &:hover {
+      background-color: var(--primary-hover);
+    }
+
+    &.btn-outline {
+      background-color: var(--background);
+      color: var(--foreground);
+      border-color: var(--border);
+
+      &:hover {
+        background-color: var(--muted);
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--focus-outline-color);
+      outline-offset: 2px;
+    }
+  }
+
+  .card {
+    @apply rounded-xl border p-lg place-content-center;
+    border-color: var(--border);
+    background-color: var(--muted);
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-xs py-4xs text-xs font-semibold;
+    background-color: var(--primary-muted);
+    color: var(--foreground);
+    inline-size: fit-content;
+    max-inline-size: 100%;
+  }
+
+  .eyebrow {
+    @apply font-heading text-primary text-sm font-semibold tracking-wide uppercase;
+  }
+}

@@ -1,0 +1,10 @@
+@import "tailwindcss";
+@import "../lib/clipper/clipper.css";
+
+p {
+  @apply readable;
+}
+
+code {
+  @apply bg-primary-500/20 p-4xs rounded;
+}
