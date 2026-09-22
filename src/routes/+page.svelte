@@ -1,11 +1,7 @@
 <script lang="ts">
-  import { enhance } from "$app/forms";
-  import { getFlash, goto } from "#lib";
-  import {
-    remoteFlashCommand,
-    remoteForm,
-    remoteRedirect,
-  } from "./remotes.remote.js";
+  import { enhance } from '$app/forms';
+  import { getFlash, goto } from '#lib';
+  import { remoteFlashCommand, remoteForm, remoteRedirect } from './remotes.remote.js';
 
   const { data } = $props();
   const flash = getFlash();
@@ -15,13 +11,14 @@
   // JS only
   $effect(() => {
     document
-      .getElementById("action-form")
-      ?.insertAdjacentHTML(
-        "beforeend",
-        '<input type="hidden" name="js" value="1"/>',
-      );
+      .getElementById('action-form')
+      ?.insertAdjacentHTML('beforeend', '<input type="hidden" name="js" value="1"/>');
   });
 </script>
+
+<svelte:head>
+  <title>sveltekit-flash-message: Temporary messages for SvelteKit</title>
+</svelte:head>
 
 <section class="bg-muted" id="overview">
   <div class="eyebrow">A complete rewrite of</div>
@@ -35,15 +32,14 @@
   <div class="grid md:grid-cols-2 gap-4 items-start">
     <div class="card">
       <p>
-        Send a <a
-          href="https://next.svelte.dev/docs/kit/remote-functions#command"
-          target="_blank">remote command</a
+        Send a <a href="https://next.svelte.dev/docs/kit/remote-functions#command" target="_blank"
+          >remote command</a
         > that sets a flash message.
       </p>
       <button
         class="btn"
         onclick={async () => {
-          await remoteFlashCommand("Remote flash command");
+          await remoteFlashCommand('Remote flash command');
         }}>Set flash message</button
       >
     </div>
@@ -61,7 +57,7 @@
           <input
             id="set-flash-name"
             class="w-full bg-muted-foreground/60 rounded-full px-3 py-1"
-            {...remoteForm.fields.name.as("text")}
+            {...remoteForm.fields.name.as('text')}
           />
           {#each remoteForm.fields.name.issues() as issue (issue.message)}
             <p class="text-red-500">{issue.message}</p>
@@ -69,8 +65,7 @@
         </dd>
         <dt></dt>
         <dd>
-          <input {...remoteForm.fields.shouldRedirect.as("checkbox")} /> Redirect
-          instead of setFlash
+          <input {...remoteForm.fields.shouldRedirect.as('checkbox')} /> Redirect instead of setFlash
         </dd>
         <dt></dt>
         <dd><button class="btn">Submit</button></dd>
@@ -80,23 +75,18 @@
       class="card"
       id="redirect-form"
       {...remoteRedirect.enhance(async (form) => {
-        const nameInput =
-          form.element.querySelector<HTMLInputElement>("#redirect-name");
-        const useGotoInput = form.element.querySelector<HTMLInputElement>(
-          'input[type="checkbox"]',
-        );
-        const name =
-          nameInput instanceof HTMLInputElement ? nameInput.value : "";
-        const useGoto =
-          useGotoInput instanceof HTMLInputElement && useGotoInput.checked;
-        console.log("enhance: Submit form");
+        const nameInput = form.element.querySelector<HTMLInputElement>('#redirect-name');
+        const useGotoInput = form.element.querySelector<HTMLInputElement>('input[type="checkbox"]');
+        const name = nameInput instanceof HTMLInputElement ? nameInput.value : '';
+        const useGoto = useGotoInput instanceof HTMLInputElement && useGotoInput.checked;
+        console.log('enhance: Submit form');
         await form.submit();
-        console.log("enhance: Remote form submitted");
+        console.log('enhance: Remote form submitted');
 
         if (useGoto) {
-          console.log("enhance: Redirecting with goto");
-          await goto("/posted", {
-            flash: { message: name + ": Redirect with goto" },
+          console.log('enhance: Redirecting with goto');
+          await goto('/posted', {
+            flash: { message: name + ': Redirect with goto' }
           });
         }
       })}
@@ -108,7 +98,7 @@
           <input
             id="redirect-name"
             class="w-full bg-muted-foreground/60 rounded-full px-3 py-1"
-            {...remoteRedirect.fields.name.as("text")}
+            {...remoteRedirect.fields.name.as('text')}
           />
           {#each remoteRedirect.fields.name.issues() as issue (issue.message)}
             <p class="text-red-500">{issue.message}</p>
@@ -116,8 +106,7 @@
         </dd>
         <dt></dt>
         <dd>
-          <input {...remoteRedirect.fields.useGoto.as("checkbox")} /> Redirect
-          with
+          <input {...remoteRedirect.fields.useGoto.as('checkbox')} /> Redirect with
           <code>goto</code> on the client
         </dd>
 
@@ -154,9 +143,7 @@
         class="btn"
         onclick={() =>
           (flash.value = {
-            message:
-              "Client-side flash set at " +
-              new Date().toLocaleTimeString().substring(0, 8),
+            message: 'Client-side flash set at ' + new Date().toLocaleTimeString().substring(0, 8)
           })}>Set flash message</button
       >
     </div>
@@ -164,9 +151,7 @@
       <p>
         Clear the flash message by setting its value to <code>undefined</code>.
       </p>
-      <button class="btn" onclick={() => (flash.value = undefined)}
-        >Clear flash message</button
-      >
+      <button class="btn" onclick={() => (flash.value = undefined)}>Clear flash message</button>
     </div>
   </div>
 </section>
