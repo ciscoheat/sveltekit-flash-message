@@ -1,10 +1,10 @@
-import { page } from "$app/state";
-import { browser } from "$app/env";
-import { afterNavigate, beforeNavigate } from "$app/navigation";
-import { SvelteMap } from "svelte/reactivity";
-import { parseFlash, FLASH_COOKIE_NAME } from "./flash.shared.ts";
+import { page } from '$app/state';
+import { browser } from '$app/env';
+import { afterNavigate, beforeNavigate } from '$app/navigation';
+import { SvelteMap } from 'svelte/reactivity';
+import { parseFlash, FLASH_COOKIE_NAME } from './flash.shared.js';
 
-type FlashValue = App.PageData["flash"];
+type FlashValue = App.PageData['flash'];
 
 export type FlashOptions = {
   clearOnNavigate?: boolean;
@@ -19,8 +19,8 @@ export type FlashContext = {
 type CookieStore = {
   get: (name: string) => Promise<{ value: string } | null>;
   delete: (name: string) => Promise<void>;
-  addEventListener: (type: "change", listener: () => void) => void;
-  removeEventListener: (type: "change", listener: () => void) => void;
+  addEventListener: (type: 'change', listener: () => void) => void;
+  removeEventListener: (type: 'change', listener: () => void) => void;
 };
 
 type FlashState = {
@@ -34,7 +34,7 @@ const cookieStorePolyfill: CookieStore = {
   get: async (name) => {
     const prefix = `${name}=`;
     const value = document.cookie
-      .split(";")
+      .split(';')
       .map((cookie) => cookie.trim())
       .find((cookie) => cookie.startsWith(prefix))
       ?.slice(prefix.length);
@@ -52,21 +52,20 @@ const cookieStorePolyfill: CookieStore = {
     if (interval === undefined) return;
     window.clearInterval(interval);
     cookiePolyfillIntervals.delete(listener);
-  },
+  }
 };
 
 const serverCookieStore: CookieStore = {
   get: async () => null,
   delete: async () => {},
   addEventListener: () => {},
-  removeEventListener: () => {},
+  removeEventListener: () => {}
 };
 
 const getCookieStore = (): CookieStore => {
   if (!browser) return serverCookieStore;
 
-  const cookieStore = (window as Window & { cookieStore?: CookieStore })
-    .cookieStore;
+  const cookieStore = (window as Window & { cookieStore?: CookieStore }).cookieStore;
   return cookieStore ?? cookieStorePolyfill;
 };
 
@@ -88,7 +87,7 @@ const bindCookieStore = (Cookie: CookieStore, Flash: FlashState) => {
   };
 
   globalState.__svelteKitFlashCookieListener = syncFlash;
-  Cookie.addEventListener("change", syncFlash);
+  Cookie.addEventListener('change', syncFlash);
   void syncFlash();
 };
 
@@ -96,7 +95,7 @@ const getFlashState = (): FlashState => {
   if (!browser) {
     return {
       value: page.data.flash,
-      receivedCookieFlashDuringNavigation: false,
+      receivedCookieFlashDuringNavigation: false
     };
   }
 
@@ -108,7 +107,7 @@ const getFlashState = (): FlashState => {
 
   const Flash = $state<FlashState>({
     value: undefined,
-    receivedCookieFlashDuringNavigation: false,
+    receivedCookieFlashDuringNavigation: false
   });
   globalState.__svelteKitFlashState = Flash;
   bindCookieStore(getCookieStore(), Flash);
@@ -141,7 +140,7 @@ export const getFlash = (options?: FlashOptions): FlashContext => {
     clearAfterMs: number;
   } = $state({
     clearOnNavigate: options?.clearOnNavigate ?? true,
-    clearAfterMs: options?.clearAfterMs ?? 0,
+    clearAfterMs: options?.clearAfterMs ?? 0
   });
 
   function Options_scheduleClear(value: FlashValue) {
@@ -159,7 +158,7 @@ export const getFlash = (options?: FlashOptions): FlashContext => {
 
   function Options_handleNavigation(type: string) {
     if (!Options.clearOnNavigate) return;
-    if (type === "form" || type === "goto") return;
+    if (type === 'form' || type === 'goto') return;
     if (Flash.receivedCookieFlashDuringNavigation) return;
     if (Page_flash() === undefined) Flash_write(undefined);
   }
@@ -204,7 +203,7 @@ export const getFlash = (options?: FlashOptions): FlashContext => {
   } = {
     clearTimer: undefined,
     lastPageFlash: Page_flash(),
-    flash: Context__getFlash(),
+    flash: Context__getFlash()
   };
 
   function Context_cancelClearTimer() {
@@ -217,16 +216,16 @@ export const getFlash = (options?: FlashOptions): FlashContext => {
     const contextFlash = { options: Options };
     return new Proxy(contextFlash as FlashContext, {
       get(target, property, receiver) {
-        if (property === "value") return Flash_read();
+        if (property === 'value') return Flash_read();
         return Reflect.get(target, property, receiver);
       },
       set(target, property, value, receiver) {
-        if (property === "value") {
+        if (property === 'value') {
           Flash_write(value as FlashValue);
           return true;
         }
         return Reflect.set(target, property, value, receiver);
-      },
+      }
     });
   }
 

@@ -1,9 +1,9 @@
-import { goto as svelteKitGoto } from "$app/navigation";
-import type { GotoOptions as SvelteKitGotoOptions } from "$app/navigation";
-import { serializeFlash } from "./flash.shared.ts";
+import { goto as svelteKitGoto } from '$app/navigation';
+import type { GotoOptions as SvelteKitGotoOptions } from '$app/navigation';
+import { serializeFlash } from './flash.shared.js';
 
 export type GotoOptions = SvelteKitGotoOptions & {
-  flash?: App.PageData["flash"];
+  flash?: App.PageData['flash'];
 };
 
 export const goto = async (url: string | URL, options?: GotoOptions) => {
@@ -13,6 +13,6 @@ export const goto = async (url: string | URL, options?: GotoOptions) => {
   const value = serializeFlash(flash);
   document.cookie =
     value === undefined
-      ? "flash=; Max-Age=0; Path=/"
+      ? 'flash=; Max-Age=0; Path=/'
       : `flash=${encodeURIComponent(value)}; Path=/; SameSite=Lax`;
 };

@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "../lib/clipper/clipper.css";
+@import 'tailwindcss';
+@import '../web/clipper/clipper.css';
 
 p {
   @apply readable;

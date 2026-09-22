@@ -1,4 +1,4 @@
-export { setFlash } from "./setFlash.ts";
-export { getFlash } from "./getFlash.ts";
-export { loadFlash } from "./loadFlash.ts";
-export { redirect } from "./redirect.ts";
+export { setFlash } from './setFlash.js';
+export { getFlash } from './getFlash.js';
+export { loadFlash } from './loadFlash.js';
+export { redirect } from './redirect.js';

@@ -1,17 +1,15 @@
-import type { ServerLoad, ServerLoadEvent } from "@sveltejs/kit";
-import { parseFlash, FLASH_COOKIE_NAME } from "../flash.shared.ts";
+import type { ServerLoad, ServerLoadEvent } from '@sveltejs/kit';
+import { parseFlash, FLASH_COOKIE_NAME } from '../flash.shared.js';
 
 type LoadResult = Record<string, any> | void;
 
-const flashEventKey = Symbol("flash");
+const flashEventKey = Symbol('flash');
 
 type FlashLocals = App.Locals & {
-  [flashEventKey]?: App.PageData["flash"];
+  [flashEventKey]?: App.PageData['flash'];
 };
 
-export const loadFlash = <L extends ServerLoad<any, any, LoadResult>>(
-  load: L,
-) => {
+export const loadFlash = <L extends ServerLoad<any, any, LoadResult>>(load: L) => {
   return async (event: ServerLoadEvent): Promise<Awaited<ReturnType<L>>> => {
     const locals = event.locals as FlashLocals;
     let flash = locals[flashEventKey];
@@ -22,7 +20,7 @@ export const loadFlash = <L extends ServerLoad<any, any, LoadResult>>(
       locals[flashEventKey] = flash;
 
       if (cookie !== undefined) {
-        event.cookies.delete(FLASH_COOKIE_NAME, { path: "/" });
+        event.cookies.delete(FLASH_COOKIE_NAME, { path: '/' });
       }
     }
 

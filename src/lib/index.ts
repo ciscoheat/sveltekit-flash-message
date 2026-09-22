@@ -1,4 +1,4 @@
-export { getFlash } from "./flash.svelte.ts";
-export type { FlashContext, FlashOptions } from "./flash.svelte.ts";
-export { goto } from "./goto.ts";
-export type { GotoOptions } from "./goto.ts";
+export { getFlash } from './flash.svelte.js';
+export type { FlashContext, FlashOptions } from './flash.svelte.js';
+export { goto } from './goto.js';
+export type { GotoOptions } from './goto.js';
