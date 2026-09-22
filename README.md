@@ -2,16 +2,18 @@
 
 Temporary messages for SvelteKit: Set one during a request, read it on the next page.
 
-Useful after a form redirect, when a message belongs on the destination page rather than beside the form. Works with both SSR and without Javascript enabled.
+Useful after a form redirect, when a message belongs on the destination page rather than beside the form. Works with remote functions, SSR and without Javascript enabled.
+
+This is a completely rewritten version that uses runes, compatibilty is set to SvelteKt 3 and late Svelte 5.
 
 ## Install
 
 ```sh
-pnpm i -D sveltekit-flash-message
+pnpm i -D sveltekit-flash-message@rewrite
 ```
 
 ```sh
-npm i -D sveltekit-flash-message
+npm i -D sveltekit-flash-message@rewrite
 ```
 
 ## How to use
@@ -26,7 +28,7 @@ Add a serializable, optional `flash` property to `App.PageData` with the type th
 declare global {
   namespace App {
     interface PageData {
-      flash?: { kind: "error" | "success"; message: string };
+      flash?: { kind: 'error' | 'success'; message: string };
     }
   }
 }
@@ -42,10 +44,10 @@ Wrap the top-most `+layout.server.ts` or `+page.server.ts` load function with
 **src/routes/+layout.server.ts**
 
 ```ts
-import { loadFlash } from "sveltekit-flash-message/server";
+import { loadFlash } from 'sveltekit-flash-message/server';
 
 export const load = loadFlash(async () => {
-  return { someData: 123 };
+  return { someOtherData: 123 };
 });
 ```
 
@@ -75,68 +77,69 @@ Use `redirect` in a remote form or other server-side request. It sets the flash
 message and redirects with status `303`.
 
 ```ts
-import { redirect } from "sveltekit-flash-message/server";
+import { redirect } from 'sveltekit-flash-message/server';
 
 export const actions = {
   default: async () => {
     // Redirect to a page with 303 status
-    redirect("/settings", { message: "Settings saved." });
+    redirect('/settings', { message: 'Settings saved.' });
 
-    // Or redirect to the same page
-    redirect({ message: "Settings saved." });
+    // Or redirect with 303 to the same page
+    redirect({ message: 'Settings saved.' });
 
     // Or redirect with another status
-    redirect(300, "/settings", { message: "Settings saved." });
-  },
+    redirect(300, '/settings', { message: 'Settings saved.' });
+  }
 };
 ```
 
 Use `setFlash` to set a flash message without redirecting, at the end of a remote form call for example:
 
 ```ts
-import { setFlash } from "sveltekit-flash-message/server";
+import { setFlash } from 'sveltekit-flash-message/server';
 
-setFlash({ message: "Please correct the highlighted fields." });
+setFlash({ message: 'Please correct the highlighted fields.' });
 ```
 
-Note that `setFlash` **does not work if Javascript is disabled**. If you need to support that case, a redirect is required to clear the flash cookie properly.
+Note that `setFlash` **does not work if Javascript is disabled**. If you need to support this case, a redirect is required to clear the flash cookie properly.
 
 ### Client-side
 
 To change the flash message, update the reactive value returned by `getFlash`:
 
 ```ts
-import { getFlash } from "sveltekit-flash-message";
+import { getFlash } from 'sveltekit-flash-message';
 
 const flash = getFlash();
-flash.value = { message: "Saved." };
-```
+flash.value = { message: 'Saved.' };
 
-(Set it to `undefined` to clear the message.)
+// Set to undefined to clear the message
+flash.value = undefined;
+```
 
 For client-side navigation, use the exported `goto` wrapper to set the flash
 message after navigation completes:
 
 ```ts
-import { goto } from "sveltekit-flash-message";
+import { goto } from 'sveltekit-flash-message';
 
-await goto("/settings", {
-  flash: { message: "Settings saved." },
+await goto('/settings', {
+  flash: { message: 'Settings saved.' }
 });
 ```
 
-The wrapper accepts all standard SvelteKit `goto` options and adds an optional
+The wrapper is identical to the native SvelteKit `goto`, with an optional
 `flash` option. The message is stored in the flash cookie for the destination
 page.
 
 ## Options
 
-Pass options to `getFlash` to control how long a message remains visible:
+Pass options to `getFlash` to control how long a message remains visible for the returned instance:
 
 ```ts
 const flash = getFlash({
   clearOnNavigate: true,
-  clearAfterMs: 5_000,
+  clearAfterMs: 5_000
 });
 ```
 

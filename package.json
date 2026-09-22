@@ -1,6 +1,6 @@
 {
   "name": "sveltekit-flash-message",
-  "version": "4.0.0-runes.0",
+  "version": "4.0.0-rewrite.0",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build && pnpm run prepack",
