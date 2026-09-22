@@ -5,6 +5,12 @@ Headlines: Added, Changed, Deprecated, Removed, Fixed, Security
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0-rewrite.0] - 2026-09-22
+
+### Changed
+
+- Full runes rewrite with compatibility set to SvelteKit 3 and late Svelte 5. See [README](https://github.com/ciscoheat/sveltekit-flash-message/blob/rewrite/README.md) in the rewrite branch for details.
+
 ## [2.4.6] - 2025-01-23
 
 ### Fixed
