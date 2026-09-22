@@ -36,7 +36,8 @@
     }
   },
   "peerDependencies": {
-    "svelte": "^5.40.0"
+    "svelte": "^5.40.0",
+    "@sveltejs/kit": ">=3.0.0-next.27 <4.0.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
