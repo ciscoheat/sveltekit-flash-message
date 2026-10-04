@@ -5,6 +5,12 @@ Headlines: Added, Changed, Deprecated, Removed, Fixed, Security
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-10-04
+
+### Changed
+
+- Compatibility version with SvelteKit `^2.12.0`, `^3.0.0` and Svelte `^5.56.4`. **No breaking changes** from 2.x except for these dependencies.
+
 ## [3.0.0-next.0] - 2026-08-27
 
 ### Changed
