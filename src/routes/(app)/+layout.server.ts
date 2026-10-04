@@ -1,5 +1,5 @@
-import { flashCookieOptions, loadFlash } from '$lib/server.js';
-import { redirect } from '$lib/server.js';
+import { flashCookieOptions, loadFlash } from '#lib/server.js';
+import { redirect } from '#lib/server.js';
 
 flashCookieOptions.sameSite = 'lax';
 

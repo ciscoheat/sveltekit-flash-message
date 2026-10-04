@@ -1,7 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import type { PageData } from './$types';
-  import { getFlash, updateFlash } from '$lib/client';
+  import { getFlash, updateFlash } from '#lib/client.js';
   import { page } from '$app/state';
   import { writable } from 'svelte/store';
 
@@ -20,7 +20,7 @@
     const form = e.target as HTMLFormElement;
     const body = new FormData(e.target as HTMLFormElement);
 
-    const response = await fetch(form.action, {
+    await fetch(form.action, {
       method: 'POST',
       body
     });
@@ -112,7 +112,7 @@
   <section>
     <h3>Events</h3>
     <div class="events">
-      {#each $events as message}
+      {#each $events as message, index (index)}
         <div>{String(message)}</div>
       {/each}
     </div>
@@ -120,7 +120,7 @@
 </aside>
 
 <style lang="scss">
-  @import './mixins.scss';
+  @use './mixins.scss' as *;
 
   .events {
     display: flex;

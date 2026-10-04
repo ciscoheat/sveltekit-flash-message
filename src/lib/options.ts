@@ -1,4 +1,4 @@
-import type { CookieSerializeOptions } from './cookie-es-main/types.js';
+import type { CookieSerializeOptions } from './cookie.js';
 
 export type FlashOptions = {
   clearArray: boolean;

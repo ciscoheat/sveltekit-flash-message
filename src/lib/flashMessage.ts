@@ -1,10 +1,9 @@
 import type { Updater, Writable } from 'svelte/store';
-import { browser } from '$app/environment';
+import { BROWSER as browser } from 'esm-env';
 import { defaultOptions, type FlashOptions } from './options.js';
 
 export type FlashMessageType =
-  | (App.PageData['flash'] extends never ? any : App.PageData['flash'])
-  | undefined;
+  (App.PageData['flash'] extends never ? any : App.PageData['flash']) | undefined;
 
 interface FlashMessageStore extends Writable<FlashMessageType> {
   set(this: void, value: FlashMessageType, options?: { concatenateArray: boolean }): void;

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { getFlash } from '$lib/client';
-  import { page } from '$app/stores';
+  import { getFlash } from '#lib/client.js';
+  import { page } from '$app/state';
 
   let error = '';
 
@@ -11,7 +11,7 @@
   }
 </script>
 
-<aside class="interactions" />
+<aside class="interactions"></aside>
 
 <article>
   <p>{error}</p>

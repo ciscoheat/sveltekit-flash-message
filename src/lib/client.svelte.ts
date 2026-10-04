@@ -1,12 +1,22 @@
 import { type Writable, type Readable, get as svelteGet, writable } from 'svelte/store';
-import type { Page } from '@sveltejs/kit';
 import { tick } from 'svelte';
 import { BROWSER as browser } from 'esm-env';
-import { serialize, type CookieSerializeOptions } from './cookie-es-main/index.js';
-import { navigating } from '$app/stores';
+import { serialize, type CookieSerializeOptions } from './cookie.js';
+import { afterNavigate, beforeNavigate } from '$app/navigation';
 import { FlashMessage, type FlashMessageType } from './flashMessage.js';
 import { FlashRouter } from './router.js';
 import type { FlashOptions } from './options.js';
+
+type Page = {
+  data: App.PageData;
+  error: unknown;
+  form: unknown;
+  params: Record<string, string>;
+  route: { id: string | null };
+  state: unknown;
+  status: number;
+  url: unknown;
+};
 
 const cookieName = 'flash';
 
@@ -22,7 +32,6 @@ function getRouter(page: Readable<Page> | Page, initialData?: FlashMessageType) 
     router = new FlashRouter();
     routers.set(page, router);
     router.getFlashMessage(get(page).route.id).message.set(initialData);
-    subscribeToNavigation(page);
   }
 
   return router;
@@ -31,26 +40,26 @@ function getRouter(page: Readable<Page> | Page, initialData?: FlashMessageType) 
 function subscribeToNavigation(page: Readable<Page> | Page) {
   if (!browser) return;
 
-  navigating.subscribe((nav) => {
-    //console.log('Navigating:', nav);
-    if (nav === null) {
-      const cookieData = parseFlashCookie();
-
-      if (cookieData !== undefined) {
-        //console.log('🚀 ~ afterNavigate:', cookieData, get(page).route.id);
-        const flash = getRouter(page).getFlashMessage(get(page).route.id);
-        flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
-        clearFlashCookie(flash.options.flashCookieOptions);
-      }
-    } else {
-      const navTo = nav?.to?.route.id;
-      if (navTo) {
-        const flash = getRouter(page).getFlashMessage(navTo);
-        if (flash.options.clearOnNavigate && nav.from?.route.id != navTo) {
-          //console.log('🚀 ~ beforeNavigate ~ clear message on nav to:', navTo);
-          flash.message.set(undefined);
+  beforeNavigate(({ to, from }) => {
+    const navTo = to?.route.id;
+    if (navTo && parseFlashCookie() === undefined) {
+      if (from?.route.id != navTo) {
+        for (const flash of getRouter(page).routes.values()) {
+          if (flash.options.clearOnNavigate) {
+            flash.message.set(undefined);
+          }
         }
       }
+    }
+  });
+
+  afterNavigate(() => {
+    const cookieData = parseFlashCookie();
+
+    if (cookieData !== undefined) {
+      const flash = getRouter(page).getFlashMessage(get(page).route.id);
+      flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
+      clearFlashCookie(flash.options.flashCookieOptions);
     }
   });
 
@@ -77,7 +86,7 @@ function subscribeToNavigation(page: Readable<Page> | Page) {
         clearFlashCookie(flash.options.flashCookieOptions);
       }
     });
-  } catch (e) {
+  } catch {
     if (!('subscribe' in page)) {
       throw new Error(
         'sveltekit-flash-message cannot use Page from $app/state in Svelte 4. Use $app/stores instead.'
@@ -100,7 +109,7 @@ function subscribeToNavigation(page: Readable<Page> | Page) {
 }
 
 export function initFlash(
-  page: Readable<Page>,
+  page: Readable<Page> | Page,
   options?: Partial<FlashOptions>
 ): Writable<App.PageData['flash']> {
   return _initFlash(page, options).message;
@@ -115,6 +124,7 @@ function _initFlash(page: Readable<Page> | Page, options?: Partial<FlashOptions>
   }
 
   const _page = get(page);
+  subscribeToNavigation(page);
 
   ///// Roles //////////////////////////////////////////////////////////////////
 
@@ -122,6 +132,14 @@ function _initFlash(page: Readable<Page> | Page, options?: Partial<FlashOptions>
 
   // eslint-disable-next-line dci-lint/literal-role-contracts
   const Router = getRouter(page, _page.data.flash);
+  const cookieData = parseFlashCookie();
+  if (cookieData !== undefined) {
+    const flash = Router.getFlashMessage(_page.route.id);
+    flash.message.set(cookieData, { concatenateArray: !flash.options.clearArray });
+    clearFlashCookie(flash.options.flashCookieOptions);
+  } else if (_page.data.flash === undefined) {
+    Router.getFlashMessage(_page.route.id).message.set(undefined);
+  }
 
   function Router_getFlashMessage() {
     const route = Router.routes.get(Page_route());
@@ -141,8 +159,7 @@ function _initFlash(page: Readable<Page> | Page, options?: Partial<FlashOptions>
   const Page = {
     store: page,
     route: _page.route.id,
-    initialdata: _page.data.flash,
-    navigating
+    initialdata: _page.data.flash
   };
 
   function Page_initialData() {
@@ -227,7 +244,7 @@ function parseFlashCookie(): App.PageData['flash'] | undefined {
   if (cookies[cookieName]) {
     try {
       return JSON.parse(cookies[cookieName]);
-    } catch (e) {
+    } catch {
       // Ignore value if parsing failed
     }
   }

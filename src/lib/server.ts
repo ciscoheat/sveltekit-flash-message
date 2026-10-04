@@ -1,6 +1,6 @@
-import type { Cookies, RequestEvent, ServerLoad, ServerLoadEvent } from '@sveltejs/kit';
+import type { Cookies, RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
 import { redirect as redir } from '@sveltejs/kit';
-import type { CookieSerializeOptions } from './cookie-es-main/index.js';
+import type { CookieSerializeOptions } from './cookie.js';
 
 //const d = console.debug;
 
@@ -12,26 +12,30 @@ export const flashCookieOptions: CookieSerializeOptions = {
   maxAge: 120,
   httpOnly: false,
   sameSite: 'strict'
-};
+} satisfies CookieSerializeOptions;
 
 /////////////////////////////////////////////////////////////////////
 
 /**
  * @deprecated Renamed to loadFlash.
  */
-export function loadFlashMessage<S extends ServerLoad, E extends ServerLoadEvent>(cb: S) {
-  return loadFlash<S, E>(cb);
+export function loadFlashMessage<E extends ServerLoadEvent, R extends Record<string, any>>(
+  load: (event: E) => R | Promise<R>
+) {
+  return loadFlash(load);
 }
 
 /**
  * Retrieves the flash message from the previous request.
  * Use as a wrapper around a top-level load function, usually in a +layout.server.ts file.
  */
-export function loadFlash<S extends ServerLoad, E extends ServerLoadEvent>(cb: S) {
+export function loadFlash<E extends ServerLoadEvent, R extends Record<string, any>>(
+  load: (event: E) => R | Promise<R>
+) {
   return async (event: E) => {
     const flash = _loadFlash(event).flash;
-    const loadFunction = await cb(event);
-    return { flash, ...loadFunction } as ReturnType<S>;
+    const loadReturn = await load(event);
+    return { flash, ...loadReturn } as R & { flash: App.PageData['flash'] | undefined };
   };
 }
 
@@ -67,7 +71,7 @@ export function _loadFlash<T extends ServerLoadEvent>(
 
     try {
       data = JSON.parse(dataString);
-    } catch (e) {
+    } catch {
       // Ignore data if parsing error
     }
   }
@@ -196,7 +200,8 @@ function realRedirect(
   message?: App.PageData['flash'],
   event?: RequestEvent | Cookies
 ) {
-  if (!message) return redir(status, location.toString());
+  const redirectLocation = redirectLocationForKit(location, event);
+  if (!message) return redir(status, redirectLocation);
   if (!event) throw new Error('RequestEvent is required for redirecting with flash message');
 
   const cookies = 'cookies' in event ? event.cookies : event;
@@ -205,7 +210,22 @@ function realRedirect(
     ...flashCookieOptions,
     path: flashCookieOptions.path ?? '/'
   });
-  return redir(status, location.toString());
+  return redir(status, redirectLocation);
+}
+
+function redirectLocationForKit(location: string | URL, event?: RequestEvent | Cookies) {
+  const locationString = location.toString();
+
+  try {
+    const target = new URL(locationString);
+    if (event && 'url' in event && target.origin === event.url.origin) {
+      return target.pathname + target.search + target.hash;
+    }
+  } catch {
+    return locationString;
+  }
+
+  return locationString;
 }
 
 ////////////////////////////////////////////////////////

@@ -1,5 +1,5 @@
 import { fail } from '@sveltejs/kit';
-import { redirect, setFlash } from '$lib/server.js';
+import { redirect, setFlash } from '#lib/server.js';
 import type { Actions, PageServerLoad } from './$types';
 import count from './counter.js';
 

@@ -1,5 +1,5 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import { redirect } from '$lib/server.js';
+import { redirect } from '#lib/server.js';
 import counter from '../counter';
 
 export function POST(event: RequestEvent) {

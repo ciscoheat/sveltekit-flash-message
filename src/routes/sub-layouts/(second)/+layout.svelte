@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { getFlash } from '$lib/client';
+  import { page } from '$app/state';
+  import { getFlash } from '#lib/client.js';
 
   const { children } = $props();
 
@@ -12,7 +12,7 @@
 
   {#if $flash}
     <div style="border: 1px solid black;">
-      {$flash.message}
+      {$flash[0]?.text}
     </div>
   {/if}
 

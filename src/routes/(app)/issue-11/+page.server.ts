@@ -1,5 +1,5 @@
 //import type { Actions } from '@sveltejs/kit';
-import { redirect } from '$lib/server';
+import { redirect } from '#lib/server.js';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {

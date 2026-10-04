@@ -1,4 +1,4 @@
-import { redirect } from '$lib/server.js';
+import { redirect } from '#lib/server.js';
 
 export const actions = {
   default: async (event) => {
