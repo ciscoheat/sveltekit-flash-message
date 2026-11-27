@@ -11,7 +11,7 @@ type Page = {
   data: App.PageData;
   error: unknown;
   form: unknown;
-  params: Record<string, string>;
+  params: Record<string, string | undefined>;
   route: { id: string | null };
   state: unknown;
   status: number;
