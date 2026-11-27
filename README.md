@@ -331,6 +331,8 @@ All options can be found in the [cookie npm package](https://github.com/jshttp/c
 }
 ```
 
+Flash data is stored in one cookie, which browsers limit to about 4 KB (the encoded cookie name and value). The usable message length varies with its contents and encoding. Oversized flash data is not set and a warning is logged; it is not truncated because flash data may be structured. Keep flash messages short, and store larger data server-side, passing only a small identifier in the flash message.
+
 The name of the cookie, `flash`, cannot be changed currently, let me know if that's inconvenient. ⚡
 
 ## Securing the flash message
