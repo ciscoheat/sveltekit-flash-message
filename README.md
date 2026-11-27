@@ -200,6 +200,64 @@ If you want to update the flash message on the client, use `getFlash` in any com
 
 This will of course not set a cookie for the next request, it'll only update the flash message on the client.
 
+### Using another backend
+
+A backend such as FastAPI can send a flash message without using the server-side helpers. Set a cookie named `flash` containing a **URL-encoded JSON value** matching your `App.PageData['flash']` type. The cookie must be readable by JavaScript (`HttpOnly` must be false). For example:
+
+```py
+import json
+from urllib.parse import quote
+
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+
+app = FastAPI()
+
+
+@app.post("/api/todos")
+def create_todo():
+    # Create the todo here.
+    message = {"type": "success", "message": "Todo saved!"}
+    value = quote(json.dumps(message, ensure_ascii=False), safe="-_.!~*'()")
+    response = JSONResponse({"ok": True})
+    response.set_cookie(
+        key="flash",
+        value=value,
+        path="/",
+        max_age=120,
+        httponly=False,
+        samesite="strict",
+        secure=True,  # Use HTTPS; set to False for local HTTP development.
+    )
+    return response
+```
+
+In the SvelteKit app, use `getFlash` to display the message as shown above, then call `updateFlash` after the browser fetches the backend:
+
+```svelte
+<script lang="ts">
+  import { page } from '$app/state';
+  import { getFlash, updateFlash } from 'sveltekit-flash-message';
+
+  const flash = getFlash(page);
+
+  async function saveTodo() {
+    const response = await fetch('/api/todos', { method: 'POST' });
+    if (!response.ok) throw new Error('Could not save todo');
+    await updateFlash(page);
+  }
+</script>
+
+<button onclick={saveTodo}>Save todo</button>
+{#if $flash}
+  <p>{$flash.message}</p>
+{/if}
+```
+
+This example assumes the frontend and API are served from the same origin (for example, through a reverse proxy), so the browser can set, read, and clear the cookie. A server-side request to the API does not automatically forward its `Set-Cookie` header to the browser. For other origins, cookie domain, path, `SameSite`, `Secure`, fetch credentials, and CORS must all permit the browser to receive and access the cookie; a host-only cookie for a different hostname cannot be read by the frontend. If you change the cookie path or domain, configure matching `flashCookieOptions` on the client so it can clear the cookie. Server-side loading deletes cookies using the configured path but without a domain, so use a host-only cookie for server-side consumption.
+
+For a client-rendered SvelteKit SPA, `getFlash` and `updateFlash` work without the server-side `loadFlash` wrapper. The client API still depends on SvelteKit's `page` and navigation APIs; it is not a standalone Svelte library. Like all flash cookies, the value is user-controlled: do not put secrets in it or trust it for authorization.
+
 ## Client-side fetching and redirecting
 
 The flash message will update automatically on redirect or navigation, but when using [fetch](https://kit.svelte.dev/docs/web-standards#fetch-apis), you must call `updateFlash` afterwards:
