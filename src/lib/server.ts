@@ -6,6 +6,7 @@ import type { CookieSerializeOptions } from './cookie.js';
 
 // Cannot change.
 const cookieName = 'flash';
+const maxCookieSize = 4096;
 
 export const flashCookieOptions: CookieSerializeOptions = {
   path: '/',
@@ -206,10 +207,7 @@ function realRedirect(
 
   const cookies = 'cookies' in event ? event.cookies : event;
 
-  cookies.set(cookieName, JSON.stringify(message), {
-    ...flashCookieOptions,
-    path: flashCookieOptions.path ?? '/'
-  });
+  setFlashCookie(message, cookies);
   return redir(status, redirectLocation);
 }
 
@@ -237,7 +235,25 @@ function redirectLocationForKit(location: string | URL, event?: RequestEvent | C
  */
 export function setFlash(message: App.PageData['flash'], event: RequestEvent | Cookies) {
   const cookies = 'cookies' in event ? event.cookies : event;
-  cookies.set(cookieName, JSON.stringify(message), {
+  setFlashCookie(message, cookies);
+}
+
+function setFlashCookie(message: App.PageData['flash'], cookies: Cookies) {
+  const value = JSON.stringify(message);
+  const encode = flashCookieOptions.encode ?? encodeURIComponent;
+  const size =
+    new TextEncoder().encode(cookieName).byteLength +
+    new TextEncoder().encode(encode(value)).byteLength;
+
+  if (size > maxCookieSize) {
+    console.warn(
+      `Flash message cookie is ${size} bytes, exceeding the ${maxCookieSize}-byte browser limit. ` +
+        'The flash message was not set; keep flash data small or store larger data server-side.'
+    );
+    return;
+  }
+
+  cookies.set(cookieName, value, {
     ...flashCookieOptions,
     path: flashCookieOptions.path ?? '/'
   });
